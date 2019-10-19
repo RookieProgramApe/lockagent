@@ -37,7 +37,7 @@
     <div class="layui-form-item">
         <label class="layui-form-label">商品名称<font color="red">*</font></label>
         <div class="layui-input-block">
-            <input type="text" name="name"  value="${Cargo.name}" lay-verify="required" autocomplete="off" id="name" class="layui-input" >
+            <input type="text" name="name"  value="${CreditCargo.name}" lay-verify="required" autocomplete="off" id="name" class="layui-input" >
         </div>
     </div>
     <div class="layui-form-item optitem">
@@ -84,43 +84,43 @@
     <div class="layui-form-item">
         <label class="layui-form-label">卡片验证</label>
         <div class="layui-input-block">
-            <input type="radio" name="iscard" value="1" title="开启"  ${Cargo.iscard==1||Cargo.iscard==null?'checked':''} >
-            <input type="radio" name="iscard" value="0" title="关闭"  ${Cargo.iscard==0?'checked':''}>
+            <input type="radio" name="iscard" value="1" title="开启"  ${CreditCargo.iscard==1||CreditCargo.iscard==null?'checked':''} >
+            <input type="radio" name="iscard" value="0" title="关闭"  ${CreditCargo.iscard==0?'checked':''}>
         </div>
     </div>
     <div class="layui-form-item">
         <label class="layui-form-label">客服电话<font color="red">*</font></label>
         <div class="layui-input-inline">
-            <input type="text" name="tellphone"  value="${Cargo.tellphone}" lay-verify="required" autocomplete="off" id="tellphone" class="layui-input" >
+            <input type="text" name="tellphone"  value="${CreditCargo.tellphone}" lay-verify="required" autocomplete="off" id="tellphone" class="layui-input" >
         </div>
 
         <label class="layui-form-label">虚拟销量<font color="red">*</font></label>
         <div class="layui-input-inline">
-            <input type="text" name="baseSaleCount"  value="${Cargo.baseSaleCount}" lay-verify="required|positiveInteger" autocomplete="off" id="base_sale_count" class="layui-input" >
+            <input type="text" name="baseSaleCount"  value="${CreditCargo.baseSaleCount}" lay-verify="required|positiveInteger" autocomplete="off" id="base_sale_count" class="layui-input" >
         </div>
     </div>
     <div class="layui-form-item">
         <label class="layui-form-label">原价<font color="red">*</font></label>
         <div class="layui-input-inline">
-            <input type="text" name="originalPrice" value="${Cargo.originalPrice}" placeholder="￥" lay-verify="required|number" autocomplete="off"  class="layui-input" >
+            <input type="text" name="originalPrice" value="${CreditCargo.originalPrice}" placeholder="￥" lay-verify="required|number" autocomplete="off"  class="layui-input" >
         </div>
         <label class="layui-form-label">现价<font color="red">*</font></label>
         <div class="layui-input-inline">
-            <input type="text" name="salePrice" value="${Cargo.salePrice}" placeholder="￥" lay-verify="required|number" autocomplete="off"  class="layui-input">
+            <input type="text" name="salePrice" value="${CreditCargo.salePrice}" placeholder="￥" lay-verify="required|number" autocomplete="off"  class="layui-input">
         </div>
     </div>
     <!--富文本 -->
     <div class="layui-form-item">
         <label class="layui-form-label">商品详情<font color="red">&nbsp;</font></label>
         <div class="layui-input-block">
-            <textarea id="container" name="description">${Cargo.description}</textarea>
+            <textarea id="container" name="description">${CreditCargo.description}</textarea>
         </div>
     </div>
 
     <!--隐藏域-不用乱动 -->
     <div class="layui-form-item layui-hide">
         <button class="layui-btn" lay-submit="" lay-filter="save" id="save">确认</button>
-        <input type="hidden" name="id"  value="${Cargo.id}">
+        <input type="hidden" name="id"  value="${CreditCargo.id}">
     </div>
 </form>
 <script type="text/javascript">
@@ -178,8 +178,8 @@
             "</tr>";
             $("#stepList").append(html);
         });
-        //获取选项
-        $.asynPost('/CargoSku/select1',{cargo_id:'${Cargo.id}'},function(res) {
+        //获取选项  gai
+        $.asynPost('/CreditCargoSku/select1',{cargo_id:'${CreditCargo.id}'},function(res) {
             var list=res.data;
             for(var i=0;i<list.length;i++){
                 var obj=list[i];
@@ -221,7 +221,7 @@
             if(delIds.length>0){
                 param.delIds = delIds.join(",");
             }
-            $.ajaxPost( "/Cargo/save", param, function (res) {
+            $.ajaxPost( "/Credit/save", param, function (res) {
                 getParentIframe().layui.table.reload('dataList');
                 winClose();
             });

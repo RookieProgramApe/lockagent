@@ -133,7 +133,7 @@
         /**创建表格*/
         table.render({
             elem: '#dataList',
-            url: $ctx + '/Cargo/pageList',
+            url: $ctx + '/Credit/pageList',
             method: "POST",
             page: true,
             loading: true,
@@ -148,9 +148,9 @@
                         return "";
                     }
                     }},
-                {field: 'salePrice', title: '现价',width:100,align: 'right',sort: true, templet:function (d) {
+                {field: 'salePrice', title: '积分',width:100,align: 'right',sort: true, templet:function (d) {
                         if(d.salePrice!=null){
-                            return d.salePrice.toFixed(2)+"元";
+                            return d.salePrice.toFixed(2)+"积分";
                         }else{
                             return "";
                         }
@@ -179,7 +179,7 @@
                     if (oldVal != orders) {
                         var id = $(this).attr("data-id");
                         if (orders && id) {
-                            $.ajaxPost('/Cargo/update',{id: id, sort: orders},
+                            $.ajaxPost('/Credit/update',{id: id, sort: orders},
                                 function (data) {
                                     table.reload("dataList");
                                 });
@@ -202,7 +202,7 @@
         };
         //添加
         admin.events.add = function () {
-            LayOpen('添加','/Cargo/toAdd','add');
+            LayOpen('添加','/Credit/toAdd','add');
         };
         //批量删除
         admin.events.delete = function () {
@@ -211,7 +211,7 @@
                 var idsArr=new Array();
                 array.forEach(function(res) {idsArr.push(res.id);});
                 layer.confirm('是否删除选中的数据?', function (index) {
-                    $.ajaxPost( '/Cargo/deleteForList',{ids:idsArr},function (d) {
+                    $.ajaxPost( '/Credit/deleteForList',{ids:idsArr},function (d) {
                         table.reload("dataList");
                     });
                 });
@@ -240,15 +240,15 @@
             var data = obj.data; //获得当前行数据
             var layEvent = obj.event;
             if (layEvent == 'detail') {//详情
-                LayOpen('详情', '/Cargo/detail?id=' + data.id, 'find');
+                LayOpen('详情', '/Credit/detail?id=' + data.id, 'find');
             }else if(layEvent == 'edit') { //编辑
-                LayOpen('编辑', '/Cargo/toAdd?id=' + data.id,'update');
+                LayOpen('编辑', '/Credit/toAdd?id=' + data.id,'update');
             }else if(layEvent=='lookPhoto'){//查看图片
                 LookPhoto(data.attachment.url);
             }else if(layEvent == 'del') { //删除
                 layer.confirm('是否删除该数据?', function (index) {
                     var param = {id: data.id};
-                    $.ajaxPost( '/Cargo/delete', param,function (data) {
+                    $.ajaxPost( '/Credit/delete', param,function (data) {
                         table.reload("dataList");
                     });
                 });

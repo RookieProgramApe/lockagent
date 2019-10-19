@@ -101,7 +101,7 @@
             /**创建表格*/
           table.render({
                 elem: '#dataList',
-                url: $ctx + '/Warehousing/pageList',
+                url: $ctx + '/CreditWarehousing/pageList',
                 method: "POST",
                 page: true,
                 loading: true,
@@ -133,7 +133,7 @@
 
             //添加
             admin.events.add = function () {
-                LayOpen('添加','/Warehousing/toAdd','add');
+                LayOpen('添加','/CreditWarehousing/toAdd','add');
             };
             //批量删除
             admin.events.delete = function () {
@@ -171,7 +171,7 @@
                  }else if(layEvent == 'del') { //删除
                     layer.confirm('是否删除该数据?', function (index) {
                     var param = {id: data.id};
-                    $.ajaxPost( '/Warehousing/delete', param,function (data) {
+                    $.ajaxPost( '/CreditWarehousing/delete', param,function (data) {
                             table.reload("dataList");
                        });
                     });
