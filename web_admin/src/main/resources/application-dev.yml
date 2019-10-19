@@ -1,12 +1,12 @@
 spring:
   #开发环境-数据库连接配置
   datasource:
-#     url: jdbc:mysql://39.100.93.20:3306/lockershop?useUnicode=true&characterEncoding=utf8&useSSL=false
-#     username: lockershop
-#     password: qq5022311
-     url: jdbc:mysql://localhost:3306/lockershop?useUnicode=true&characterEncoding=utf8&useSSL=false
-     username: root
-     password: 123456
+     url: jdbc:mysql://39.100.93.20:3306/lockershop?useUnicode=true&characterEncoding=utf8&useSSL=false
+     username: lockershop
+     password: qq5022311
+#     url: jdbc:mysql://localhost:3306/lockershop?useUnicode=true&characterEncoding=utf8&useSSL=false
+#     username: root
+#     password: 123456
      driver-class-name: com.mysql.jdbc.Driver
      type: com.zaxxer.hikari.HikariDataSource
      hikari:
