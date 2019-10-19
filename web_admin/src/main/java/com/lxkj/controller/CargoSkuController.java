@@ -61,10 +61,10 @@ public class CargoSkuController extends BaseController {
     PageData params = this.getPageData();
     String cargo_id = params.getString("cargo_id");
     IPage<CargoSku> page = cargoSkuService.page(new Page<CargoSku>(params.getInteger("page"), params.getInteger("limit")),
-        new QueryWrapper<CargoSku>()
-            .eq(StringUtils.isNotBlank(cargo_id), "cargo_id", cargo_id)
-            .like(StringUtils.isNotBlank(keyword), "name", keyword)
-            .orderByDesc("create_time"));
+            new QueryWrapper<CargoSku>()
+                    .eq(StringUtils.isNotBlank(cargo_id), "cargo_id", cargo_id)
+                    .like(StringUtils.isNotBlank(keyword), "name", keyword)
+                    .orderByDesc("create_time"));
     DataGridModel<CargoSku> grid = new DataGridModel(page.getRecords(), page.getTotal());
     return grid;
   }
@@ -75,9 +75,9 @@ public class CargoSkuController extends BaseController {
     PageData params = this.getPageData();
     String cargo_id = params.getString("cargo_id");
     IPage<CargoSku> page = cargoSkuService.page(new Page<CargoSku>(params.getInteger("page"), params.getInteger("limit")),
-        new QueryWrapper<CargoSku>()
-            .eq("cargo_id", cargo_id)
-            .orderByDesc("create_time"));
+            new QueryWrapper<CargoSku>()
+                    .eq("cargo_id", cargo_id)
+                    .orderByDesc("create_time"));
 
 //        page.getRecords().stream().forEach(p->{
 //              Integer num = jdbcTemplate.queryForObject("select ifnull(sum(count),0) from `order` where sku_id=? and status in (2,3,4)",Integer.class,p.getId());
