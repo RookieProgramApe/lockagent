@@ -83,7 +83,7 @@
                       <th width="10" style="background-color: #f2f2f2;text-align: right;">商品名称：</th>
                       <td width="40" align="left">${Order.cargoName} </td>
                       <th width="10" style="background-color: #f2f2f2;text-align: right;">规格名称：</th>
-                      <td width="40" align="left">${Order.cateName == ''?Order.skuName:Order.cateName + ' | ' + Order.skuName}</td>
+                      <td width="40" align="left">${Order.cateName==null || Order.cateName==""?Order.skuName:Order.skuName + ' | ' + Order.cateName}</td>
                   </tr>
                   <tr>
                       <th width="10" style="background-color: #f2f2f2;text-align: right;">原价：</th>
