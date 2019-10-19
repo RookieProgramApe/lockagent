@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html style="background-color: #fff;">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>编辑内容</title>
+    <%include("/includes/common.html"){}%>
+    <%include("/includes/ueditor.html"){}%>
+    <%include("/includes/webuploader.html"){}%>
+</head>
+<body class="childrenBody">
+    <form class="layui-form" id="addForm" >
+        <div class="layui-form-item">
+            <label class="layui-form-label">卡片一级分销奖励金额<font color="red">*</font></label>
+            <div class="layui-input-inline">
+                <input type="text" name="firstAward" value="${Retailer.firstAward}" placeholder="￥" lay-verify="required|number|positive" autocomplete="off"  class="layui-input" >
+            </div>
+            <div class="layui-form-mid layui-word-aux">/张，每张奖励金额</div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">卡片二级分销奖励金额<font color="red">*</font></label>
+            <div class="layui-input-inline">
+                <input type="text" name="secondAward" value="${Retailer.secondAward}" placeholder="￥" lay-verify="required|number|positive" autocomplete="off"  class="layui-input">
+            </div>
+            <div class="layui-form-mid layui-word-aux">/张，每张奖励金额</div>
+        </div>
+        <!--隐藏域-不用乱动 -->
+        <div class="layui-form-item layui-hide">
+            <button class="layui-btn" lay-submit="" lay-filter="save" id="save">确认</button>
+                <input type="hidden" name="id"  value="${Retailer.id}">
+        </div>
+    </form>
+<script type="text/javascript">
+    layui.use(['index','layer', 'table', 'element', 'form', 'laytpl','laydate'], function () {
+        var form = layui.form;
+        var admin = layui.admin;
+
+        form.verify({
+            positive:function(value){
+                if(value<0){
+                    return "不能输入负数，请输入正数";
+                }
+            }
+        });
+        //表单提交
+        form.on('submit(save)', function (data) {
+            var param = data.field;
+            $.ajaxPost( "/Retailer/update", param, function (res) {
+                getParentIframe().layui.table.reload('dataList');
+                winClose();
+            });
+            return false;
+        });
+        form.render();
+     });
+     function aClick() {
+        window.open("http://lbs.qq.com/tool/getpoint/", "_blank")
+     }
+</script>
+</body>
+</html>

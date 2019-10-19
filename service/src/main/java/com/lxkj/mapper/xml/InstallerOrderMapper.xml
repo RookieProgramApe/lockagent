@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lxkj.mapper.InstallerOrderMapper">
+
+        <!-- 通用查询映射结果 -->
+        <resultMap id="BaseResultMap" type="com.lxkj.entity.InstallerOrder">
+                    <id column="id" property="id" />
+                    <result column="installer_id" property="installerId" />
+                    <result column="member_id" property="memberId" />
+                    <result column="order_id" property="orderId" />
+                    <result column="total_price" property="totalPrice" />
+                    <result column="status" property="status" />
+                    <result column="remk" property="remk" />
+                    <result column="orderNo" property="orderNo" />
+                    <result column="create_time" property="createTime" />
+        </resultMap>
+
+        <!-- 通用查询结果列 -->
+        <sql id="Base_Column_List">
+        id, installer_id, member_id, order_id, total_price, status, remk, orderNo, create_time
+    </sql>
+
+</mapper>

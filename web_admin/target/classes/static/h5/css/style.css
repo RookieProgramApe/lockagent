@@ -1,0 +1,36 @@
+body{background: url(../images/bg.jpg) no-repeat; background-size: cover;text-align: center;color:#fff;overflow: hidden;height:auto;}
+.logo{width: 200px; margin: 60px auto 0;}
+.logo img{width: 100%;}
+.title{animation-delay: 0.3s;}
+.title h1{font-size: 44px;font-family: 'Microsoft YaHei UI Light' !important;}
+.downBtn{margin-top: 50px;animation-delay: 0.8s;}
+.downBtn a{position: relative;font-family: 'Microsoft YaHei UI Light' !important; background: #339933;height: 60px;width: 200px;border-radius: 5px;margin:0 20px;display: inline-block; line-height: 60px;color: #fff;font-size: 24px;transition: background .5s; -moz-transition: background .5s; -webkit-transition: background .5s; -o-transition: background .5s;}
+.downBtn a.iPhone{background: #cc9933;}
+.downBtn a:hover{background:#246b24 }
+.downBtn a.iPhone:hover{background: #8e6b24;}
+.downBtn a img{margin-right: 15px;vertical-align: top; margin-top: 15px;}
+.downBtn a .codeImg{position: absolute; top: 60px;left: 50%;width: 180px;margin-left: -90px;display: none;}
+.downBtn a .codeImg img{width: 100%;margin-right: 0;margin-top: 0;}
+.downBtn p{margin-top: 20px; width: 80%;margin-left: 10%;font-family: 'Microsoft YaHei UI Light' !important;}
+.downBtn span{display: block;height: 1px;}
+/*.botImg{position: absolute; bottom: -100px; left: 50%; width: 320px;margin-left:-160px;}
+.botImg img{width: 100%;}*/
+@media screen and (max-width: 640px) {
+    body{background: url(../images/bg2.jpg) no-repeat;background-size: cover;height:auto;}
+    .logo{width: 140px;}
+    .title h1{font-size: 28px;margin-top: 15px;}
+    .downBtn{margin-top: 40px;}
+    .downBtn a{height: 48px; line-height: 48px;font-size: 18px;}
+    .downBtn a img{margin-top: 10px;width: 24px;}
+    .downBtn p{font-size: 12px;}
+}
+@media screen and (max-width: 480px) {
+    .title h1{font-size: 24px;}
+}
+@media screen and (max-width: 320px) {
+    .logo{width: 100px; margin: 60px auto 0;}
+    .title h1{font-size: 20px;}
+    .downBtn{margin-top: 30px;}
+    .downBtn a{height: 40px; line-height: 40px;font-size: 16px;}
+    .downBtn a img{margin-top: 9px;width: 20px;}
+}

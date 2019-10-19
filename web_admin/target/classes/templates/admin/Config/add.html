@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html style="background-color: #fff;">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>编辑内容</title>
+    <%include("/includes/common.html"){}%>
+    <%include("/includes/ueditor.html"){}%>
+</head>
+<body>
+<form class="layui-form" id="addForm">
+    <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+        <ul class="layui-tab-title">
+            <li class="layui-this">客服电话</li>
+            <li>公司介绍</li>
+            <li>企业文化</li>
+            <li>荣誉证书</li>
+        </ul>
+
+        <div class="layui-tab-content">
+            <div class="layui-tab-item layui-show">
+                <div class="layui-form-item">
+                    <div class="layui-input-inline">
+                        <input type="text" name="about_contact@${about_contact.id}" value="${about_contact.value}"
+                               lay-verify="required" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+            </div>
+            <div class="layui-tab-item ">
+                <div class="layui-form-item">
+                    <div class="layui-input-block">
+                        <textarea id="container" name="about_introduction@${about_introduction.id}">${about_introduction.value}</textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-tab-item ">
+                <div class="layui-form-item">
+                    <div class="layui-input-block">
+                            <textarea id="container1"
+                                      name="about_culture@${about_culture.id}">${about_culture.value}</textarea>
+                    </div>
+                </div>
+            </div>
+            <!--富文本 -->
+            <div class="layui-tab-item ">
+                <div class="layui-form-item">
+                    <div class="layui-input-block">
+                        <textarea id="container2" name="about_certificate@${about_certificate.id}">${about_certificate.value}</textarea>
+                    </div>
+                </div>
+            </div>
+            <!--隐藏域-不用乱动 -->
+            <div class="layui-form-item " style="text-align:center">
+                <button class="layui-btn" lay-submit="" lay-filter="save" id="save">确认提交</button>
+            </div>
+        </div>
+
+    </div>
+</form>
+<script type="text/javascript">
+    layui.use(['index', 'layer', 'table', 'element', 'form', 'laytpl', 'laydate'], function () {
+        var form = layui.form;
+        var admin = layui.admin;
+        var element = layui.element; //Tab的切换功能，切换事件监听等，需要依赖element模块
+        //富文本
+        var um = UE.getEditor('container', {
+            initialFrameWidth: 900, //初始化编辑器宽度,默认500
+            initialFrameHeight: 400,
+            enableAutoSave: true
+        });
+        //富文本
+        var um1 = UE.getEditor('container1', {
+            initialFrameWidth: 900, //初始化编辑器宽度,默认500
+            initialFrameHeight: 400,
+            enableAutoSave: true
+        });
+        //富文本
+        var um2 = UE.getEditor('container2', {
+            initialFrameWidth: 900, //初始化编辑器宽度,默认500
+            initialFrameHeight: 400,
+            enableAutoSave: true
+        });
+        //表单提交
+        form.on('submit(save)', function (data) {
+            var param = data.field;
+            $.ajaxPost("/Config/save", param, function (res) {
+            });
+            return false;
+        });
+        form.render();
+    });
+
+    function aClick() {
+        window.open("http://lbs.qq.com/tool/getpoint/", "_blank")
+    }
+</script>
+</body>
+</html>

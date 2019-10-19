@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lxkj.mapper.OrderMapper">
+
+        <!-- 通用查询映射结果 -->
+        <resultMap id="BaseResultMap" type="com.lxkj.entity.Order">
+                    <id column="id" property="id" />
+                    <result column="sequence" property="sequence" />
+                    <result column="member_id" property="memberId" />
+                    <result column="type" property="type" />
+                    <result column="giftcard_id" property="giftcardId" />
+                    <result column="unit_price" property="unitPrice" />
+                    <result column="count" property="count" />
+                    <result column="credit" property="credit" />
+                    <result column="credit_discount" property="creditDiscount" />
+                    <result column="total_price" property="totalPrice" />
+                    <result column="status" property="status" />
+                    <result column="delivery_provider" property="deliveryProvider" />
+                    <result column="delivery_track" property="deliveryTrack" />
+                    <result column="recipient" property="recipient" />
+                    <result column="mobile" property="mobile" />
+                    <result column="province" property="province" />
+                    <result column="city" property="city" />
+                    <result column="county" property="county" />
+                    <result column="address" property="address" />
+                    <result column="remark" property="remark" />
+                    <result column="cargo_id" property="cargoId" />
+                    <result column="cargo_name" property="cargoName" />
+                    <result column="cargo_image" property="cargoImage" />
+                    <result column="sku_id" property="skuId" />
+                    <result column="sku_name" property="skuName" />
+                    <result column="cate_id" property="cateId" />
+                    <result column="cate_name" property="cateName" />
+                    <result column="create_time" property="createTime" />
+        </resultMap>
+
+        <!-- 通用查询结果列 -->
+        <sql id="Base_Column_List">
+            id, sequence, member_id, type, giftcard_id, unit_price, count, credit, credit_discount, total_price, status, delivery_provider, delivery_track, recipient, mobile, province, city, county, address, remark, cargo_id, cargo_name, cargo_image, sku_id, sku_name, cate_id, cate_name, create_time
+        </sql>
+
+</mapper>

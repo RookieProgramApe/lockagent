@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>文章详情</title>
+    <meta name="viewport" content="width=100%; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+    <script src="${ctxPath}/static/plugins/jquery/jquery.min.js"></script>
+    <link rel="stylesheet" href="${ctxPath}/static/h5/css/home.css"/>
+    <link rel="stylesheet" href="${ctxPath}/static/h5/css/aui.css"/>
+</head>
+<body>
+<div class="aui-main">
+    <article class="article padding-side">
+        <div>
+            <h1 class="article-title">${Information.title}</h1>
+        </div>
+        <div style="border-bottom:1px solid #eae6e6;padding-top: 2px;padding-bottom: 2px;">
+            <span style="font-size: 12px;color: #9a9a9a;">发布时间</span>&nbsp;
+            <span style="font-size: 12px;color: #9a9a9a;">${Information.createTime,dateFormat="yyyy-MM-dd hh:ss"}</span>&nbsp;
+            <span style="border:1px solid #a6a8ab;border-radius:3px;font-size: 12px;"><font color="#a6a8ab" style="margin: 4px;">健康教育</font></span>
+        </div>
+
+        <div class="article-content" style="padding-top: 5px;" id="img_box">
+            ${Information.cnts}
+        </div>
+        <!--<div style="padding-top: 30px;font-size: 12px;color: #9a9a9a;">-->
+            <!--<div style="border-left: 1px solid #eae6e6;border-width:2px;">-->
+                <!--<div style="margin-left: 6px;">免责申明·本人来自</div>-->
+            <!--</div>-->
+        <!--</div>-->
+    </article>
+</div>
+
+
+</body>
+
+<!-- <script src="${ctx}/static/js/previewImage/md5.js"></script> -->
+<script src="${ctx}/static/previewImage/previewImage.min.js"></script>
+<script type="text/javascript">
+    $(function(){
+        var $ = {};
+        /**
+         * get multiple elements
+         * @public
+         */
+        $.all = function(selector, contextElement) {
+            var nodeList,
+                list = [];
+            if (contextElement) {
+                nodeList = contextElement.querySelectorAll(selector);
+            } else {
+                nodeList = document.querySelectorAll(selector);
+            }
+            if (nodeList && nodeList.length > 0) {
+                list = Array.prototype.slice.call(nodeList);
+            }
+            return list;
+        }
+
+        /**
+         * delegate an event to a parent element
+         * @public
+         * @param  array     $el        parent element
+         * @param  string    eventType  name of the event
+         * @param  string    selector   target's selector
+         * @param  function  fn
+         */
+        $.delegate = function($el, eventType, selector, fn) {
+            if (!$el) { return; }
+            $el.addEventListener(eventType, function(e) {
+                var targets = $.all(selector, $el);
+                if (!targets) {
+                    return;
+                }
+                // findTarget:
+                for (var i=0; i<targets.length; i++) {
+                    var $node = e.target;
+                    while ($node) {
+                        if ($node == targets[i]) {
+                            fn.call($node, e);
+                            break; //findTarget;
+                        }
+                        $node = $node.parentNode;
+                        if ($node == $el) {
+                            break;
+                        }
+                    }
+                }
+            }, false);
+        };
+
+        var urls = [];
+        var imgs = $.all('img',$.all('#img_box')[0]);
+        imgs.forEach(function(v,i){
+            urls.push(v.src);
+        })
+
+        $.delegate(document.querySelector('#img_box'), 'click','img',function(){
+            var current = this.src;
+            var obj = {
+                urls : urls,
+                current : current
+            };
+            previewImage.start(obj);
+        });
+    });
+
+</script>
+</html>

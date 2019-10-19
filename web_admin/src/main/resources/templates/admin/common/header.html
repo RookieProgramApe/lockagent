@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="commonHeader">
+    <meta charset="utf-8">
+    <title>后台管理</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <link rel="stylesheet" th:href="@{/plugins/layuiadmin/layui/css/layui.css}" media="all">
+    <link rel="stylesheet" th:href="@{/css/base.css}" media="all">
+
+    <script th:src="@{/plugins/jquery-1.11.3.min.js}"></script>
+    <script  th:src="@{/plugins/layuiadmin/layui/layui.js}"></script>
+    <script th:src="@{/plugins/myUtils/CommonUtils.js}"></script>
+
+    <!--[if lt IE 9]>
+    <script src="https:// oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js">
+    </script>
+    <script src="https:// oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js">
+    </script>
+    <![endif]-->
+    <script th:inline="javascript">
+        var ctx = [[${#httpServletRequest.getContextPath()}]];
+        layui.config({
+            base: ctx+'/plugins/layuiadmin/' //静态资源所在路径
+        }).extend({
+            index: 'lib/index' //主入口模块
+        });
+        //父层弹出框对象
+        var pLayer = top.layer;
+    </script>
+
+</head>
+</html>

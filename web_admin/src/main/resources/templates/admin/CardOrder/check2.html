@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html style="background-color: #fff;">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>编辑内容</title>
+    <%include("/includes/common.html"){}%>
+</head>
+<body class="childrenBody">
+<div class="layui-tab-item layui-show">
+    <% if(isNotEmpty(cardOrderFlow)){ %>
+    <div class="layui-form">
+        <table class="layui-table" lay-skin="" width="100%">
+            <tr>
+                <th width="10" style="background-color: #f2f2f2;text-align: right;">提交人：</th>
+                <td width="40" align="left">${cardOrderFlow.realName}</td>
+                <th width="10" style="background-color: #f2f2f2;text-align: right;">手机号：</th>
+                <td width="40" align="left">${cardOrderFlow.mobile}</td>
+            </tr>
+            <tr>
+                <th width="10" style="background-color: #f2f2f2;text-align: right;">审核时间：</th>
+                <td width="40" align="left">${cardOrderFlow.createTime,dateFormat="yyyy-MM-dd"}</td>
+                <th width="10" style="background-color: #f2f2f2;text-align: right;">备注：</th>
+                <td width="40" align="left">${cardOrderFlow.remark}</td>
+            </tr>
+
+            <% if(isNotEmpty(cardOrderFlow.fileList)){ %>
+            <tr>
+                <td colspan="4">
+                    <div style="display: flex;flex-wrap: wrap;" id="layer-photos-demo">
+                        <% for( hosp in cardOrderFlow.fileList){ %>
+                        <div style="display: flex;flex-direction: column;align-items: center;margin-right: 10px;">
+                            <img src="${hosp.imageurl}" style="width: 180px; height: 180px;max-width:180px;" layer-src="${hosp.imageurl}" />
+                        </div>
+                        <% } %>
+                    </div>
+                </td>
+            </tr>
+            <% } %>
+
+        </table>
+    </div>
+    <% } %>
+    <form class="layui-form" id="addForm">
+        <div class="layui-form-item">
+            <label class="layui-form-label">初审结果<font color="red">*</font></label>
+            <div class="layui-input-block">
+                <input type="radio" name="status" value="2" title="通过" checked lay-filter="status">
+                <input type="radio" name="status" value="3" title="作废[直接拒绝]" lay-filter="status">
+                <input type="radio" name="status" value="1" title="打回重审[退回上一节点]" lay-filter="status">
+            </div>
+        </div>
+        <!--大文本 -->
+        <div class="layui-form-item layui-form-text" id="resonl">
+            <label class="layui-form-label">作废意见<font id="font1" color="red">&nbsp;</font></label>
+            <div class="layui-input-block">
+                <textarea name="reson" id="reson" placeholder="请输入内容" class="layui-textarea"></textarea>
+            </div>
+        </div>
+        <div class="layui-form-item" id="retailstatel">
+            <label class="layui-form-label">交易结果<font color="red">*</font></label>
+            <div class="layui-input-block">
+                <input type="radio" name="retailstate" value="1" title="收费[可计分销]" checked>
+                <input type="radio" name="retailstate" value="2" title="免费[不计分销]">
+            </div>
+        </div>
+        <div class="layui-form-item layui-form-text" id="remarkl">
+            <label class="layui-form-label">备注</label>
+            <div class="layui-input-block">
+                <textarea name="remark" id="remark" placeholder="请输入内容" class="layui-textarea"></textarea>
+            </div>
+        </div>
+        <!--隐藏域-不用乱动 -->
+        <div class="layui-form-item layui-hide">
+            <button class="layui-btn" lay-submit="" lay-filter="save" id="save">确认</button>
+            <input type="hidden" name="id" value="${id}">
+        </div>
+    </form>
+    <script type="text/javascript">
+        layui.use(['index', 'layer', 'table', 'element', 'form', 'laytpl', 'laydate'], function () {
+            var form = layui.form;
+            var admin = layui.admin;
+            var laydate = layui.laydate;
+            $("#resonl").hide();
+            layer.photos({
+                photos: '#layer-photos-demo'
+                ,anim: 5 //0-6的选择，指定弹出图片动画类型，默认随机（请注意，3.0之前的版本用shift参数）
+            });
+            form.on('radio(status)', function (data) {
+                if (data.value == "2") {//通过
+                    $("#font1").html("&nbsp");
+                    $("#resonl").hide();
+                    $("#resonl").val("");
+                    $("#retailstatel").show();
+                    $("#reson").removeAttr("lay-verify");
+                } else if (data.value == "3") {//作废
+                    $("#resonl").show();
+                    $("#retailstatel").hide();
+                    if (typeof ($("#reson").attr("lay-verify")) == "undefined" || $("#reson").attr("lay-verify") != "required") {
+                        $("#font1").html("*");
+                        $("#reson").attr("lay-verify", "required");
+                    }
+                } else if (data.value == "1") {//打回
+                    $("#resonl").hide();
+                    $("#resonl").val("");
+                    $("#retailstatel").hide();
+                    $("#reson").removeAttr("lay-verify");
+                }
+            });
+
+            //表单提交
+            form.on('submit(save)', function (data) {
+                var param = data.field;
+                $.ajaxPost("/CardOrder/endCheck", param, function (res) {
+                    getParentIframe().layui.table.reload('dataList');
+                    winClose();
+                });
+                return false;
+            });
+            form.render();
+        });
+    </script>
+</body>
+</html>

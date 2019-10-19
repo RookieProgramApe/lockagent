@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html style="background-color: #fff;">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>编辑内容</title>
+    <%include("/includes/common.html"){}%>
+</head>
+<body class="childrenBody">
+    <form class="layui-form" id="addForm" >
+        <div class="layui-form-item">
+            <label class="layui-form-label">选择商品<font color="red">*</font></label>
+            <div class="layui-input-block">
+                <select class="select" name="cargoId" url="${ctxPath}/Cargo/select" child="skuId" childDataPath="${ctxPath}/CargoSku/select" selectValue="${Warehousing.cargoId}" promtion="请选择商品" lay-search="" >
+                    <option value="">请选择商品</option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">选择规格<font color="red">*</font></label>
+            <div class="layui-input-block">
+                <select class="select" name="skuId"   selectValue="${Warehousing.skuId}" promtion="请选择规格" lay-search=""  >
+                    <option value="">请选择规格</option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">数量<font color="red">*</font></label>
+            <div class="layui-input-inline">
+                <input type="text" name="inventory" value="${Warehousing.inventory}" lay-verify="required|positiveInteger" autocomplete="off"  class="layui-input">
+            </div>
+        </div>
+        <!--大文本 -->
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">备注</label>
+            <div class="layui-input-block">
+                <textarea name="remk" placeholder="请输入内容" class="layui-textarea">${Warehousing.remk}</textarea>
+            </div>
+        </div>
+        <!--隐藏域-不用乱动 -->
+        <div class="layui-form-item layui-hide">
+            <button class="layui-btn" lay-submit="" lay-filter="save" id="save">确认</button>
+                <input type="hidden" name="id"  value="${Warehousing.id}">
+        </div>
+    </form>
+<script type="text/javascript">
+    layui.config({
+        base: '${ctxPath}/static/plugins/layuiadmin/' //静态资源所在路径
+    }).extend({
+        cascadeSelect: 'select/cascadeSelect'
+    }).use(['index','layer', 'table', 'element', 'form', 'laytpl','laydate','cascadeSelect'], function () {
+        var form = layui.form;
+        var admin = layui.admin;
+        var cascadeSelect = layui.cascadeSelect;
+        cascadeSelect.init('cargoId', false);
+
+        //自定义非负整数验证
+        form.verify({
+            positiveInteger: function(value){ //自定义lay-verify的昵称，value：表单的值
+                var r = /^\+?[1-9][0-9]*$/;/^[+]{0,1}(\d+)$|^[+]{0,1}(\d+\.\d+)$/;
+                if (!r.test(value)&&value!=0) {
+                    return "请输入非负整数";
+                }
+            }
+        });
+        //表单提交
+        form.on('submit(save)', function (data) {
+            var param = data.field;
+            $.ajaxPost( "/Warehousing/save", param, function (res) {
+                getParentIframe().layui.table.reload('dataList');
+                winClose();
+            });
+            return false;
+        });
+        form.render();
+     })
+     function aClick() {
+        window.open("http://lbs.qq.com/tool/getpoint/", "_blank")
+     }
+</script>
+</body>
+</html>

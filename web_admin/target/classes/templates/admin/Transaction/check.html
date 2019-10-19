@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html style="background-color: #fff;">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>编辑内容</title>
+    <%include("/includes/common.html"){}%>
+    <%include("/includes/ueditor.html"){}%>
+    <%include("/includes/webuploader.html"){}%>
+</head>
+<body class="childrenBody">
+    <form class="layui-form" id="addForm" >
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">审核<font color="red">*</font></label>
+            <div class="layui-input-block">
+                <input type="radio" name="status" value=1 title="通过" checked lay-filter="status" >
+                <input type="radio" name="status" value=99 title="拒绝"  lay-filter="status" >
+            </div>
+        </div>
+        <!--大文本 -->
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">审核意见<font id="font1" color="red">&nbsp;</font></label>
+            <div class="layui-input-block">
+                <textarea name="comment" id="comment" placeholder="请输入内容"  class="layui-textarea"></textarea>
+            </div>
+        </div>
+
+        <!--隐藏域-不用乱动 -->
+        <div class="layui-form-item layui-hide">
+            <button class="layui-btn" lay-submit="" lay-filter="save" id="save">确认</button>
+                <input type="hidden" name="id"  value="${Transaction.id}">
+        </div>
+    </form>
+    <div class="layui-form">
+        <table class="layui-table" lay-skin="" width="100%">
+            <% if(isNotEmpty(member)){ %>
+            <tr>
+                <th  style="background-color: #BFEFFF;text-align: center;" colspan="4">合伙人信息</th>
+            </tr>
+            <tr>
+                <th width="10" style="background-color: #f2f2f2;text-align: right;">头像：</th>
+                <td width="40" align="left" colspan="3">
+                    <img class="layui-circle" src="${member.avatar}" style="height: 50px;" onclick="LookPhoto(this.src)">
+                </td>
+            </tr>
+            <tr>
+                <th width="10" style="background-color: #f2f2f2;text-align: right;">昵称：</th>
+                <td width="40" align="left">${member.nickname} </td>
+                <th width="10" style="background-color: #f2f2f2;text-align: right;">性别：</th>
+                <td width="40" align="left">${member.gender}</td>
+            </tr>
+            <tr>
+                <th width="10" style="background-color: #f2f2f2;text-align: right;">手机号码：</th>
+                <td width="40" align="left">${member.mobile} </td>
+                <th width="10" style="background-color: #f2f2f2;text-align: right;">积分余额：</th>
+                <td width="40" align="left">${member.integral}</td>
+            </tr>
+            <tr>
+                <th width="10" style="background-color: #f2f2f2;text-align: right;">类型：</th>
+                <td width="40" align="left">
+                    <%if(member.isretailer==0){ %>
+                    普通会员
+                    <%}else if(member.isretailer==1){%>
+                    代理商
+                    <%}%>
+                </td>
+                <th width="10" style="background-color: #f2f2f2;text-align: right;">创建时间：</th>
+                <td width="40" align="left" >${member.createTime,dateFormat="yyyy-MM-dd HH:mm:ss"}</td>
+            </tr>
+            <% } %>
+            <% if(isNotEmpty(Retailer)){ %>
+            <tr>
+                <th  style="background-color: #BFEFFF;text-align: center;" colspan="4">合伙人信息</th>
+            </tr>
+            <tr>
+                <th width="10" style="background-color: #f2f2f2;text-align: right;">姓名：</th>
+                <td width="40" align="left">${Retailer.name} </td>
+                <th width="10" style="background-color: #f2f2f2;text-align: right;">身份证号：</th>
+                <td width="40" align="left">${Retailer.identity}</td>
+            </tr>
+            <tr>
+                <th width="10" style="background-color: #f2f2f2;text-align: right;">性别：</th>
+                <td width="40" align="left">${Retailer.gender}</td>
+                <th width="10" style="background-color: #f2f2f2;text-align: right;">安装电话：</th>
+                <td width="40" align="left">${Retailer.installerMobile}</td>
+            </tr>
+            <tr>
+                <th width="10" style="background-color: #f2f2f2;text-align: right;">地址：</th>
+                <td width="40" align="left">${Retailer.city}</td>
+                <th width="10" style="background-color: #f2f2f2;text-align: right;">手机号：</th>
+                <td width="40" align="left">${Retailer.phone}</td>
+            </tr>
+            <tr>
+                <th width="10" style="background-color: #f2f2f2;text-align: right;">开户人：</th>
+                <td width="40" align="left">${Retailer.bankHolder}</td>
+                <th width="10" style="background-color: #f2f2f2;text-align: right;">开户行：</th>
+                <td width="40" align="left">${Retailer.bank}</td>
+            </tr>
+            <tr>
+                <th width="10" style="background-color: #f2f2f2;text-align: right;">银行卡号：</th>
+                <td width="40" align="left">${Retailer.bankAccountNumber}</td>
+                <th width="10" style="background-color: #f2f2f2;text-align: right;">审核状态：</th>
+                <td width="40" align="left">
+                    <% if(Retailer.status==0){%>
+                    待审核
+                    <% }else if(Retailer.status==1){%>
+                    审核通过
+                    <% }else if(Retailer.status==99){%>
+                    审核不通过
+                    <% }%>
+                </td>
+            </tr>
+            <tr>
+                <th width="10" style="background-color: #f2f2f2;text-align: right;">审核意见：</th>
+                <td width="40" align="left" >${Retailer.approvalComment}</td>
+                <th width="10" style="background-color: #f2f2f2;text-align: right;">钱包余额：</th>
+                <td width="40" align="left" >${Retailer.balance}</td>
+            </tr>
+            <tr>
+                <th width="10" style="background-color: #f2f2f2;text-align: right;">创建时间：</th>
+                <td width="40" align="left" colspan="3">${Retailer.createTime,dateFormat="yyyy-MM-dd HH:mm:ss"}</td>
+            </tr>
+            <% } %>
+            <% if(isNotEmpty(Order)){ %>
+            <tr>
+                <th  style="background-color: #BFEFFF;text-align: center;" colspan="4">订单信息</th>
+            </tr>
+            <tr>
+                <th width="10" style="background-color: #f2f2f2;text-align: right;">商品名称：</th>
+                <td width="40" align="left">${Order.cargoName} </td>
+                <th width="10" style="background-color: #f2f2f2;text-align: right;">规格名称：</th>
+                <td width="40" align="left">${Order.skuName}</td>
+            </tr>
+            <tr>
+                <th width="10" style="background-color: #f2f2f2;text-align: right;">原价：</th>
+                <td width="40" align="left">${Order.unitPrice}</td>
+                <th width="10" style="background-color: #f2f2f2;text-align: right;">购买数量：</th>
+                <td width="40" align="left">${Order.count}</td>
+            </tr>
+            <tr>
+                <th width="10" style="background-color: #f2f2f2;text-align: right;">积分抵扣：</th>
+                <td width="40" align="left">${Order.credit}</td>
+                <th width="10" style="background-color: #f2f2f2;text-align: right;">积分抵扣金额：</th>
+                <td width="40" align="left">${Order.creditDiscount}</td>
+            </tr>
+            <tr>
+                <th width="10" style="background-color: #f2f2f2;text-align: right;">金额：</th>
+                <td width="40" align="left">${Order.totalPrice}</td>
+                <th width="10" style="background-color: #f2f2f2;text-align: right;">状态：</th>
+                <td width="40" align="left">
+                    <%select(Order.status){
+                    case 1:println("待支付");
+                    case 2:println("已支付");
+                    case 3:println("已发货");
+                    case 4:println("已完成");
+                    default:
+                    }
+                    %></td>
+            </tr>
+            <tr>
+                <th width="10" style="background-color: #f2f2f2;text-align: right;">物流订单号：</th>
+                <td width="40" align="left">${Order.sequence}</td>
+                <th width="10" style="background-color: #f2f2f2;text-align: right;">快递公司：</th>
+                <td width="40" align="left">${Order.deliveryProvider}</td>
+
+            </tr>
+            <tr>
+                <th width="10" style="background-color: #f2f2f2;text-align: right;">运单号：</th>
+                <td width="40" align="left">${Order.deliveryTrack}</td>
+                <th width="10" style="background-color: #f2f2f2;text-align: right;">收件人：</th>
+                <td width="40" align="left">${Order.recipient}</td>
+            </tr>
+            <tr>
+                <th width="10" style="background-color: #f2f2f2;text-align: right;">收件人号码：</th>
+                <td width="40" align="left">${Order.mobile}</td>
+                <th width="10" style="background-color: #f2f2f2;text-align: right;">创建时间：</th>
+                <td width="40" align="left">${Order.createTime,dateFormat="yyyy-MM-dd HH:mm:ss"}</td>
+            </tr>
+            <tr>
+                <th width="10" style="background-color: #f2f2f2;text-align: right;">收件人地址：</th>
+                <td width="40" align="left" colspan="3">${Order.province}${Order.city}${Order.county}${Order.address}</td>
+            </tr>
+            <tr>
+                <th width="10" style="background-color: #f2f2f2;text-align: right;">备注：</th>
+                <td width="40" align="left" colspan="3">${Order.remark}</td>
+            </tr>
+            <% } %>
+            <% if(isNotEmpty(Transaction)){ %>
+            <tr>
+                <th  style="background-color: #BFEFFF;text-align: center;" colspan="4">支付信息</th>
+            </tr>
+            <tr>
+                <th width="10" style="background-color: #f2f2f2;text-align: right;">类型：</th>
+                <td width="40" align="left"><%
+                  select(Transaction.type){
+                    case 1:print("支付");
+                    case 80:print("卡片奖励");
+                    case 81:print("提货佣金");
+                    case 99:print("提现");
+                        default:print("");
+                    }
+                    %> </td>
+                <th width="10" style="background-color: #f2f2f2;text-align: right;">金额：</th>
+                <td width="40" align="left">${Transaction.amount}</td>
+            </tr>
+            <tr>
+                <th width="10" style="background-color: #f2f2f2;text-align: right;">手续费：</th>
+                <td width="40" align="left">${Transaction.commission}</td>
+                <th width="10" style="background-color: #f2f2f2;text-align: right;">创建时间：</th>
+                <td width="40" align="left">${Transaction.createTime,dateFormat="yyyy-MM-dd HH:mm:ss"}</td>
+            </tr>
+            <tr>
+                <th width="10" style="background-color: #f2f2f2;text-align: right;">审核状态：</th>
+                <td width="40" align="left" colspan="3" >
+                    <% if(Transaction.status==0){%>
+                    待审核
+                    <% }else if(Transaction.status==1){%>
+                    审核通过
+                    <% }else if(Transaction.status==99){%>
+                    审核不通过
+                    <% }%>
+                </td>
+            </tr>
+            <tr>
+                <th width="10" style="background-color: #f2f2f2;text-align: right;">审核意见：</th>
+                <td width="40" align="left" colspan="3" >${Transaction.comment}</td>
+            </tr>
+            <% } %>
+        </table>
+    </div>
+<script type="text/javascript">
+    layui.use(['index','layer', 'table', 'element', 'form', 'laytpl','laydate'], function () {
+        var form = layui.form;
+        var admin = layui.admin;
+        var laydate = layui.laydate;
+
+        form.on('radio(status)',function(data){
+            if(data.value=="1"){
+              $("#font1").html("&nbsp");
+              $("#reson").removeAttr("lay-verify");
+
+            }else if(data.value=="99"){
+                console.log(":"+$("#reson").attr("lay-verify"));
+                if(typeof($("#reson").attr("lay-verify"))=="undefined"||$("#reson").attr("lay-verify")!="required"){
+                    $("#font1").html("*");
+                    $("#reson").attr("lay-verify","required");
+                }
+            }
+        });
+        //表单提交
+        form.on('submit(save)', function (data) {
+            var param = data.field;
+            var param1={id:param.id,status:param.status,comment:param.comment};
+            $.ajaxPost( "/Transaction/check", param1, function (res) {
+                getParentIframe().layui.table.reload('dataList');
+                winClose();
+            });
+            return false;
+        });
+        form.render();
+     });
+</script>
+</body>
+</html>

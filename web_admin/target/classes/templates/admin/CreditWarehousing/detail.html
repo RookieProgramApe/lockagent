@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html style="background-color: #fff;">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>详情</title>
+<%include("/includes/common.html"){}%>
+</head>
+<body class="childrenBody">
+<div class="layui-tab ">
+    <ul class="layui-tab-title">
+        <li class="layui-this">基础信息</li>
+        <li>相关列表</li>
+    </ul>
+    <div class="layui-tab-content">
+        <div class="layui-tab-item layui-show">
+            <div class="layui-form">
+              <table class="layui-table" lay-skin="" width="100%">
+                    <tr>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">头像：</th>
+                        <td width="40" align="left">
+                            <img src="${Warehousing.photo}" style="height: 50px;">
+                        </td>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">钱包：</th>
+                        <td width="40" align="left">${Warehousing.wallet}元</td>
+                    </tr>
+                    <tr>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">姓名：</th>
+                        <td width="40" align="left">${Warehousing.name}</td>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">手机号：</th>
+                        <td width="40" align="left">${Warehousing.mobile}</td>
+                    </tr>
+                    <tr>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">出生日期：</th>
+                        <td width="40" align="left">${Warehousing.birthday,dateFormat="yyyy-MM-dd"}</td>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">评价得分：</th>
+                        <td width="40" align="left">${Warehousing.evaluationScore}星</td>
+                    </tr>
+                    <tr>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">联系地址：</th>
+                        <td width="40" align="left" colspan="3">${Warehousing.address}</td>
+                    </tr>
+                    <tr>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">状态：</th>
+                        <td width="40" align="left" colspan="3">
+                            <% if(Warehousing.approveStatus == 0){ %>
+                                    注册
+                            <% } %>
+                            <% if(Warehousing.approveStatus == 1){ %>
+                                    待审核
+                            <% } %>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">坐诊医院：</th>
+                        <td width="40" align="left" colspan="3">
+                            <% for( hosp in bean.hospitals){ %>
+                            <span style="margin-right: 10px;">${Warehousing.name}</span>
+                            <% } %>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div style="display: flex;flex-wrap: wrap;">
+                <div style="display: flex;flex-direction: column;align-items: center;margin-right: 10px;">
+                <img src="${Warehousing.certificateFacadePath}" style="width: 180px; height: 180px;"/>
+                <div>医师资格证正面</div>
+            </div>
+            <div style="display: flex;flex-direction: column;align-items: center;margin-right: 10px;">
+                <img src="${Warehousing.certificateObversePath}" style="width: 180px; height: 180px;"/>
+                <div>医师资格证反面</div>
+            </div>
+            <div style="display: flex;flex-direction: column;align-items: center;margin-right: 10px;">
+                <img src="${Warehousing.qualificationFacadePath}" style="width: 180px; height: 180px;"/>
+                <div>执业资格证正面</div>
+            </div>
+            <div style="display: flex;flex-direction: column;align-items: center;margin-right: 10px;">
+                <img src="${Warehousing.qualificationObversePath}" style="width: 180px; height: 180px;"/>
+                <div>执业资格证反面</div>
+            </div>
+        </div>
+        </div>
+            <div class="layui-tab-item">
+                <script type="text/html" id="toolbarTpl">
+                    <a class="layui-btn layui-btn-xs" lay-event="detail">查看</a>
+                </script>
+                <table id="dataList" lay-filter="dataList"></table>
+            </div>
+        </div>
+    </div>
+
+<script type="text/javascript">
+   layui.use(['index','layer', 'table', 'element', 'laytpl'], function () {
+        var table = layui.table, form = layui.form;
+        var admin = layui.admin;
+        /**创建表格*/
+        table.render({
+            elem: '#dataList',
+            url: $ctx + '/Warehousing/page',
+            method: "POST",
+            page: true,
+            loading: true,
+            cols: [[
+                {field: 'reservationCode', title: '预约单号', width: 200},
+                {field: 'doctorName', title: '医生名称', width: 100},
+                {field: 'doctorPhone', title: '医生电话', width: 150},
+                {field: 'patientName', title: '就诊人名称', width: 100},
+                {field: 'patientAge', title: '就诊人年龄', width: 150},
+                {field: 'realChargePrice', title: '预约费用', width: 100},
+                {field: 'tool', title: '操作', width: 120, toolbar: '#toolbarTpl'}
+            ]]
+            , limit: 10
+            , text: {
+                none: '暂无相关数据' //默认：无数据。注：该属性为 layui 2.2.5 开始新增
+            }
+        });
+        //刷新
+        admin.events.refresh = function () {
+            table.reload('dataList');
+        };
+        //监听工具条(编辑|删除)
+        table.on('tool(dataList)', function (obj) { //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
+            var data = obj.data; //获得当前行数据
+            var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+        });
+    })
+</script>
+</body>
+</html>

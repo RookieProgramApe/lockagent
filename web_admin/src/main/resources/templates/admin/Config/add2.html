@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>编辑内容</title>
+    <%include("/includes/common.html"){}%>
+    <%include("/includes/ueditor.html"){}%>
+    <%include("/includes/webuploader.html"){}%>
+</head>
+<body>
+<div class="layui-fluid list_card">
+    <div class="layui-form list_box">
+        <!--搜索条件-->
+        <div class="layui-card-header layuiadmin-card-header-auto layui-row">
+            <form class="layui-form" id="addForm">
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label">会员人数虚拟值<font color="red">*</font></label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="base_member_count@${base_member_count.id}" id="credit_reward_rate"
+                               value="${base_member_count.value}" lay-verify="required|positiveInteger"
+                               placeholder="请输入非负数" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+
+                <!--隐藏域-不用乱动 -->
+                <div class="layui-form-item " style="text-align:center">
+                    <button class="layui-btn" lay-submit="" lay-filter="save" id="save">确认</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    layui.use(['index', 'layer', 'table', 'element', 'form', 'laytpl', 'laydate'], function () {
+        var form = layui.form;
+        var admin = layui.admin;
+        //自定义非负整数验证
+        form.verify({
+            positiveInteger: function (value) { //自定义lay-verify的昵称，value：表单的值
+                var r = /^\+?[1-9][0-9]*$/;
+                /^[+]{0,1}(\d+)$|^[+]{0,1}(\d+\.\d+)$/;
+                if (!r.test(value) && value != 0) {
+                    return "请输入非负整数";
+                }
+            }
+        });
+        //表单提交
+        form.on('submit(save)', function (data) {
+            var param = data.field;
+            $.ajaxPost("/Config/save", param, function (res) {
+            });
+            return false;
+        });
+        form.render();
+    });
+
+    function aClick() {
+        window.open("http://lbs.qq.com/tool/getpoint/", "_blank")
+    }
+</script>
+</body>
+</html>

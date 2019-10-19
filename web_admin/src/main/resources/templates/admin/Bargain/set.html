@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html style="background-color: #fff;">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>编辑内容</title>
+    <%include("/includes/common.html"){}%>
+    <%include("/includes/ueditor.html"){}%>
+    <%include("/includes/webuploader.html"){}%>
+</head>
+<style>
+    .t1 {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .tidiv {
+        position: relative;
+    }
+
+    .cha {
+        width: 20px;
+        height: 20px;
+        position: absolute;
+        right: -5px;
+        top: 0;
+    }
+
+    .pict {
+        width: 100px;
+        height: 60px;
+    }
+</style>
+<body class="childrenBody">
+<form class="layui-form" id="addForm">
+
+    <div class="layui-form-item optitem">
+        <label class="layui-form-label">添加选项<font color="red">*</font></label>
+        <div class="layui-input-block">
+            <div class='layui-upload-list'>
+                <table class='layui-table' lay-size='sm'>
+                    <thead>
+                    <tr>
+                        <th style="width: 80px;">序号</th>
+                        <th>砍刀价格(元)</th>
+                        <th style="width: 30px;text-align: center;">
+                            <img height="25" width="25" style="cursor:pointer"  src="${ctxPath}/static/image/jia.png"  id="stepAdd">
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody id="stepList">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="layui-input-block" style="color: red;">
+            序号越小越靠前
+        </div>
+    </div>
+
+    <!--隐藏域-不用乱动 -->
+    <div class="layui-form-item layui-hide">
+        <button class="layui-btn" lay-submit="" lay-filter="save" id="save">确认</button>
+        <input type="hidden" name="id" value="${id}">
+    </div>
+</form>
+
+<script type="text/javascript">
+    var delIds=new Array();
+    layui.use(['index', 'layer', 'table', 'element', 'form', 'laytpl', 'laydate'], function () {
+        var form = layui.form;
+        var admin = layui.admin;
+        //添加选项
+        $('#stepAdd').click(function(){
+            var btnId="upload"+guid();
+            var sort=$("#stepList tr").length+1;
+            var html="<tr>" +
+                "<td><input class='layui-input' type='text'  name='sortAll' value='"+sort+"'  lay-verify='required|number' lay-verType='tips' maxlength='10' ></td>" +
+                "<td><input type='hidden' name='optionId'  value='' /><input class='layui-input' type='text'  name='content'  lay-verify='required|number' lay-verType='tips' maxlength='200' ></td>" +
+                "<td style='text-align: center;'>" +
+                " <img height='30' width='30' style='cursor:pointer' src='${ctxPath}/static/image/jian.png' onclick='del(this)'>" +
+                "</td>" +
+                "</tr>";
+            $("#stepList").append(html);
+
+        });
+        //获取选项
+        $.asynPost('/BargainStep/select',{bargain_id:'${id}'},function(res) {
+            var list=res.data;
+            for(var i=0;i<list.length;i++){
+                var obj=list[i];
+                var btnId = "uploads_"+obj.id;
+                var price = obj.price==null?0.00:obj.price.toFixed(2);
+                var html="<tr>" +
+                    "<td><input class='layui-input' type='text'  name='sortAll' value='"+obj.sort+"'  lay-verify='required|number' lay-verType='tips' maxlength='10' ></td>" +
+                    "<td><input type='hidden' name='optionId'  value='"+obj.id+"' /><input class='layui-input' type='text'  name='content' value='"+price+"'  lay-verify='required|number' lay-verType='tips' maxlength='200' ></td>" +
+                    "<td style='text-align: center;'>" +
+                    " <img height='30' width='30' style='cursor:pointer' src='${ctxPath}/static/image/jian.png' data-id='"+obj.id+"' onclick='addDel(this)'>" +
+                    "</td>" +
+                    "</tr>";
+                $("#stepList").append(html);
+                //附件上传
+                $("#"+btnId+"").uploadPicFile({
+                    def:obj.image,
+                    name: "image",//隐藏域 input[name=fileUrl],通过js方法 getFileUrls("fileUrl")获取数组
+                    size: 100,//单个附件不能超过200MB
+                    number: 1,//附件不能超过3个
+                    model: 'QuizItem',//新文件目录
+                    type: 'image'//所有类型  image:图片类型 ,video:视频,file:所有
+                });
+            }
+        })
+
+
+        //表单提交
+        form.on('submit(save)', function (data) {
+            var param = data.field;
+                var stepArr=new Array();
+                $("#stepList tr").each(function () {
+                    var josn={};
+                    var id=$(this).find('input:hidden[name="optionId"]').val()||"";
+                    var content=$(this).find('input[name="content"]').val()||"";
+                    var sort=$(this).find('input[name="sortAll"]').val()||"";
+                    josn.id=id;
+                    josn.content=content;
+                    josn.sort=sort;
+                    stepArr.push(josn);
+                });
+                if(stepArr.length==0){
+                    layer.msg("请添加选项", {icon: 5,time: 1000});
+                    return false;
+                }
+                param.stepArr = JSON.stringify(stepArr);
+
+            if(delIds.length>0){
+                param.delIds = delIds.join(",");
+            }
+            $.ajaxPost("/BargainStep/save", param, function (res) {
+                getParentIframe().layui.table.reload('dataList');
+                winClose();
+            });
+            return false;
+        });
+        form.render();
+    })
+
+    function aClick() {
+        window.open("http://lbs.qq.com/tool/getpoint/", "_blank")
+    }
+    function del(obj){
+        $(obj).parent().parent().remove();
+    }
+    //历史删除
+    function addDel(obj){
+        var id=$(obj).attr("data-id");
+        delIds.push(id);
+        $(obj).parent().parent().remove();
+    }
+</script>
+</body>
+</html>

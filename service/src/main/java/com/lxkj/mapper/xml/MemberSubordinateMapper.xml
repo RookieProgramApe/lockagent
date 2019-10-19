@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lxkj.mapper.MemberSubordinateMapper">
+
+        <!-- 通用查询映射结果 -->
+        <resultMap id="BaseResultMap" type="com.lxkj.entity.MemberSubordinate">
+                    <id column="id" property="id" />
+                    <result column="member_id" property="memberId" />
+                    <result column="subordinate_member_id" property="subordinateMemberId" />
+                    <result column="level" property="level" />
+                    <result column="create_time" property="createTime" />
+        </resultMap>
+
+        <!-- 通用查询结果列 -->
+        <sql id="Base_Column_List">
+        id, member_id, subordinate_member_id, level, create_time
+    </sql>
+
+</mapper>

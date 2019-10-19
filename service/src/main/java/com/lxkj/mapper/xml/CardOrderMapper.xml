@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lxkj.mapper.CardOrderMapper">
+
+        <!-- 通用查询映射结果 -->
+        <resultMap id="BaseResultMap" type="com.lxkj.entity.CardOrder">
+                    <id column="id" property="id" />
+                    <result column="sequence" property="sequence" />
+                    <result column="member_id" property="memberId" />
+                    <result column="count" property="count" />
+                    <result column="total_price" property="totalPrice" />
+                    <result column="status" property="status" />
+                    <result column="delivery_provider" property="deliveryProvider" />
+                    <result column="delivery_track" property="deliveryTrack" />
+                    <result column="recipient" property="recipient" />
+                    <result column="mobile" property="mobile" />
+                    <result column="city" property="city" />
+                    <result column="address" property="address" />
+                    <result column="remark" property="remark" />
+                    <result column="create_time" property="createTime" />
+        </resultMap>
+
+        <!-- 通用查询结果列 -->
+        <sql id="Base_Column_List">
+        id, sequence, member_id, count, total_price, status, delivery_provider, delivery_track, recipient, mobile, city, address, remark, create_time
+    </sql>
+
+</mapper>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html style="background-color: #fff;">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>编辑内容</title>
+    <%include("/includes/common.html"){}%>
+</head>
+<body class="childrenBody">
+<form class="layui-form" id="addForm">
+    <div class="layui-form-item" style="display: flex;align-items: center;">
+        <label class="layui-form-label">选择合伙人<font color="red">*</font></label>
+        <div class="layui-input-inline">
+            <input type="text" name="name" id="name" value="" placeholder="请选择" lay-verify="required" readonly
+                   autocomplete="off" class="layui-input">
+            <input type="hidden" name="retailerId" lay-verify="required" value="" id="retailerId">
+        </div>
+        <div class="layui-input-inline" layadmin-event="selectUser">
+            <button type="button" class="layui-btn layui-btn-sm">
+                <i class="layui-icon">&#xe615;</i>查找合伙人
+            </button>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">卡片量(套)<font color="red">*</font></label>
+        <div class="layui-input-inline">
+            <input type="text" name="count"  lay-verify="required|number" autocomplete="off"  class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">收件人<font color="red">*</font></label>
+        <div class="layui-input-inline">
+            <input type="text" name="recipient" id="recipient" placeholder="收件人姓名" autocomplete="off" class="layui-input" lay-verify="required">
+        </div>
+        <label class="layui-form-label">联系电话<font color="red">*</font></label>
+        <div class="layui-input-inline">
+            <input type="text" name="mobile" id="mobile" placeholder="收件人联系方式" autocomplete="off" class="layui-input" lay-verify="required">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">收件地区<font color="red">*</font></label>
+        <div class="layui-input-block">
+            <input type="text" name="city" id="city"  placeholder="收件地区，例如：安徽省 合肥市 蜀山区" autocomplete="off" class="layui-input" lay-verify="required">
+        </div>
+    </div>
+    <div class="layui-form-item layui-form-text">
+        <label class="layui-form-label">详细地址</label>
+        <div class="layui-input-block">
+            <textarea name="address" placeholder="收货的详细地址" class="layui-textarea"></textarea>
+        </div>
+    </div>
+    <!--隐藏域-不用乱动 -->
+    <div class="layui-form-item layui-hide">
+        <button class="layui-btn" lay-submit="" lay-filter="save" id="save">确认</button>
+    </div>
+</form>
+<script type="text/javascript">
+    layui.use(['index', 'layer', 'table', 'element', 'form', 'laytpl', 'laydate'], function () {
+        var form = layui.form;
+        var admin = layui.admin;
+        //选择会员
+        admin.events.selectUser = function () {
+            var index = layer.open({
+                type: 2,
+                isOutAnim: true,
+                title: "选择代理商",
+                shade: 0.1,
+                maxmin: true, //开启最大化最小化按钮
+                area: ['1100px', '550px'],
+                content: $ctx + "/CardOrder/toSelectUser",
+            });
+        };
+        //表单提交
+        form.on('submit(save)', function (data) {
+            var param = data.field;
+            //获得复选框
+            $.ajaxPost("/CardOrder/buyAdminCard", param, function (res) {
+                getParentIframe().layui.table.reload('dataList');
+                winClose();
+            });
+            return false;
+        });
+        form.render();
+    })
+
+    function aClick() {
+        window.open("http://lbs.qq.com/tool/getpoint/", "_blank")
+    }
+
+    function doSelectUser(obj) {
+        $("#retailerId").val(obj.id)
+        $("#name").val(obj.name)
+        $("#recipient").val(obj.name);
+        $("#mobile").val(obj.phone);
+        $("#city").val(obj.city);
+
+    }
+</script>
+</body>
+</html>

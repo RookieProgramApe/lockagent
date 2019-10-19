@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html style="background-color: #fff;">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>编辑内容</title>
+    <%include("/includes/common.html"){}%>
+    <%include("/includes/ueditor.html"){}%>
+    <%include("/includes/webuploader.html"){}%>
+</head>
+<body class="childrenBody">
+    <form class="layui-form" id="addForm" >
+        <div class="layui-form-item">
+            <label class="layui-form-label">奖励金额<font color="red">*</font></label>
+            <div class="layui-input-block">
+                <input type="text" name="figure" value="${figure}" placeholder="￥" lay-verify="required|number|positive" autocomplete="off"  class="layui-input" >
+            </div>
+        </div>
+        <!--隐藏域-不用乱动 -->
+        <div class="layui-form-item layui-hide">
+            <button class="layui-btn" lay-submit="" lay-filter="save" id="save">确认</button>
+                <input type="hidden" name="id"  value="${id}">
+                <input type="hidden" name="retailerId"  value="${retailer_id}">
+                <input type="hidden" name="cargoId"  value="${cargo_id}">
+        </div>
+    </form>
+<script type="text/javascript">
+    layui.use(['index','layer', 'table', 'element', 'form', 'laytpl','laydate'], function () {
+        var form = layui.form;
+        var admin = layui.admin;
+
+        form.verify({
+            positive:function(value){
+                if(value<0){
+                    return "不能输入负数，请输入正数";
+                }
+            }
+        });
+        //表单提交
+        form.on('submit(save)', function (data) {
+            var param = data.field;
+            $.ajaxPost( "/RetailerReward/save", param, function (res) {
+                var frames = parent.document.getElementsByTagName('iframe');
+                for (var i = 0; i < frames.length; i ++) {
+                    var frame = frames[i].contentWindow.document;
+                    var holder = frame.getElementById('dataList_cargoList');
+                    if (holder) {
+                        frames[i].contentWindow.table.reload("dataList_cargoList");
+                    }
+                }
+                winClose();
+            });
+            return false;
+        });
+        form.render();
+     });
+     function aClick() {
+        window.open("http://lbs.qq.com/tool/getpoint/", "_blank")
+     }
+</script>
+</body>
+</html>

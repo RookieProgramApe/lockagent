@@ -1,0 +1,27 @@
+layui-upload-img {
+    width: 92px;
+    height: 92px;
+    margin: 0 10px 10px 0;
+}
+.childrenBody{
+    padding: 10px;
+}
+
+.layui-card-header.layuiadmin-card-header-auto{
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+.list_card{
+    padding: 10px;
+}
+.list_btnGroup{
+    padding: 5px 5px 0 5px;
+}
+.list_table{
+    padding: 0 5px 5px 5px;
+}
+.list_box{
+    border-radius: 2px;
+    background-color: #fff;
+    box-shadow: 0 1px 2px 0 rgba(0,0,0,.05);
+}

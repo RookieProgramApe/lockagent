@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lxkj.mapper.CargoAttachmentMapper">
+
+        <!-- 通用查询映射结果 -->
+        <resultMap id="BaseResultMap" type="com.lxkj.entity.CargoAttachment">
+                    <id column="id" property="id" />
+                    <result column="cargo_id" property="cargoId" />
+                    <result column="type" property="type" />
+                    <result column="url" property="url" />
+        </resultMap>
+
+        <!-- 通用查询结果列 -->
+        <sql id="Base_Column_List">
+        id, cargo_id, type, url
+    </sql>
+
+</mapper>

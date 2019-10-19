@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html style="background-color: #fff;">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>菜单添加</title> 
+	<%include("/includes/common.html"){}%>
+	<%include("/includes/zTree.html"){}%>
+</head>
+<body class="childrenBody">
+  	<form class="layui-form" style="width:95%;" id="addForm">
+  	  		<input type="hidden" name="id" id="id" value="${SysResource.id}" />
+  	  		<% if(SysResource.id==null){ %>
+				<div class="layui-form-item">
+					<label class="layui-form-label">父级资源</label>
+					<div class="layui-input-block">
+						<input class="layui-input" type="text" placeholder="根节点" readonly id="pid" name="pid"  value="${SysResource.pid}">
+					</div>
+				</div>
+				<div class="layui-form-item">
+				    <label class="layui-form-label">资源类型</label>
+				    <div class="layui-input-block">
+				           <input type="radio" name="resType" value="1" title="菜单" checked lay-filter="resType" >
+	     				    <input type="radio" name="resType" value="2" title="功能"  lay-filter="resType" >
+				    </div>
+				</div>
+		     <% } %>
+	
+		<div class="layui-form-item">
+			<label class="layui-form-label">资源名称</label>
+			<div class="layui-input-block">
+				<input class="layui-input" type="text" placeholder="请输入名称"   name="resName" lay-verify="required" value="${SysResource.resName}">
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label">图标</label>
+			<div class="layui-input-inline">
+  				<input class="layui-input" type="text" placeholder="图标"   name="resIcon"  value="${SysResource.resIcon}">
+			</div>
+			<div class="layui-form-mid layui-word-aux"><a href="https://www.layui.com/doc/element/icon.html" target="_blank" style="color: blue;">[点击找图标]</a></div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label">权限标识</label>
+			<div class="layui-input-block">
+				<input class="layui-input" type="text" placeholder="请输入自定义权限验证标识"   name="resPermission" value="${SysResource.resPermission}">
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label">访问路径</label>
+			<div class="layui-input-block">
+				<input class="layui-input" type="text" placeholder="请输入跳转请求URL"   name="resUrl" value="${SysResource.resUrl}">
+			</div>
+		</div>
+
+		<div class="layui-form-item" style="text-align: center;display: none;">
+	            <div class="layui-input-block">
+	                <button class="layui-btn" lay-submit="" lay-filter="save" id="save">立即提交</button>
+	            </div>
+	    </div>
+	</form>
+	   
+<script>
+    layui.use(['index','layer', 'table', 'element', 'form', 'laytpl','upload','laydate'], function(){
+	  var form = layui.form;
+	  //父级资源
+	   $('#pid').comboTree({
+		        url:$ctx+'/SysResource/getTreeData',
+		        expandAll:true,
+		        type:'radio',
+		        value:'${SysResource.pid}'
+	  },function () {});
+	  
+ 	   var resType='${SysResource.resType}';
+	   if(resType){
+		   if(resType==1){
+				  $("input[name=resUrl]").parent().parent().show();
+			  }else if(resType==2){
+				  $("input[name=resUrl]").val('');
+				  $("input[name=resUrl]").parent().parent().hide();
+			      $("input[name=resIcon]").parent().parent().hide();
+			  }
+	   }
+
+	  //资源类型
+	  form.on('radio(resType)', function(data){
+		  if(data.value==1){
+			  $("input[name=resUrl]").parent().parent().show();
+		  }else if(data.value==2){
+			  $("input[name=resUrl]").val('');
+			  $("input[name=resUrl]").parent().parent().hide();
+			  $("input[name=resIcon]").parent().parent().hide();
+		  }
+	  }); 
+	  //立即提交
+	  form.on('submit(save)', function(data){
+		  var param=data.field;
+ 	       $.ajaxPost('/SysResource/sava',param,
+	        		 //请求成功回调函数
+          		 function(data){
+	        				//刷新父类方法【reloadTable】
+	        				getParentIframe().reloadTable();
+							//关闭当前窗口
+							winClose();
+             		  }); 
+	        return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+	  });
+     //更新
+     form.render();  
+	  
+});
+function add(){
+		$("#save").click();
+	}
+</script>
+</body>

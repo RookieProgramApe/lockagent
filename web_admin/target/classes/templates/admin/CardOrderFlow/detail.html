@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html style="background-color: #fff;">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>详情</title>
+<%include("/includes/common.html"){}%>
+</head>
+<body class="childrenBody">
+<div class="layui-form">
+    <table class="layui-table" lay-skin="" width="100%">
+        <tr>
+            <th width="10" style="background-color: #f2f2f2;text-align: right;">提交人：</th>
+            <td width="40" align="left">${cardOrderFlow.realName}</td>
+            <th width="10" style="background-color: #f2f2f2;text-align: right;">手机号：</th>
+            <td width="40" align="left">${cardOrderFlow.mobile}</td>
+        </tr>
+        <tr>
+            <th width="10" style="background-color: #f2f2f2;text-align: right;">审核时间：</th>
+            <td width="40" align="left">${cardOrderFlow.createTime,dateFormat="yyyy-MM-dd"}</td>
+            <th width="10" style="background-color: #f2f2f2;text-align: right;">备注：</th>
+            <td width="40" align="left">${cardOrderFlow.remark}</td>
+        </tr>
+
+        <% if(isNotEmpty(cardOrderFlow.fileList)){ %>
+        <tr>
+            <td colspan="4">
+                <div style="display: flex;flex-wrap: wrap;" id="layer-photos-demo">
+                    <% for( hosp in cardOrderFlow.fileList){ %>
+                    <div style="display: flex;flex-direction: column;align-items: center;margin-right: 10px;">
+                        <img src="${hosp.imageurl}" style="width: 180px; height: 180px;max-width:180px;" layer-src="${hosp.imageurl}" />
+                    </div>
+                    <% } %>
+                </div>
+            </td>
+        </tr>
+        <% } %>
+
+    </table>
+</div>
+
+<script type="text/javascript">
+   layui.use(['index','layer', 'table', 'element', 'laytpl'], function () {
+        var table = layui.table, form = layui.form;
+        var admin = layui.admin;
+       layer.photos({
+           photos: '#layer-photos-demo'
+           ,anim: 5 //0-6的选择，指定弹出图片动画类型，默认随机（请注意，3.0之前的版本用shift参数）
+       });
+
+    })
+</script>
+</body>
+</html>

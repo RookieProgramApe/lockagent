@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html style="background-color: #fff;">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>详情</title>
+<%include("/includes/common.html"){}%>
+</head>
+<body class="childrenBody">
+<div class="layui-tab ">
+    <ul class="layui-tab-title">
+        <li class="layui-this">详细列表</li>
+    </ul>
+    <div class="layui-tab-content">
+            <div class="layui-tab-item layui-show">
+                <table id="dataList" lay-filter="dataList"></table>
+            </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+   layui.use(['index','layer', 'table', 'element', 'laytpl'], function () {
+        var table = layui.table, form = layui.form;
+        var admin = layui.admin;
+        /**创建表格*/
+        table.render({
+            elem: '#dataList',
+            url: $ctx + '/GiftcardBatch/pageList1',
+            method: "POST",
+            page: true,
+            loading: true,
+            where:{
+                sequence:"${sequence}"
+            },
+            cols: [[
+                {field: 'serial', title: '卡号', width: 100},
+                {field: 'passcode', title: '提货码', width: 150},
+                {field: 'status', title: '状态', width: 100,templet:function(d){
+                    switch(d.status){
+                        case -1:return "<span style='color:red;'>失败</span>";break;
+                        case  1:return "<span style='color:green;'>成功</span>";break;
+                        default:return "";
+                    }
+                    }},
+                {field: 'reason', title: '备注', width: 200},
+                {field: 'createTime', title: '创建时间', width: 200}
+            ]]
+            , limit: 10
+            , text: {
+                none: '暂无相关数据' //默认：无数据。注：该属性为 layui 2.2.5 开始新增
+            }
+        });
+        //刷新
+        admin.events.refresh = function () {
+            table.reload('dataList');
+        };
+        //监听工具条(编辑|删除)
+        table.on('tool(dataList)', function (obj) { //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
+            var data = obj.data; //获得当前行数据
+            var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+        });
+    })
+</script>
+</body>
+</html>

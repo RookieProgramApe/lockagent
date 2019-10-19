@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<title>安装订单首页</title>
+<%include("/includes/common.html"){}%>
+<%include("/includes/toolbar.html"){}%>
+</head>
+<body>
+
+<div class="layui-fluid list_card">
+    <div class="layui-form list_box">
+        <!--搜索条件-->
+        <div class="layui-card-header layuiadmin-card-header-auto layui-row">
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">支付状态</label>
+                    <div class="layui-input-block">
+                        <select name="status" lay-search="" class="layui-select">
+                            <option value="">-全部-</option>
+                            <option value="1">未支付</option>
+                            <option value="2">已支付</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--按钮组-->
+        <div class="layui-row list_btnGroup">
+            <div class="layui-btn-group" style="float: right;">
+                <button class="layui-btn layui-btn-sm layui-bg-cyan" title="搜索" lay-submit lay-filter="searchBtn"><i class="layui-icon layui-icon-search"></i></button>
+                <button class="layui-btn layui-btn-sm layui-bg-cyan" title="刷新" layadmin-event="refresh"><i class="layui-icon layui-icon-refresh"></i></button>
+            </div>
+        </div>
+        <!--表格渲染-->
+        <div class="layui-row list_table">
+            <table id="dataList" lay-filter="dataList"></table>
+        </div>
+    </div>
+</div>
+
+<!-- 条件筛选 -->
+<script  type="text/html" id="gender">
+        {{# if(d.gender==1){ }}
+            <span>男</span>
+        {{# }else if(d.gender==2){ }}
+            <span>女</span>
+        {{# } }}
+</script>
+
+<!-- 头像 -->
+<script id="headUrl" type="text/html">
+    <img class="layui-circle" src="{{d.avatar}}" style="width: 50px;height: 100%;"/>
+</script>
+
+<!-- 封面 -->
+<script type="text/html" id="picture">
+    <img src="{{ d.advertUrl}}"  style="width:100%;height: 100%;" lay-event="lookPhoto"/>
+</script>
+、
+
+<script type="text/javascript">
+     layui.use(['index','layer', 'table', 'element', 'form', 'laytpl'], function () {
+          var table = layui.table, form = layui.form;
+          var admin = layui.admin;
+            /**创建表格*/
+          table.render({
+                elem: '#dataList',
+                url: $ctx + '/InstallerOrder/pageList',
+                method: "POST",
+                page: true,
+                loading: true,
+                cols: [[
+                    {field: 'create_time', title: '下单时间', width: 200},
+                    {field: 'nickname', title: '昵称', width: 120},
+                   {field: 'avatar', title: '下单人',templet:'#headUrl',width:100, align: 'center'},
+                    {field: 'recipient', title: '下单人', width: 150},
+                    {field: 'mobile', title: '联系电话', width: 180},
+                    {field: 'province', title: '详细地址',width:300,align: 'center',templet:function (d) {
+                            return d.province+"/"+d.city+"/"+d.county+"/"+d.address;
+                        }},
+                    {field: 'total_price', title: '安装费',width:120,align: 'right',sort: true, templet:function (d) {
+                            return d.total_price+"元";
+                        }},
+                    {field: 'status', title: '状态', width: 100,templet:function (d) {
+                            if(d.status == 1){
+                                return "<font color='red'>待支付</font>";
+                            }else if(d.status == 2){
+                                return "<font color='green'>已支付</font>";
+                            }
+                        }},
+                    {field: 'cargo_name', title: '商品名称', width: 180},
+                    {field: 'sku_name', title: '商品规格', width: 180},
+                    {field: 'ordernum', title: '商品订单号', width: 180},
+                    {field: 'orderPrice', title: '商品订单金额',width:180,align: 'right',sort: true, templet:function (d) {
+                            return d.orderPrice+"元";
+                        }},
+                   {field: 'salesOrder', title: 'ASMP服务号', width: 200}
+                ]]
+                , limit: 10
+                , text: {
+                  none: '暂无相关数据'
+                }
+            });
+            //搜索
+            form.on('submit(searchBtn)', function (data) {
+                var field = data.field;
+                table.reload('dataList', {
+                    where: field,
+                    page: {curr: 1}
+                });
+            });
+            //刷新
+            admin.events.refresh = function () {
+                table.reload('dataList');
+            };
+
+            //添加
+            admin.events.add = function () {
+                LayOpen('添加','/InstallerOrder/toAdd','add');
+            };
+            //批量删除
+            admin.events.delete = function () {
+                var array = table.checkStatus("dataList").data;
+                if(array.length>0) {
+                    var idsArr=new Array();
+                    array.forEach(function(res) {idsArr.push(res.id);});
+                    layer.confirm('是否删除选中的数据?', function (index) {
+                        $.ajaxPost( '/InstallerOrder/deleteForList',{ids:idsArr},function (d) {
+                            table.reload("dataList");
+                        });
+                    });
+                }else{
+                    layer.msg("请勾选要删除信息", { time: 1000});
+                }
+            };
+            //监听开/关
+            form.on('switch(stateFilter)', function (data) {
+                var name = $(data.elem).attr("name"), id = $(data.elem).attr("data-id"),
+                obj = data.elem, isChecked = data.elem.checked, val = 1;
+                if (isChecked) val =2;
+                $.ajaxPost("/InstallerOrder/update", {id: id, state: val});
+            });
+
+            //监听工具条(查询|编辑|删除|查看图片)
+             table.on('tool(dataList)', function (obj) { //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
+                var data = obj.data; //获得当前行数据
+                var layEvent = obj.event;
+                 if (layEvent == 'detail') {//详情
+                     LayOpen('详情', '/InstallerOrder/detail?id=' + data.id, 'find');
+                 }else if(layEvent == 'edit') { //编辑
+                     LayOpen('编辑', '/InstallerOrder/toAdd?id=' + data.id,'update');
+                 }else if(layEvent=='lookPhoto'){//查看图片
+                     LookPhoto(data.advertUrl);
+                 }else if(layEvent == 'del') { //删除
+                    layer.confirm('是否删除该数据?', function (index) {
+                    var param = {id: data.id};
+                    $.ajaxPost( '/InstallerOrder/delete', param,function (data) {
+                            table.reload("dataList");
+                       });
+                    });
+                 }
+              });
+            //表单更新
+            form.render();
+     });
+</script>
+
+</body>
+</html>

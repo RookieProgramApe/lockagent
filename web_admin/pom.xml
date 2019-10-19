@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>web_admin</artifactId>
+  <version>1.0.0</version>
+  <packaging>jar</packaging>
+
+  <name>web_admin</name>
+
+  <parent>
+    <groupId>com.lxkj</groupId>
+    <artifactId>lockagent</artifactId>
+    <version>1.0.0</version>
+  </parent>
+  <dependencies>
+    <dependency>
+      <groupId>com.lxkj</groupId>
+      <artifactId>service</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+    <!-- ueditor富文本-->
+    <dependency>
+      <groupId>org.json</groupId>
+      <artifactId>json</artifactId>
+      <version>20160810</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>2.6</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-fileupload</groupId>
+      <artifactId>commons-fileupload</artifactId>
+      <version>1.4</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+      <version>1.12</version>
+    </dependency>
+    <!-- shiro 权限集成-->
+    <dependency>
+      <groupId>org.apache.shiro</groupId>
+      <artifactId>shiro-spring</artifactId>
+      <version>1.4.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.shiro</groupId>
+      <artifactId>shiro-ehcache</artifactId>
+      <version>1.4.1</version>
+    </dependency>
+    <!--beetl模版引擎-->
+    <dependency>
+      <groupId>com.ibeetl</groupId>
+      <artifactId>beetl-framework-starter</artifactId>
+      <version>1.2.8.RELEASE</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <finalName>lockagent</finalName>
+    <plugins>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <configuration>
+          <fork>true</fork>
+          <excludeDevtools>true</excludeDevtools>
+          <includeSystemScope>true</includeSystemScope>
+          <jvmArguments>-Dfile.encoding=UTF-8</jvmArguments>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+
+</project>

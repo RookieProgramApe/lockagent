@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html style="background-color: #fff;">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>编辑内容</title>
+    <%include("/includes/common.html"){}%>
+    <%include("/includes/ueditor.html"){}%>
+    <%include("/includes/webuploader.html"){}%>
+</head>
+<body class="childrenBody">
+    <form class="layui-form" id="addForm" >
+        <!--附件上传 -->
+        <div class="layui-form-item">
+            <label class="layui-form-label">上传图片<font color="red">*</font></label>
+            <div class="layui-input-block">
+                <div id="picker"><i class="layui-icon">&#xe67c;</i>选择文件</div>
+            </div>
+        </div>
+        <!--隐藏域-不用乱动 -->
+        <div class="layui-form-item layui-hide">
+            <button class="layui-btn" lay-submit="" lay-filter="save" id="save">确认</button>
+                <input type="hidden" name="id"  value="${Banner.id}">
+        </div>
+    </form>
+<script type="text/javascript">
+    layui.use(['index','layer', 'table', 'element', 'form', 'laytpl','laydate'], function () {
+        var form = layui.form;
+        var admin = layui.admin;
+
+        //附件上传
+        $("#picker").uploadFile({
+            def:'${Banner.image}',
+            name: "image",//隐藏域 input[name=fileUrl],通过js方法 getFileUrls("fileUrl")获取数组
+            size: 100,//单个附件不能超过200MB
+            number: 1,//附件不能超过3个
+            model: 'Banner',//新文件目录
+            type: 'image'//所有类型  image:图片类型 ,video:视频,file:所有
+        });
+        //表单提交
+        form.on('submit(save)', function (data) {
+            var param = data.field;
+            //获得复选框
+            var arr = new Array();
+            $('[name=businessId]:checkbox:checked').each(function () {
+                arr.push($(this).val());
+            });
+            //截图传数组
+            var fileArr=getFileUrls("image");
+            if(fileArr.length<=0){
+                layer.msg("请上图片", {icon: 5,time: 1000});
+                return false;
+            }
+            $.ajaxPost( "/Banner/save", param, function (res) {
+                getParentIframe().layui.table.reload('dataList');
+                winClose();
+            });
+            return false;
+        });
+        form.render();
+     });
+     function aClick() {
+        window.open("http://lbs.qq.com/tool/getpoint/", "_blank")
+     }
+</script>
+</body>
+</html>

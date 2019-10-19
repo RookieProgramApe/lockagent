@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <title>砍价活动首页</title>
+    <%include("/includes/common.html"){}%>
+    <%include("/includes/toolbar.html"){}%>
+</head>
+<body>
+
+<div class="layui-fluid list_card">
+    <div class="layui-form list_box">
+        <!--搜索条件-->
+
+        <!--按钮组-->
+        <div class="layui-row list_btnGroup">
+            <div style="float: left;">
+                <button class="layui-btn layui-btn-sm" layadmin-event="add">添加</button>
+            </div>
+            <div class="layui-btn-group" style="float: right;">
+                <button class="layui-btn layui-btn-sm layui-bg-cyan" title="刷新" layadmin-event="refresh"><i
+                        class="layui-icon layui-icon-refresh"></i></button>
+            </div>
+        </div>
+        <!--表格渲染-->
+        <div class="layui-row list_table">
+            <table id="dataList" lay-filter="dataList"></table>
+        </div>
+    </div>
+</div>
+
+
+<!-- 开关 -->
+<script type="text/html" id="stateTpl">
+    <input type="checkbox" name="status" data-id="{{d.id}}" lay-skin="switch"
+           lay-filter="stateFilter" style="width:52px;" lay-text="上架|下架" {{d.status==1 ? 'checked' : '' }} />
+</script>
+
+<script type="text/html" id="toolbar1">
+    <div class="layui-btn-group">
+        <button class="layui-btn layui-btn-xs" lay-event="detail" title="查询">
+            <i class="layui-icon layui-icon-search"></i>
+        </button>
+        <button class="layui-btn layui-btn-xs layui-bg-blue" lay-event="edit" title="修改">
+            <i class="layui-icon">&#xe642;</i>
+        </button>
+        <button class="layui-btn layui-btn-xs layui-btn-danger" lay-event="del" title="删除">
+            <i class="layui-icon">&#xe640;</i>
+        </button>
+    </div>
+</script>
+<!-- 封面 -->
+<script type="text/html" id="picture">
+    <img src="{{ d.cargo.picture}}" style="width:100%;height: 100%;">
+</script>
+
+<!-- 排序-->
+<script type="text/html" id="ordersTpl">
+    <input name="orders" value="{{d.sort}}" style="height: 28px;" data-oval="{{d.sort}}" data-id="{{d.id}}"
+           class="layui-input sort" onkeyup="value=value.replace(/[^\d]/g,'')"
+           keydown="value=value.replace(/[^\d]/g,'')">
+</script>
+
+<script type="text/javascript">
+    layui.use(['index', 'layer', 'table', 'element', 'form', 'laytpl'], function () {
+        var table = layui.table, form = layui.form;
+        var admin = layui.admin;
+        /**创建表格*/
+        table.render({
+            elem: '#dataList',
+            url: $ctx + '/Bargain/pageList',
+            method: "POST",
+            page: true,
+            loading: true,
+            cols: [[
+                {field: 'advertUrl', title: '封面', templet: '#picture', width: 100, align: 'center'},
+                {
+                    field: 'cargo.name', title: '商品名称', width: 250, templet: function (d) {
+                        return d.cargo.name;
+                    }
+                },
+                {
+                    field: 'cargo.salePrice',
+                    title: '原售价',
+                    width: 120,
+                    align: 'right',
+                    sort: true,
+                    templet: function (d) {
+                        return d.cargo.salePrice + "元";
+                    }
+                },
+                {
+                    field: 'floorPrice', title: '底价', width: 120, align: 'right', sort: true, templet: function (d) {
+                        return d.floorPrice + "元";
+                    }
+                },
+                {field: 'stock', title: '开放库存', width: 90, align: 'center'},
+                {field: 'orders', title: '排序', width: 90, templet: '#ordersTpl', align: 'center'},
+                {field: 'status', title: '是否发布', templet: '#stateTpl', align: 'center', width: 120},
+                {field: 'tool', title: '操作', width: 120, toolbar: '#toolbar1'}
+            ]]
+            , limit: 10
+            , text: {
+                none: '暂无相关数据'
+            }
+            , done: function (res, curr, count) {
+                //排序
+                $("input[name=orders]").on("focus", function () {
+                    $(this).attr("data-oval", $(this).val()); //将当前值存入自定义属性
+                }).on("blur", function () {
+                    var oldVal = $(this).attr("data-oval"); //获取原值
+                    var orders = $(this).val(); //获取当前值
+                    if (!orders) {
+                        $(this).val(oldVal);
+                        return;
+                    }
+                    if (oldVal != orders) {
+                        var id = $(this).attr("data-id");
+                        if (orders && id) {
+                            $.ajaxPost('/Bargain/update', {id: id, sort: orders},
+                                function (data) {
+                                    table.reload("dataList");
+                                });
+                        }
+                    }
+                });
+            }
+        });
+        //搜索
+        form.on('submit(searchBtn)', function (data) {
+            var field = data.field;
+            table.reload('dataList', {
+                where: field,
+                page: {curr: 1}
+            });
+        });
+        //刷新
+        admin.events.refresh = function () {
+            table.reload('dataList');
+        };
+
+        //添加
+        admin.events.add = function () {
+            LayOpen('添加', '/Bargain/toAdd', 'add');
+        };
+
+        //监听开/关
+        form.on('switch(stateFilter)', function (data) {
+            var name = $(data.elem).attr("name"), id = $(data.elem).attr("data-id"),
+                obj = data.elem, isChecked = data.elem.checked, val = 0;
+            if (isChecked) val = 1;
+            $.ajaxPost("/Bargain/update", {id: id, status: val});
+        });
+
+        //监听工具条(查询|编辑|删除|查看图片)
+        table.on('tool(dataList)', function (obj) { //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
+            var data = obj.data; //获得当前行数据
+            var layEvent = obj.event;
+            if (layEvent == 'detail') {//详情
+                LayOpen('详情', '/Bargain/detail1?id=' + data.id, 'find');
+            } else if (layEvent == 'edit') { //编辑
+                LayOpen('编辑', '/Bargain/toAdd?id=' + data.id, 'update');
+            } else if (layEvent == 'lookPhoto') {//查看图片
+                LookPhoto(data.advertUrl);
+            } else if (layEvent == 'del') { //删除
+                layer.confirm('是否删除该数据?', function (index) {
+                    var param = {id: data.id};
+                    $.ajaxPost('/Bargain/delete', param, function (data) {
+                        table.reload("dataList");
+                    });
+                });
+            }
+        });
+        //表单更新
+        form.render();
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,65 @@
+{
+  "groups": [
+    {
+      "name": "wechat.mp",
+      "type": "com.lxkj.config.WxProperties",
+      "sourceType": "com.lxkj.config.WxProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "wechat.mp.aes-key",
+      "type": "java.lang.String",
+      "description": "设置微信小程序的EncodingAESKey",
+      "sourceType": "com.lxkj.config.WxProperties"
+    },
+    {
+      "name": "wechat.mp.appid",
+      "type": "java.lang.String",
+      "description": "设置微信小程序的appid",
+      "sourceType": "com.lxkj.config.WxProperties"
+    },
+    {
+      "name": "wechat.mp.callback-url",
+      "type": "java.lang.String",
+      "description": "连连支付回调",
+      "sourceType": "com.lxkj.config.WxProperties"
+    },
+    {
+      "name": "wechat.mp.callback-url2",
+      "type": "java.lang.String",
+      "sourceType": "com.lxkj.config.WxProperties"
+    },
+    {
+      "name": "wechat.mp.mch-id",
+      "type": "java.lang.String",
+      "description": "商户号",
+      "sourceType": "com.lxkj.config.WxProperties"
+    },
+    {
+      "name": "wechat.mp.mch-key",
+      "type": "java.lang.String",
+      "description": "支付密钥",
+      "sourceType": "com.lxkj.config.WxProperties"
+    },
+    {
+      "name": "wechat.mp.secret",
+      "type": "java.lang.String",
+      "description": "设置微信小程序的Secret",
+      "sourceType": "com.lxkj.config.WxProperties"
+    },
+    {
+      "name": "wechat.mp.token",
+      "type": "java.lang.String",
+      "description": "设置微信小程序的token",
+      "sourceType": "com.lxkj.config.WxProperties"
+    },
+    {
+      "name": "wechat.mp.wxcallback-url",
+      "type": "java.lang.String",
+      "description": "微信支付回调",
+      "sourceType": "com.lxkj.config.WxProperties"
+    }
+  ],
+  "hints": []
+}

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html style="background-color: #fff;">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+<title>详情</title>
+<%include("/includes/common.html"){}%>
+</head>
+<body class="childrenBody">
+<div class="layui-tab ">
+    <ul class="layui-tab-title">
+        <li class="layui-this">基础信息</li>
+        <li>规格列表</li>
+        <li>交易列表</li>
+    </ul>
+    <div class="layui-tab-content">
+        <div class="layui-tab-item layui-show">
+            <div class="layui-form">
+              <table class="layui-table" lay-skin="" width="100%">
+                    <tr>
+                      <th width="100px" style="background-color: #f2f2f2;text-align: right;">商品名称：</th>
+                      <td width="400px" align="left" >${Cargo.name}</td>
+                    </tr>
+                    <tr>
+                        <th width="100px" style="background-color: #f2f2f2;text-align: right;">封面：</th>
+                        <td width="400px" align="left" >
+                            <%if(image!=null&&image!=""){%>
+                            <img src="${image}" style="height: 50px;" onclick="LookPhoto(this.src)">
+                            <%}%>
+                        </td>
+                    </tr>
+                    <%if(video!=null&&video!=""){%>
+                    <tr>
+                      <th width="100px" style="background-color: #f2f2f2;text-align: right;">视频：</th>
+                      <td width="400px" align="left" >
+                          <video src="${video}" controls="controls" style="height: 70px;">
+                              您的浏览器不支持 video 标签。
+                          </video>
+                      </td>
+                    </tr>
+                    <%}%>
+                    <tr>
+                        <th width="100px" style="background-color: #f2f2f2;text-align: right;">客服电话：</th>
+                        <td width="400px" align="left" colspan="3">${Cargo.tellphone}</td>
+
+                    </tr>
+                    <tr>
+                        <th width="100px" style="background-color: #f2f2f2;text-align: right;">虚拟销量：</th>
+                        <td width="400px" align="left" >${Cargo.baseSaleCount}</td>
+                    </tr>
+                    <tr>
+                        <th width="100px" style="background-color: #f2f2f2;text-align: right;">原价：</th>
+                        <td width="400px" align="left" >￥${Cargo.originalPrice}</td>
+
+                    </tr>
+                  <tr>
+                      <th width="100px" style="background-color: #f2f2f2;text-align: right;">现价：</th>
+                      <td width="400px" align="left" >￥${Cargo.salePrice}</td>
+                  </tr>
+                    <tr>
+                        <th width="100px" style="background-color: #f2f2f2;text-align: right;">商品详情：</th>
+                        <td width="400px" align="left" > ${Cargo.description}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+            <div class="layui-tab-item">
+                <script type="text/html" id="toolbarTpl">
+                    <a class="layui-btn layui-btn-xs" lay-event="detail">查看</a>
+                </script>
+                <table id="dataList" lay-filter="dataList"></table>
+            </div>
+            <div class="layui-tab-item">
+            <table id="dataList1" lay-filter="dataList1"></table>
+        </div>
+        </div>
+    </div>
+<script src="${ctxPath}/static/plugins/ueditor/ueditor.parse.js"></script>
+<script type="text/javascript">
+   layui.use(['index','layer', 'table', 'element', 'laytpl'], function () {
+        var table = layui.table, form = layui.form;
+        var admin = layui.admin;
+
+        uParse("#content1",{rootPath: '${ctxPath}/static/plugins/ueditor'});
+        /**创建表格*/
+        table.render({
+            elem: '#dataList',
+            url: $ctx + '/CargoSku/pageList1',
+            method: "POST",
+            page: false,
+            loading: true,
+            where:{
+                cargo_id:'${Cargo.id}'
+            },
+            cols: [[
+                {field: 'name', title: '规格名称', width: 150},
+                {field: 'inventory', title: '剩余库存', width: 100},
+                {field: 'status', title: '状态', width: 150,templet:function(d){
+                    switch(d.status){
+                        case 0:return "下架";break;
+                        case 1:return "上架";break;
+                        default:
+                    }
+                    }},
+                {field: 'createTime', title: '创建时间', width: 200}
+            ]]
+            , limit: 10
+            , text: {
+                none: '暂无相关数据' //默认：无数据。注：该属性为 layui 2.2.5 开始新增
+            }
+        });
+       table.render({
+           elem: '#dataList1',
+           url: $ctx + '/Cargo/pageListOrder',
+           method: "POST",
+           page: false,
+           loading: true,
+           where:{
+               cargo_id:'${Cargo.id}'
+           },
+           cols: [[
+               {field: 'sku_name', title: '规格名称', width: 200},
+               {field: 'count', title: '购买数量', width: 100},
+               {field: 'status', title: '状态', width: 100,templet:function(d){
+                   switch(d.status){
+                       case 1:return "<span style='color:red;'>待支付</span>";break;
+                       case 2:return "<span style='color:green;'>已支付</span>";break;
+                       case 3:return "已发货";break;
+                       case 4:return "已完成";break;
+                       default:return "";
+                   }
+                   }},
+               {field: 'create_time', title: '交易时间', width: 200}
+           ]]
+           , limit: 10
+           , text: {
+               none: '暂无相关数据' //默认：无数据。注：该属性为 layui 2.2.5 开始新增
+           },done:function(d){
+               console.log(d.data);
+           }
+       });
+        //刷新
+        admin.events.refresh = function () {
+            table.reload('dataList');
+        };
+        //监听工具条(编辑|删除)
+        table.on('tool(dataList)', function (obj) { //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
+            var data = obj.data; //获得当前行数据
+            var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+        });
+    })
+</script>
+</body>
+</html>

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <title>用户管理</title>
+    <%include("/includes/common.html"){}%>
+    <style type="text/css">
+        /*tbody .layui-table-cell {*/
+        /*height: 40px;*/
+        /*line-height: 40px;*/
+        /*padding: 0 15px;*/
+        /*position: relative;*/
+        /*overflow: hidden;*/
+        /*text-overflow: ellipsis;*/
+        /*white-space: nowrap;*/
+        /*box-sizing: border-box;*/
+        /*}*/
+    </style>
+</head>
+<body>
+<div class="layui-fluid" style="padding: 10px;">
+    <div class="layui-card">
+        <!--搜素-->
+        <div class="layui-form layui-card-header layuiadmin-card-header-auto">
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">账号</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="userName" placeholder="请输入" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">姓名</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="realName" placeholder="请输入" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+
+                <div class="layui-inline">
+                    <button class="layui-btn layui-btn-sm" lay-submit lay-filter="searchBtn">
+                        <i class="layui-icon layui-icon-search layuiadmin-button-btn"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!--表格-->
+        <div class="layui-card-body">
+            <div style="padding-bottom: 10px;">
+                <button class="layui-btn layui-btn-sm addBtn">添加</button>
+            </div>
+            <table id="dataList" lay-filter="dataList"></table>
+        </div>
+    </div>
+</div>
+
+<script type="text/html" id="stateTpl">
+    <input type="checkbox" name="state" data-id="{{d.id}}" lay-skin="switch"
+           lay-filter="stateFilter" style="width:52px;" lay-text="启用|禁用" {{
+           d.enableStatus==0 ? 'checked' : '' }} />
+</script>
+<script type="text/html" id="operBtnTpl">
+    <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="edit">编辑</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+<script>
+    $(function () {
+        layui.use(['index', "table", "form"], function () {
+            var table = layui.table, form = layui.form;
+            var admin = layui.admin;
+            //数据管理
+            table.render({
+                elem: '#dataList'
+                , url: $ctx + '/SysUser/pageList' //模拟接口
+                , cols: [[
+                    {field: 'userName', title: '账号', width: 200}
+                    , {field: 'realName', title: '姓名', width: 150}
+                    , {field: 'mobile', title: '手机', align: 'center', width: 150}
+                    , {field: 'gender', title: '性别', align: 'center', width: 80}
+                    , {field: 'enableStatus', title: '是否启用', templet: '#stateTpl', align: 'center', width: 120}
+                    , {field: 'createTime', title: '加入时间', templet: '#buttonTpl', align: 'center', width: 180}
+                    , {title: '操作', width: 150, align: 'center', toolbar: '#operBtnTpl'}
+                ]]
+                , page: true
+                , limit: 20
+                , text: {
+                    none: '暂无相关数据' //默认：无数据。注：该属性为 layui 2.2.5 开始新增
+                }
+            });
+            //监听模糊搜索
+            form.on('submit(searchBtn)', function (data) {
+                var field = data.field;
+                //执行重载
+                table.reload('dataList', {
+                    where: field
+                });
+            });
+            //监听列表状态值
+            form.on('switch(stateFilter)', function (data) {
+                var name = $(data.elem).attr("name"), id = $(data.elem).attr("data-id"),
+                    obj = data.elem, isChecked = data.elem.checked, val = 1;
+                if (isChecked) {
+                    val = 0;
+                }
+                $.ajaxPost("/SysUser/updateState", {id: id, enableStatus: val});
+            });
+
+            /**添加按钮*/
+            $(".addBtn").click(function () {
+                var index = top.layer.open({
+                    type: 2,
+                    isOutAnim: true,
+                    title: '添加用户',
+                    shade: 0.1,
+                    maxmin: true, //开启最大化最小化按钮
+                    area: ['800px', '650px'],
+                    content: $ctx + '/SysUser/toAdd',
+                    btn: ['确定', '取消'],
+                    yes: function (index, layero) {
+                        var submit = layero.find('iframe').contents().find("#sava");
+                        submit.click();
+                    }
+                });
+            });
+            //监听工具条
+            table.on('tool(dataList)', function (obj) {
+                var data = obj.data;
+                if (obj.event === 'del') {
+                    layer.confirm('真的删除行么', function (index) {
+                        var param = {id: data.id,};
+                        $.ajaxPost('/SysUser/delete', param,
+                            function (data) {
+                                table.reload("dataList");
+                            });
+                    });
+                } else if (obj.event === 'edit') {
+                    var index = top.layer.open({
+                        type: 2,
+                        isOutAnim: true,
+                        title: ' 编辑用户',
+                        shade: 0.1,
+                        maxmin: true, //开启最大化最小化按钮
+                        area: ['800px', '650px'],
+                        content: $ctx + '/SysUser/toAdd?id=' + data.id,
+                        btn: ['确定', '取消'],
+                        yes: function (index, layero) {
+                            var submit = layero.find('iframe').contents().find("#sava");
+                            submit.click();
+                        }
+                    });
+                }
+            });
+        });
+    })
+</script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+{
+  "groups": [
+    {
+      "name": "file",
+      "type": "com.lxkj.common.bean.FileMappingProperties",
+      "sourceType": "com.lxkj.common.bean.FileMappingProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "file.mapping",
+      "type": "java.lang.String",
+      "sourceType": "com.lxkj.common.bean.FileMappingProperties"
+    },
+    {
+      "name": "file.path",
+      "type": "java.lang.String",
+      "sourceType": "com.lxkj.common.bean.FileMappingProperties"
+    }
+  ],
+  "hints": []
+}

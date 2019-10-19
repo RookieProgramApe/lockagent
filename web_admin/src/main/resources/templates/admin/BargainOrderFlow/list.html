@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<title>砍价订单完成情况首页</title>
+<%include("/includes/common.html"){}%>
+<%include("/includes/toolbar.html"){}%>
+</head>
+<body>
+
+<div class="layui-fluid list_card">
+    <div class="layui-form list_box">
+        <!--搜索条件-->
+        <div class="layui-card-header layuiadmin-card-header-auto layui-row">
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">关键字</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="keyword" value="" placeholder="请输入" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">动态选择器</label>
+                    <div class="layui-input-block">
+                         <select name="selectId" lay-search="" id="selectId" ></select>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">静态选择器</label>
+                    <div class="layui-input-block">
+                        <select name="selectId2" lay-search="" class="layui-select">
+                            <option value="">-全部-</option>
+                            <option value="1">选择1</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--按钮组-->
+        <div class="layui-row list_btnGroup">
+            <div style="float: left;">
+                <button class="layui-btn layui-btn-sm" layadmin-event="add">添加</button>
+                <button class="layui-btn layui-btn-sm layui-btn-danger" layadmin-event="delete">删除</button>
+            </div>
+            <div class="layui-btn-group" style="float: right;">
+                <button class="layui-btn layui-btn-sm layui-bg-cyan" title="搜索" lay-submit lay-filter="searchBtn"><i class="layui-icon layui-icon-search"></i></button>
+                <button class="layui-btn layui-btn-sm layui-bg-cyan" title="刷新" layadmin-event="refresh"><i class="layui-icon layui-icon-refresh"></i></button>
+            </div>
+        </div>
+        <!--表格渲染-->
+        <div class="layui-row list_table">
+            <table id="dataList" lay-filter="dataList"></table>
+        </div>
+    </div>
+</div>
+
+<!-- 条件筛选 -->
+<script  type="text/html" id="gender">
+        {{# if(d.gender==1){ }}
+            <span>男</span>
+        {{# }else if(d.gender==2){ }}
+            <span>女</span>
+        {{# } }}
+</script>
+
+<!-- 循环遍历 -->
+<script  type="text/html" id="gz">
+        {{#  layui.each(d.ptlist, function(index, item){ }}
+                <span class="layui-badge layui-bg-cyan">{{item}}</span>&nbsp;
+        {{#  }); }}
+</script>
+
+<!-- 开关 -->
+<script type="text/html" id="stateTpl">
+   <input type="checkbox" name="state" data-id="{{d.id}}" lay-skin="switch"
+        lay-filter="stateFilter" style="width:52px;" lay-text="上架|下架" {{d.state==2 ? 'checked' : '' }} />
+</script>
+
+<!-- 头像 -->
+<script id="headUrl" type="text/html">
+    <img class="layui-circle" src="{{d.avatarUrl}}" style="width: 50px;height: 100%;"/>
+</script>
+
+<!-- 封面 -->
+<script type="text/html" id="picture">
+    <img src="{{ d.advertUrl}}"  style="width:100%;height: 100%;" lay-event="lookPhoto"/>
+</script>
+
+<!-- 排序-->
+<script type="text/html" id="ordersTpl">
+    <input name="orders" value="{{d.orders}}" style="height: 28px;" data-oval="{{d.orders}}" data-id="{{d.id}}"
+             class="layui-input sort" onkeyup="value=value.replace(/[^\d]/g,'')"
+                 keydown="value=value.replace(/[^\d]/g,'')">
+</script>
+
+<script type="text/javascript">
+     layui.use(['index','layer', 'table', 'element', 'form', 'laytpl'], function () {
+          var table = layui.table, form = layui.form;
+          var admin = layui.admin;
+            /**创建表格*/
+          table.render({
+                elem: '#dataList',
+                url: $ctx + '/BargainOrderFlow/pageList',
+                method: "POST",
+                page: true,
+                loading: true,
+                cols: [[
+                    {type: 'checkbox'},
+                   {field: 'headUrl', title: '头像',templet:'#headUrl',width:100, align: 'center'},
+                   {field: 'advertUrl', title: '封面',templet:'#picture',width:100, align: 'center'},
+                   {field: 'orders', title: '排序', width: 90, templet: '#ordersTpl', align: 'center'},
+                   {field: 'title', title: '标题', width: 250},
+                   {field: 'remk', title: '描述', width: 200},
+                   {field: 'currentPrice', title: '现价',width:120,align: 'right',sort: true, templet:function (d) {
+                         return d.currentPrice+"元";
+                    }},
+                   {field: 'reservationStatus', title: '状态', width: 100,templet:function (d) {
+                        if(d.reservationStatus === 0){
+                            return "待支付";
+                        }
+                    }},
+                   {field: 'status', title: '是否发布', templet: '#stateTpl', align: 'center', width: 120},
+                   {field: 'createTime', title: '创建时间', width: 200},
+                   {field: 'tool', title: '操作', width: 120, toolbar: '#toolbar'}
+                ]]
+                , limit: 10
+                , text: {
+                  none: '暂无相关数据'
+                }
+                ,done: function (res, curr, count) {
+                    //排序
+                    $("input[name=orders]").on("focus", function () {
+                         $(this).attr("data-oval", $(this).val()); //将当前值存入自定义属性
+                    }).on("blur", function () {
+                        var oldVal = $(this).attr("data-oval"); //获取原值
+                        var orders = $(this).val(); //获取当前值
+                        if (!orders) {
+                            $(this).val(oldVal);
+                            return;
+                        }
+                        if (oldVal != orders) {
+                            var id = $(this).attr("data-id");
+                            if (orders && id) {
+                                $.ajaxPost('/BargainOrderFlow/update',{id: id, orders: orders},
+                                    function (data) {
+                                        table.reload("dataList");
+                                 });
+                            }
+                        }
+                    });
+                }
+            });
+            //搜索
+            form.on('submit(searchBtn)', function (data) {
+                var field = data.field;
+                table.reload('dataList', {
+                    where: field,
+                    page: {curr: 1}
+                });
+            });
+            //刷新
+            admin.events.refresh = function () {
+                table.reload('dataList');
+            };
+
+            //Select动态数据源
+            $("#selectId").Select({
+                url: $ctx + '/Category/select',
+                data:{},
+                valueName:'id',
+                labelName:'name'
+            });
+            //添加
+            admin.events.add = function () {
+                LayOpen('添加','/BargainOrderFlow/toAdd','add');
+            };
+            //批量删除
+            admin.events.delete = function () {
+                var array = table.checkStatus("dataList").data;
+                if(array.length>0) {
+                    var idsArr=new Array();
+                    array.forEach(function(res) {idsArr.push(res.id);});
+                    layer.confirm('是否删除选中的数据?', function (index) {
+                        $.ajaxPost( '/BargainOrderFlow/deleteForList',{ids:idsArr},function (d) {
+                            table.reload("dataList");
+                        });
+                    });
+                }else{
+                    layer.msg("请勾选要删除信息", { time: 1000});
+                }
+            };
+            //监听开/关
+            form.on('switch(stateFilter)', function (data) {
+                var name = $(data.elem).attr("name"), id = $(data.elem).attr("data-id"),
+                obj = data.elem, isChecked = data.elem.checked, val = 1;
+                if (isChecked) val =2;
+                $.ajaxPost("/BargainOrderFlow/update", {id: id, state: val});
+            });
+
+            //监听工具条(查询|编辑|删除|查看图片)
+             table.on('tool(dataList)', function (obj) { //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
+                var data = obj.data; //获得当前行数据
+                var layEvent = obj.event;
+                 if (layEvent == 'detail') {//详情
+                     LayOpen('详情', '/BargainOrderFlow/detail?id=' + data.id, 'find');
+                 }else if(layEvent == 'edit') { //编辑
+                     LayOpen('编辑', '/BargainOrderFlow/toAdd?id=' + data.id,'update');
+                 }else if(layEvent=='lookPhoto'){//查看图片
+                     LookPhoto(data.advertUrl);
+                 }else if(layEvent == 'del') { //删除
+                    layer.confirm('是否删除该数据?', function (index) {
+                    var param = {id: data.id};
+                    $.ajaxPost( '/BargainOrderFlow/delete', param,function (data) {
+                            table.reload("dataList");
+                       });
+                    });
+                 }
+              });
+            //表单更新
+            form.render();
+     });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html style="background-color: #fff;">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>编辑内容</title>
+    <%include("/includes/common.html"){}%>
+</head>
+<body class="childrenBody">
+    <form class="layui-form" id="addForm" >
+        <!--大文本 -->
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">公告内容<font color="red">*</font></label>
+            <div class="layui-input-block">
+                <textarea name="content" placeholder="请输入内容" class="layui-textarea" lay-verify="required">${Bulletin.content}</textarea>
+            </div>
+        </div>
+        <!--隐藏域-不用乱动 -->
+        <div class="layui-form-item layui-hide">
+            <button class="layui-btn" lay-submit="" lay-filter="save" id="save">确认</button>
+                <input type="hidden" name="id"  value="${Bulletin.id}">
+        </div>
+    </form>
+<script type="text/javascript">
+    layui.use(['index','layer', 'table', 'element', 'form', 'laytpl','laydate'], function () {
+        var form = layui.form;
+        var admin = layui.admin;
+
+        //表单提交
+        form.on('submit(save)', function (data) {
+            var param = data.field;
+            $.ajaxPost( "/Bulletin/save", param, function (res) {
+                getParentIframe().layui.table.reload('dataList');
+                winClose();
+            });
+            return false;
+        });
+        form.render();
+     });
+     function aClick() {
+        window.open("http://lbs.qq.com/tool/getpoint/", "_blank")
+     }
+</script>
+</body>
+</html>

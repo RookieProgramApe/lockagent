@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <title>系统机构首页</title>
+    <%include("/includes/common.html"){}%>
+    <%include("/includes/toolbar.html"){}%>
+</head>
+<body>
+
+<div class="layui-fluid list_card">
+    <div class="layui-form list_box">
+        <!--搜索条件-->
+        <!--按钮组-->
+        <div class="layui-row list_btnGroup">
+            <div style="float: left;">
+                <button class="layui-btn layui-btn-sm" layadmin-event="add">添加</button>
+            </div>
+            <div class="layui-btn-group" style="float: right;">
+                <button class="layui-btn layui-btn-sm layui-bg-cyan" title="刷新" layadmin-event="refresh"><i
+                        class="layui-icon layui-icon-refresh"></i></button>
+            </div>
+        </div>
+        <!--表格渲染-->
+        <div class="layui-row list_table">
+            <table class="layui-table layui-form" id="tree-table" lay-size="sm"></table>
+        </div>
+    </div>
+</div>
+
+
+<!-- 开关 -->
+
+
+<!-- 排序-->
+<script type="text/html" id="ordersTpl">
+    <input name="orders" value="{{d.orders}}" style="height: 28px;" data-oval="{{d.orders}}" data-id="{{d.id}}"
+           class="layui-input sort" onkeyup="value=value.replace(/[^\d]/g,'')"
+           keydown="value=value.replace(/[^\d]/g,'')">
+</script>
+
+
+<script type="text/javascript">
+    var treeTable;
+    var re;
+    layui.config({
+        base: '${ctxPath}/static/plugins/layuiadmin/' //静态资源所在路径
+    }).extend({
+        treeTable: 'treeTable',
+    }).use(['index', 'element', 'layer', 'form', 'laytpl', 'treeTable'], function () {
+        var o = layui.$;
+        var table = layui.table, form = layui.form;
+        var admin = layui.admin;
+        treeTable = layui.treeTable;
+        /**创建表格*/
+        re = treeTable.render({
+            elem: '#tree-table',
+            url: $ctx + '/SysOrg/treeList',
+            icon_key: 'orgName',
+            is_checkbox: false,
+            end: function (e) {
+                /**改变排序触发*/
+                $("input[name=sort]").on("focus",function(){
+                    $(this).attr("data-oval",$(this).val()); //将当前值存入自定义属性
+                }).on("blur",function(){
+                    var oldVal=$(this).attr("data-oval"); //获取原值
+                    var orders=$(this).val(); //获取当前值
+                    if(!orders){
+                        $(this).val(oldVal);
+                        return;
+                    }
+                    if (oldVal!=orders) {
+                        var id = $(this).attr("data-id"),param = { id: id, orders: orders };
+                        if(orders&&id){
+                            $.ajaxPost('/SysOrg/update',param,
+                                function(data){
+                                    treeTable.openAll(re);
+                                    treeTable.render(re);
+                                });
+                        }
+                    }
+                });
+                form.render();
+            },
+            cols: [
+                {
+                    key: 'orgName',
+                    title: '机构名称',
+                    align: 'center',
+                    width: '200px',
+                },
+                {
+                    key: 'orgCode',
+                    title: '机构编码',
+                    width: '120px',
+                    align: 'center',
+                },
+                {
+                    title: '排序',
+                    width: '100px',
+                    align: 'center',
+                    template: function (item) {
+                     return '<input name="sort" value="'+item.orders+'" data-oval="'+item.orders+'" data-id="'+item.id+'" class="layui-input" >';
+                    }
+                }, {
+                    title: '是否启用',
+                    width: '100px',
+                    align: 'center',
+                    template: function (item) {
+                            if(item.enableStatus==1){
+                                return '<input type="checkbox" name="enableStatus" lay-skin="switch"  data-id="'+item.id+'" lay-text="启用|禁用" lay-filter="stateFilter" checked="checked">';
+                            }else{
+                                return '<input type="checkbox" name="enableStatus" lay-skin="switch"  data-id="'+item.id+'"  lay-text="启用|禁用" lay-filter="stateFilter">';
+                            }
+                    }
+                },
+                {
+                    title: '操作',
+                    align: 'center',
+                    template: function (item) {
+                        return '<a href="javascript:;" class="layui-btn layui-btn-xs ajax-add" lay-filter="add" >添加</a>\n' +
+                            '<a href="javascript:;" class="layui-btn layui-btn-normal layui-btn-xs ajax-edit" lay-filter="edit" >修改</a>\n' +
+                            '<a href="javascript:;" class="layui-btn layui-btn-danger layui-btn-xs ajax-delete"  lay-filter="del">删除</a>';
+                    }
+                }
+            ]
+        });
+        treeTable.openAll(re);
+        //刷新
+        admin.events.refresh = function () {
+            treeTable.openAll(re);
+            treeTable.render(re);
+        };
+        //新增
+        admin.events.add = function () {
+            LayOpen('添加', '/SysOrg/toAdd', 'add', ['500px', '400px']);
+        };
+        // 添加
+        treeTable.on('tree(add)', function (data) {
+            LayOpen('添加[上一层：'+data.item.orgName+']', '/SysOrg/toAddPid?id='+data.item.id, 'add', ['500px', '400px']);
+        })
+        //编辑
+        treeTable.on('tree(edit)', function (data) {
+            LayOpen('修改', '/SysOrg/toAdd?id='+data.item.id, 'add', ['500px', '400px']);
+        })
+
+
+        // 删除
+        treeTable.on('tree(del)', function (data) {
+            layer.confirm('是否删除该数据?', function (index) {
+                var param = {id: data.item.id};
+                $.ajaxPost('/SysOrg/delete', param, function (data) {
+                    treeTable.openAll(re);
+                    treeTable.render(re);
+                });
+            });
+        })
+        //禁用/启用
+        form.on('switch(stateFilter)', function (data) {
+            var id = $(data.elem).attr("data-id"),
+                obj=data.elem,isChecked=data.elem.checked,val = 0;
+            if (isChecked) {
+                val = 1;
+            }
+            var param = { id: id, enableStatus: val };
+            $.ajaxPost('/SysOrg/update',param);
+        });
+
+        //表单更新
+        form.render();
+    });
+    function resh() {
+        treeTable.openAll(re);
+        treeTable.render(re);
+    }
+</script>
+
+</body>
+</html>

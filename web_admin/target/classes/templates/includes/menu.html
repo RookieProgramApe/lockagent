@@ -1,0 +1,47 @@
+<div class="layui-side-scroll">
+    <div class="layui-logo" lay-href="${ctxPath}/home">
+        <span>后台管理系统</span>
+    </div>
+
+    <ul class="layui-nav layui-nav-tree" lay-shrink="all" id="LAY-system-side-menu"
+        lay-filter="layadmin-system-side-menu">
+
+        <% for(item in user.sysResourceList){ %>
+            <li data-name="${item.resPermission}" class="layui-nav-item">
+                <% if(item.resUrl!=''&&item.resUrl!=null){ %>
+                    <a href="javascript:;" lay-tips="${item.resName}" lay-direction="2" lay-href="${ctxPath}${item.resUrl}}">
+                        <i class="layui-icon ${item.resIcon}"></i>
+                        <cite>${item.resName}</cite>
+                    </a>
+                <% }else{ %>
+                    <a href="javascript:;" lay-tips="${item.resName}" lay-direction="2">
+                        <i class="layui-icon ${item.resIcon}"></i>
+                        <cite>${item.resName}</cite>
+                    </a>
+                <% }%>
+                <% if(item.childList.~size>0){ %>
+                    <dl class="layui-nav-child">
+                        <% for(item2 in item.childList){ %>
+                            <dd data-name="${item2.resPermission}">
+                                <% if(item2.resUrl!=''&&item2.resUrl!=null){ %>
+                                    <a href="javascript:;" lay-href="${ctxPath}${item2.resUrl}" lay-tips="${item2.resName}" lay-direction="2">${item2.resName}</a>
+                                <% }else{ %>
+                                    <a  href="javascript:;" lay-tips="${item2.resName}" lay-direction="2">${item2.resName}</a>
+                                <% }%>
+                                <% if(item2.childList.~size>0){ %>
+                                    <dl class="layui-nav-child">
+                                        <% for(item3 in item2.childList){ %>
+                                            <dd data-name="${item3.resPermission}"><a href="javascript:;" lay-href="${ctxPath}${item3.resUrl}" lay-tips="${item3.resName}" lay-direction="2">${item3.resName}</a></dd>
+                                        <% }%>
+                                    </dl>
+                                <% }%>
+                            </dd>
+                        <% } %>
+                    </dl>
+                <% } %>
+            </li>
+        <% } %>
+    </ul>
+</div>
+
+

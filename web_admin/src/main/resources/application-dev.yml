@@ -1,0 +1,20 @@
+spring:
+  #开发环境-数据库连接配置
+  datasource:
+#     url: jdbc:mysql://39.100.93.20:3306/lockershop?useUnicode=true&characterEncoding=utf8&useSSL=false
+#     username: lockershop
+#     password: qq5022311
+     url: jdbc:mysql://localhost:3306/lockershop?useUnicode=true&characterEncoding=utf8&useSSL=false
+     username: root
+     password: 123456
+     driver-class-name: com.mysql.jdbc.Driver
+     type: com.zaxxer.hikari.HikariDataSource
+     hikari:
+        #公式：connections =cpu核心数*2 + 硬盘数
+        maximum-pool-size: 15
+        max-lifetime: 60000
+########################附件配置########################
+file:
+  mapping: http://127.0.0.1:8088/lockagent/static/downFile
+  path: D:\\projects
+devmode: true

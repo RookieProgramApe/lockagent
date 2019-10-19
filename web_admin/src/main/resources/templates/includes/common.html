@@ -1,0 +1,22 @@
+<script>var $ctx='${ctxPath}';</script>
+<!-- fa 字体样式库 -->
+<link rel="stylesheet" href="${ctxPath}/static/plugins/layuiadmin/layui/css/layui.css" media="all">
+<link rel="stylesheet" href="${ctxPath}/static/css/base.css" media="all">
+<link rel="stylesheet" href="${ctxPath}/static/plugins/layuiadmin/style/admin.css" media="all">
+<!-- jquery3.2.1核心基础库-->
+<script src="${ctxPath}/static/plugins/jquery/jquery.min.js"></script>
+<script src="${ctxPath}/static/plugins/jquery/jquery.serializejson.js"></script>
+<script src="${ctxPath}/static/plugins/jquery/jquery.form.js"></script>
+<script src=""></script>
+<!-- layui库 -->
+<script src="${ctxPath}/static/plugins/layuiadmin/layui/layui.js"></script>
+<!-- 通用工具 -->
+<script src="${ctxPath}/static/plugins/myUtils/CommonUtils.js"></script>
+
+<script>
+    layui.config({
+        base: '${ctxPath}/static/plugins/layuiadmin/' //静态资源所在路径
+    }).extend({
+        index: 'lib/index' //主入口模块
+    });
+</script>

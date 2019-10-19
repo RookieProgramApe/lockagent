@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html style="background-color:transparent">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>后台管理系统</title>
+    <%include("/includes/common.html"){}%>
+    <link rel="stylesheet" href="${ctxPath}/static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="${ctxPath}/static/plugins/font-awesome/css/font-awesome.min.css" media="all">
+    <link rel="stylesheet" href="${ctxPath}/static/css/templatemo-style.css">
+    <style>
+        .kit-login-bg {
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            right: 0px;
+            bottom: 0px;
+            background-size: 100% 100%;
+            background-repeat:no-repeat;
+            /*background-image: url(${ctxPath}/static/image/bj.jpg);*/
+        }
+    </style>
+</head>
+
+<body class="light-gray-bg kit-login-bg">
+<div class="templatemo-content-widget templatemo-login-widget white-bg tp-8">
+    <header class="text-center">
+        <!--<div class="square"></div>-->
+        <h1>后台管理系统</h1>
+    </header>
+    <form class="templatemo-login-form">
+        <div class="form-group">
+            <div class="input-group">
+                <div class="input-group-addon"><i class="fa fa-user fa-fw"></i></div>
+                <input type="text" id="username" class="form-control" placeholder="请输入登录账户">
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="input-group">
+                <div class="input-group-addon"><i class="fa fa-key fa-fw"></i></div>
+                <input type="password" id="pwd" class="form-control" placeholder="请输入密码">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <button type="button" class="templatemo-blue-button width-100 login_btn">登录</button>
+        </div>
+        <div class="form-group" style="text-align: right;">
+            <span style="color: #9ca4ac">仅供内部人使用</span>
+            <span style="margin-left: 5px;color: #576b95;cursor: pointer" onclick="toRes()"></span>
+        </div>
+    </form>
+</div>
+<div class="templatemo-content-widget templatemo-login-widget templatemo-register-widget white-bg">
+    <p>Powered by <strong><a class="blue-text">代理商城</a></strong></p>
+</div>
+<script type="text/javascript">
+    layui.use(['layer', 'jquery', 'form'], function () {
+        var layer = layui.layer,
+            $ = layui.jquery,
+            form = layui.form;
+        $(function () {
+            document.onkeyup = function (e) {
+                var ev = document.all ? window.event : e;
+                if (ev.keyCode === 13) {
+                    $('.login_btn').click();
+                }
+            };
+        });
+
+
+        $('.login_btn').click(function () {
+            var name = $('#username').val();
+            var pwd = $('#pwd').val();
+            if (name == '' || $.trim(name).length == 0) {
+                layer.tips('请输入登录名称', '#username', {tips: [3, '#3595cc'], anim: 4});
+                return false;
+            }
+            if (pwd == '' || $.trim(pwd).length == 0) {
+                layer.tips('请输入登录密码', '#pwd', {tips: [3, '#3595cc'], anim: 4});
+                return false;
+            }
+            var loginLoading = top.layer.msg('登陆中，请稍候', {icon: 16, time: false, shade: 0.1});
+            $.post($ctx + "/doLogin", {userName: name, passWord: pwd}, function (res) {
+                top.layer.close(loginLoading);
+                if (res.code ==200) {
+                    layer.msg(res.msg, {icon:1,time:500},function () {
+                        location.href = $ctx + "/index";
+                    });
+                } else {
+                    layer.msg(res.msg, {icon: 5,time:600});
+                    $("#pwd").val("");
+                }
+            });
+        });
+
+    });
+
+</script>
+</body>
+</html>

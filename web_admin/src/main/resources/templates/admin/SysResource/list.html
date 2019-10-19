@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>菜单管理</title> 
+	<%include("/includes/common.html"){}%>
+</head>
+<body>
+<div class="layui-fluid" style="padding: 10px;">
+	<div class="layui-card">
+		<!--表格-->
+		<div class="layui-card-body">
+			<div style="padding-bottom: 10px;">
+				<button class="layui-btn layui-btn-sm addBtn">添加</button>
+				<button class="layui-btn layui-btn-sm refreshBtn">刷新</button>
+			</div>
+			<div class="layui-form" id="treeTable"  style="padding-top: 2px;"></div>
+		</div>
+	</div>
+</div>
+
+
+
+
+<script id="treeTableTemplate" type="text/html">
+        <table class="layui-table" lay-size="sm"  lay-filter="treeTable" style="margin: 0px;">
+            <thead>
+                <tr>
+                  		<th>菜单名称</th>
+	                    <th style="width: 50px;">排序</th>
+	                    <th style="width: 30px;">类型</th>
+	                    <th>请求地址</th>
+	                    <th style="width: 70px;">状态</th>
+						<th style="width: 120px;">权限标识</th>
+	                    <th style="width: 70px;">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{# layui.each(d.rows,function(index,r){ }}
+					<tr>
+	                	<td class="layui-elip">
+							{{#  if(r.resType === 1){ }}
+								<i class="layui-icon {{r.resIcon}}"></i>&nbsp;{{r.resName}}
+							{{#  }else if(r.resType === 2){ }}
+								<div class="layui-btn layui-btn-xs">&nbsp;{{r.resName}}</div>
+							{{#  } }}
+
+						</td>
+	                    <td>
+							<input name="sort" value="{{r.orders}}" data-oval="{{r.orders}}" data-id="{{r.id}}" class="layui-input" onkeyup="value=value.replace(/[^\d]/g,'')" keydown="value=value.replace(/[^\d]/g,'')"> 
+	                    </td>
+	                    <td>
+  								{{#  if(r.resType === 1){ }}
+    										菜单
+ 							    {{#  }else if(r.resType === 2){ }} 
+ 											功能
+								{{#  } }} 
+						</td>
+	                    <td>{{r.resUrl}}</td>
+	                    <td>
+	                        <input type="checkbox" name="enableStatus" lay-skin="switch" lay-text="启用|禁用" {{# if(r.enableStatus==1){ }}checked="checked"{{# } }}  lay-filter="ajax" data-id="{{r.id}}" >
+						</td>
+  						<td title="{{ $.replaceNull(r.resPermission) }}">
+							{{ $.interceptString(r.resPermission,30) }}
+						</td>
+	                    <td>
+	                        <a href="javascript:;" class="layui-btn layui-btn-normal layui-btn-sm ajax-edit" data-id="{{r.id}}"><i class="layui-icon">&#xe642;</i>编辑</a>
+	                        <a href="javascript:;" class="layui-btn layui-btn-danger layui-btn-sm ajax-delete" data-id="{{r.id}}"><i class="layui-icon">&#xe640;</i>删除</a>
+	                    </td>
+	                </tr>
+                {{# }); }}
+            </tbody>
+        </table>
+</script>
+<script>
+var treeGird;
+$(function(){
+    layui.config({
+        base: '${ctxPath}/static/plugins/layuiadmin/' //静态资源所在路径
+    }).extend({
+        treegrid:  'layUiTreeGrid/treegrid',
+        grid:  'layUiTreeGrid/grid'
+    }).use(['index','element','layer','form','laytpl','treegrid'], function () {
+            var laytpl = layui.laytpl;
+            var form = layui.form;
+            var treegrid = layui.treegrid;
+            var admin=layui.admin;
+            /**初始化生成表格*/
+            treegrid.config.render = function (viewid, data) {
+                var view = document.getElementById(viewid).innerHTML;
+                return laytpl(view).render(data) || '';
+            };
+            treeGird= treegrid.createNew({
+                elem: 'treeTable',
+                view: 'treeTableTemplate',
+                url:$ctx+'/SysResource/treeList',
+                parentid: 'pid',
+                order:'order',
+                asc:'desc',
+                singleSelect: false,
+                dataSuccess: function (data) {//数据加载成功后调用
+                },
+            	success: function(pageData,elem){//渲染成功后调用
+            		 /**渲染更新*/
+               		 form.render();
+            	
+               		 /**改变排序触发*/
+               		  $("input[name=sort]").on("focus",function(){
+               			    $(this).attr("data-oval",$(this).val()); //将当前值存入自定义属性
+                     }).on("blur",function(){
+                    	  var oldVal=$(this).attr("data-oval"); //获取原值
+                          var orders=$(this).val(); //获取当前值
+                          if(!orders){
+                        	  $(this).val(oldVal);
+                        	  return;
+                          }
+                          if (oldVal!=orders) {
+	                     	  var id = $(this).attr("data-id"),param = { id: id, orders: orders };
+	                     	  if(orders&&id){
+	                     	    $.ajaxPost('/SysResource/doUpdate',param,
+	            	            		 function(data){
+                                             treeGird.build();
+	            	               		   });
+	                     	 }
+                          }
+                     });
+               		 
+                     /**状态(禁用|启用)*/
+                     form.on('switch(ajax)', function(data) {
+         	               var name = $(data.elem).attr("name"),id = $(data.elem).attr("data-id"),
+         	               obj=data.elem,isChecked=data.elem.checked,val = 0;
+         	               console.log(data);
+         	               if (isChecked) {
+         	                    val = 1;
+         	                }
+         	               var param = { id: id, enableStatus: val };
+         	               $.ajaxPost('/SysResource/doUpdate',param);
+                     });
+                     
+                     /**刷新按钮*/
+                     $(".refreshBtn").click(function(){
+                     	  treeGird.build();
+                     });
+                     /**删除按钮*/
+                     $(".ajax-delete").click(function(){
+                    	 var id=$(this).attr("data-id");
+                    	 if(id){
+                    	      layer.confirm('真的删除行么', function(index){
+            	            	  var param = { id: id};
+            		               $.ajaxPost('/SysResource/delete',param,
+            		            	function(data){
+            		            	   treeGird.build();
+            		            	   layer.close(list);
+            		               }); 
+            	              });
+                    	 }
+                     });
+                     
+                     /**编辑按钮*/
+                     $(".ajax-edit").click(function(){
+                    	 var id=$(this).attr("data-id");
+                    	 if(id){
+                    		 var index =top.layer.open({
+                        		 id:'1',
+                        		 type: 2,
+                        	      isOutAnim:true,
+                        	      title: '编辑',
+                        	      shadeClose: true,
+                        	      content: $ctx+'/SysResource/toAdd?id='+id,
+                        	      shade: false,
+                        	      maxmin: true, //开启最大化最小化按钮
+                        	      area: ['650px', '550px'],
+                          	      btn: ['保存', '关闭'],
+                        	      yes: function(index, layero){
+                        	    	  //treeGird.build();
+                        	          var iframeWin = parent.parent.window[layero.find('iframe')[0]['name']];
+                        	          iframeWin.add();  // 能正常调用子页面的addUser方法，但却无法触发表单验证
+                        	    	  return false;
+                        	      },
+                        	      close: function(index, layero){ 
+                        	    	    layer.close(list);
+                        	    	    return false;
+                        	      }  
+                        	
+                        	 });
+                    	 }
+                     });
+                     /**添加按钮*/
+                     $(".addBtn").click(function(){
+                    	 var index =top.layer.open({
+                    		 id:'1',
+                    		 type: 2,
+                    	      isOutAnim:true,
+                    	      title: "添加",
+                    	      shadeClose: true,
+                    	      shade: false,
+                    	      maxmin: true, //开启最大化最小化按钮
+                    	      area: ['650px', '550px'],
+                    	      content: $ctx+'/SysResource/toAdd',
+                    	      btn: ['保存', '关闭'],
+                    	      yes: function(index, layero){
+                    	    	  //treeGird.build();
+                    	          var iframeWin = parent.parent.window[layero.find('iframe')[0]['name']];
+                    	          iframeWin.add();  // 能正常调用子页面的addUser方法，但却无法触发表单验证
+                    	    	  return false;
+                    	      },
+                    	      close: function(index, layero){ 
+                    	    	    layer.close(list);
+                    	    	    return false;
+                    	      }    
+                    	    });
+                     });
+                }
+            })
+           	treeGird.build();
+        });
+});
+//刷新表格
+function reloadTable() {
+	  treeGird.build();
+}
+</script>
+
+</body>

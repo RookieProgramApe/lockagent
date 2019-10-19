@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lxkj.mapper.SysResourceMapper">
+
+        <!-- 通用查询映射结果 -->
+        <resultMap id="BaseResultMap" type="com.lxkj.entity.SysResource">
+                    <id column="id" property="id" />
+                    <result column="pid" property="pid" />
+                    <result column="resPermission" property="resPermission" />
+                    <result column="resName" property="resName" />
+                    <result column="resUrl" property="resUrl" />
+                    <result column="resIcon" property="resIcon" />
+                    <result column="levels" property="levels" />
+                    <result column="resType" property="resType" />
+                    <result column="enableStatus" property="enableStatus" />
+                    <result column="orders" property="orders" />
+        </resultMap>
+
+        <!-- 通用查询结果列 -->
+        <sql id="Base_Column_List">
+        id, pid, resPermission, resName, resUrl, resIcon, levels, resType, enableStatus, orders
+    </sql>
+
+</mapper>

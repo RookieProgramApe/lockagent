@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html style="background-color: #fff;">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>编辑内容</title>
+    <%include("/includes/common.html"){}%>
+    <%include("/includes/ueditor.html"){}%>
+    <%include("/includes/webuploader.html"){}%>
+</head>
+<style>
+    .t1 {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .tidiv {
+        position: relative;
+    }
+
+    .cha {
+        width: 20px;
+        height: 20px;
+        position: absolute;
+        right: -5px;
+        top: 0;
+    }
+
+    .pict {
+        width: 100px;
+        height: 60px;
+    }
+</style>
+<body class="childrenBody">
+    <form class="layui-form" id="addForm" >
+        <div class="layui-form-item">
+            <label class="layui-form-label">SKU名称<font color="red">*</font></label>
+            <div class="layui-input-block">
+                <input type="text" name="name"  value="${CargoSku.name}" lay-verify="required" autocomplete="off" id="name" class="layui-input" >
+            </div>
+        </div>
+        <div class="layui-form-item optitem">
+            <label class="layui-form-label">添加商品<font color="red">*</font></label>
+            <div class="layui-input-block">
+                <div class='layui-upload-list'>
+                    <table class='layui-table' lay-size='sm'>
+                        <thead>
+                        <tr>
+                            <th style="width: 110px;">选择</th>
+                            <th>商品名称</th>
+                            <th style="width: 30px;text-align: center;">
+                                <img height="25" width="25" style="cursor:pointer"  src="${ctxPath}/static/image/jia.png"  id="stepAdd">
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody id="stepList">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="layui-input-block" style="color: red;">
+                * 点击选择按钮进行选择，不可手动输入，
+            </div>
+        </div>
+
+        <!--隐藏域-不用乱动 -->
+        <div class="layui-form-item layui-hide">
+            <button class="layui-btn" lay-submit="" lay-filter="save" id="save">确认</button>
+                <input type="hidden" name="id"  value="${CargoSku.id}">
+        </div>
+    </form>
+<script type="text/javascript">
+    var delIds=new Array();
+    layui.use(['index','layer', 'table', 'element', 'form', 'laytpl','laydate'], function () {
+         var form = layui.form;
+        var admin = layui.admin;
+
+        //添加选项
+        $('#stepAdd').click(function(){
+            var uid = guid();
+            var btnId="upload"+uid;
+            var html="<tr>" +
+                "<td class='t1'>" +
+                " <input type='hidden' name='optionId'   value='' />" +
+                " <input type='hidden' id='cargo_id"+uid+"' name='cargo_id' value='' />" +
+                "<button class=\"layui-btn layui-btn-sm\" type='button' onclick=toSelect('','"+uid+"')>选择商品</button>"+
+                " </td>" +
+                "<td><input class='layui-input' type='text' id='cargo_name"+uid+"' name='content'  lay-verify='required' lay-verType='tips' maxlength='200' readonly></td>" +
+                "<td style='text-align: center;'>" +
+                " <img height='30' width='30' style='cursor:pointer' src='${ctxPath}/static/image/jian.png' onclick='del(this)'>" +
+                "</td>" +
+                "</tr>";
+            $("#stepList").append(html);
+        });
+        //获取选项
+        $.asynPost('/Cargo/select',{name:'${CargoSku.name}'},function(res) {
+            var list=res.data;
+            for(var i=0;i<list.length;i++){
+                var obj=list[i];
+                var html="<tr>" +
+                    "<td class='t1'>" +
+                    " <input type='hidden' name='optionId'  value='"+obj.id+"' />" +
+                    " <input type='hidden' id='cargo_id"+obj.id+"'  value='' />" +
+                    "<button class=\"layui-btn layui-btn-sm\" type='button' onClick=toSelect('"+obj.id+"','"+obj.id+"')>选择商品</button>"+
+                    " </td>" +
+                    "<td><input class='layui-input' type='text' id='cargo_name"+obj.id+"' name='content' value='"+obj.content+"'  lay-verify='required' lay-verType='tips' maxlength='200' ></td>" +
+                    "<td style='text-align: center;'>" +
+                    " <img height='30' width='30' style='cursor:pointer' src='${ctxPath}/static/image/jian.png' data-id='"+obj.id+"' onclick='addDel(this)'>" +
+                    "</td>" +
+                    "</tr>";
+                $("#stepList").append(html);
+
+            }
+        });
+
+        //表单提交
+        form.on('submit(save)', function (data) {
+            var param = data.field;
+                var stepArr=new Array();
+                $("#stepList tr").each(function () {
+                    var josn={};
+                    var id=$(this).find('input:hidden[name="optionId"]').val()||"";
+                    var cargoId=$(this).find('input:hidden[name="cargo_id"]').val()||"";
+                    josn.id=id;
+                    josn.cargoId=cargoId;
+                    stepArr.push(josn);
+                });
+                if(stepArr.length==0){
+                    layer.msg("请添加商品", {icon: 5,time: 1000});
+                    return false;
+                }
+            if(delIds.length>0){
+                param.delIds = delIds.join(",");
+            }
+                param.stepArr = JSON.stringify(stepArr);
+            $.ajaxPost("/CargoSku/save", param, function (res) {
+                getParentIframe().layui.table.reload('dataList');
+                winClose();
+            });
+            return false;
+        });
+        form.render();
+     });
+    function toSelect(id,uid){
+        console.log("toselect");
+        var str="cargo_id"+uid;
+        console.log(document.getElementById('cargo_id'+uid));
+        console.log(document.getElementById("str"));
+        LayOpen("选择商品", "/CargoSku/select?id="+id+"&uid=" + uid, 'find');
+    }
+    function del(obj){
+        $(obj).parent().parent().remove();
+    }
+    //历史删除
+    function addDel(obj){
+        var id=$(obj).attr("data-id");
+        delIds.push(id);
+        $(obj).parent().parent().remove();
+    }
+     function aClick() {
+        window.open("http://lbs.qq.com/tool/getpoint/", "_blank")
+     }
+</script>
+</body>
+</html>

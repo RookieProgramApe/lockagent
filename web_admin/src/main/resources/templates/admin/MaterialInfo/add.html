@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html style="background-color: #fff;">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>编辑内容</title>
+    <%include("/includes/common.html"){}%>
+    <%include("/includes/ueditor.html"){}%>
+    <%include("/includes/webuploader.html"){}%>
+</head>
+<body class="childrenBody">
+    <form class="layui-form" id="addForm" >
+        <div class="layui-form-item">
+            <label class="layui-form-label">所属分类<font color="red">*</font></label>
+            <div class="layui-input-block">
+                <select name="categoryId" lay-search="" id="categoryId" lay-verify="required" lay-filter="categoryId"></select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">选择框<font color="red">*</font></label>
+            <div class="layui-input-block">
+                <select name="city" lay-search="" lay-verify="required">
+                    <option value=""></option>
+                    <option value="0">北京</option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">密码框</label>
+            <div class="layui-input-inline">
+                <input type="password" name="password" required lay-verify="required" placeholder="请输入密码" autocomplete="off" class="layui-input">
+            </div>
+            <div class="layui-form-mid layui-word-aux"><a href="javascript:void(0)" onclick="aClick()"><b
+                            style="color: blue;cursor:pointer;">点击打开地图</b></a></div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">单选框</label>
+            <div class="layui-input-block">
+                <input type="radio" name="advertType" value="1" title="自定义(图文、视频)" checked lay-filter="advertType" >
+                <input type="radio" name="advertType" value="2" title="外链接(H5跳转地址)"  lay-filter="advertType" >
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">复选<font color="red">*</font></label>
+            <div class="layui-input-block">
+                <input type="checkbox" name="businessId" value="1" title="写作">
+                <input type="checkbox" name="businessId" value="2" title="阅读" checked>
+                <input type="checkbox" name="businessId" value="3" title="发呆">
+            </div>
+        </div>
+        <!--附件上传 -->
+        <div class="layui-form-item">
+            <label class="layui-form-label">附件<font color="red">*</font></label>
+            <div class="layui-input-block">
+                <div id="picker"><i class="layui-icon">&#xe67c;</i>选择文件</div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">名称<font color="red">*</font></label>
+            <div class="layui-input-block">
+                <input type="text" name="name"  value="${MaterialInfo.name}" lay-verify="required" autocomplete="off" id="name" class="layui-input" >
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">价格<font color="red">*</font></label>
+            <div class="layui-input-inline">
+                <input type="text" name="store" value="${MaterialInfo.store}" placeholder="￥" lay-verify="required|number" autocomplete="off"  class="layui-input" >
+            </div>
+            <label class="layui-form-label">销量<font color="red">*</font></label>
+            <div class="layui-input-inline">
+                <input type="text" name="soldNum" value="${MaterialInfo.store}" lay-verify="required|number" autocomplete="off"  class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">日期范围<font color="red">*</font></label>
+            <div class="layui-input-inline">
+                <input type="text" name="startTime" id="startTime" value="${MaterialInfo.startTime,dateFormat='yyyy-MM-dd'}" lay-verify="required" placeholder="开始日期"   class="layui-input" >
+            </div>
+            <div class="layui-form-mid">-</div>
+            <div class="layui-input-inline">
+                <input type="text" name="endTime" id="endTime" value="${MaterialInfo.endTime,dateFormat='yyyy-MM-dd'}" lay-verify="required" placeholder="结束日期"   class="layui-input" >
+            </div>
+        </div>
+        <!--富文本 -->
+        <div class="layui-form-item">
+            <label class="layui-form-label">富文本<font color="red">*</font></label>
+            <div class="layui-input-block">
+                <textarea id="container" name="cnts">${MaterialInfo.cnts}</textarea>
+            </div>
+        </div>
+        <!--大文本 -->
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">文本域</label>
+            <div class="layui-input-block">
+                <textarea name="desc" placeholder="请输入内容" class="layui-textarea">${MaterialInfo.text}</textarea>
+            </div>
+        </div>
+        <!--隐藏域-不用乱动 -->
+        <div class="layui-form-item layui-hide">
+            <button class="layui-btn" lay-submit="" lay-filter="save" id="save">确认</button>
+                <input type="hidden" name="id"  value="${MaterialInfo.id}">
+        </div>
+    </form>
+<script type="text/javascript">
+    layui.use(['index','layer', 'table', 'element', 'form', 'laytpl','laydate'], function () {
+        var form = layui.form;
+        var admin = layui.admin;
+        //单选框选中
+        var gender = '${MaterialInfo.gender}';
+        if (gender) {
+            $("input[name=gender][value=" + gender + "]").attr("checked", true);
+        }
+        //日期控件
+        layui.laydate.render({
+            elem: '#startTime'
+        });
+        layui.laydate.render({
+            elem: '#endTime'
+        });
+        //单选按钮触发
+        form.on('radio(advertType)', function(data){
+            if(data.value==1){
+                $("#advertUrlDIV").hide();
+                $("#advertUrl").removeAttr("lay-verify");
+                form.render();
+            }else if(data.value==2){//外链接
+                $("#containerDIV").hide();
+                $("#advertUrl").attr("lay-verify", "required|url");
+                um.setContent('',false);
+                form.render();
+            }
+        });
+        //select下拉触发
+        form.on('select(categoryId)', function(data){
+            if(data.value=='7c3512caa38d44908b4cffea238956bd'){
+                $("#themeShow").show();
+            }else{
+                $("#themeShow").hide();
+            }
+        });
+        //富文本
+        var um = UE.getEditor('container', {
+            initialFrameWidth: 700, //初始化编辑器宽度,默认500
+            initialFrameHeight: 700,
+            enableAutoSave: true
+        });
+        //Select动态
+        $("#categoryId").Select({
+            url: $ctx + '/Category/select',
+            data:{},
+            valueName:'id',
+            def:'${MaterialInfo.categoryId}'
+        });
+        //附件上传
+        $("#picker").uploadFile({
+            def:'${MaterialInfo.avatarUrl}',
+            name: "avatarUrl",//隐藏域 input[name=fileUrl],通过js方法 getFileUrls("fileUrl")获取数组
+            size: 100,//单个附件不能超过200MB
+            number: 1,//附件不能超过3个
+            model: 'MaterialInfo',//新文件目录
+            type: 'image'//所有类型  image:图片类型 ,video:视频,file:所有
+        });
+        //表单提交
+        form.on('submit(save)', function (data) {
+            var param = data.field;
+            //获得复选框
+            var arr = new Array();
+            $('[name=businessId]:checkbox:checked').each(function () {
+                arr.push($(this).val());
+            });
+            //截图传数组
+            var fileArr=getFileUrls("avatarUrl");
+            if(fileArr.length<=0){
+                layer.msg("请上图片", {icon: 5,time: 1000});
+                return false;
+            }
+            //富文本纯字符串
+            param.remk=um.getContentTxt();
+            $.ajaxPost( "/MaterialInfo/save", param, function (res) {
+                getParentIframe().layui.table.reload('dataList');
+                winClose();
+            });
+            return false;
+        });
+        form.render();
+     })
+     function aClick() {
+        window.open("http://lbs.qq.com/tool/getpoint/", "_blank")
+     }
+</script>
+</body>
+</html>

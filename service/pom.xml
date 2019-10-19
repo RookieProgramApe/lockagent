@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>service</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+
+    <name>service</name>
+    <description>service module</description>
+
+    <parent>
+        <groupId>com.lxkj</groupId>
+        <artifactId>lockagent</artifactId>
+        <version>1.0.0</version>
+    </parent>
+    <dependencies>
+        <dependency>
+            <groupId>com.lxkj</groupId>
+            <artifactId>common</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.deepoove</groupId>
+            <artifactId>poi-tl</artifactId>
+            <version>1.5.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-xml</artifactId>
+            <version>2.9.9</version>
+        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>lianpay_commom</groupId>-->
+<!--            <artifactId>lianpaySecurity</artifactId>-->
+<!--            <version>0.0.1</version>-->
+<!--            <scope>system</scope>-->
+<!--            <systemPath>${pom.basedir}/lib/lianpay_common_security-0.0.1.jar</systemPath>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>lianpay_commom</groupId>-->
+<!--            <artifactId>lianpayUtil</artifactId>-->
+<!--            <version>0.0.1</version>-->
+<!--            <scope>system</scope>-->
+<!--            <systemPath>${pom.basedir}/lib/lianpay_common_util-0.0.1.jar</systemPath>-->
+<!--        </dependency>-->
+        <dependency>
+            <groupId>sun.misc</groupId>
+            <artifactId>BASE64Decoder</artifactId>
+            <version>0.0.1</version>
+            <scope>system</scope>
+            <systemPath>${pom.basedir}/lib/sun.misc.BASE64Decoder.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.6</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>RELEASE</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/java</directory>
+                <includes>
+                    <include>**/*.xml</include>
+                </includes>
+            </resource>
+            <!--指定资源的位置-->
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+        </resources>
+    </build>
+</project>

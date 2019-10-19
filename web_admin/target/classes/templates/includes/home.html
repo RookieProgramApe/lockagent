@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>首页</title>
+    <%include("/includes/common.html"){}%>
+</head>
+<body>
+
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+
+        <div class="layui-col-sm6 layui-col-md3">
+            <div class="layui-card">
+                <div class="layui-card-header">
+                    注册用户
+                    <span class="layui-badge layui-bg-orange layuiadmin-badge">人</span>
+                </div>
+                <div class="layui-card-body layuiadmin-card-list">
+                    <p class="layuiadmin-big-font">${countMember}</p>
+                    <p>全部会员
+                        <span class="layuiadmin-span-color">
+                         <i class="layui-inline layui-icon layui-icon-user"></i>
+                        </span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-col-sm6 layui-col-md3">
+            <div class="layui-card">
+                <div class="layui-card-header">
+                    代理商
+                    <span class="layui-badge layui-bg-green layuiadmin-badge">人</span>
+                </div>
+                <div class="layui-card-body layuiadmin-card-list">
+                    <p class="layuiadmin-big-font">${contRetailer}</p>
+                    <p>
+                        总人数
+                        <span class="layuiadmin-span-color">
+                <!--23家-->
+               <i class="layui-inline layui-icon layui-icon-flag"></i></span>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="layui-col-sm6 layui-col-md3">
+            <div class="layui-card">
+                <div class="layui-card-header">
+                    总营收入
+                    <span class="layui-badge layui-bg-blue layuiadmin-badge">元</span>
+                </div>
+                <div class="layui-card-body layuiadmin-card-list">
+                    <p class="layuiadmin-big-font">${sumPrice}</p>
+                    <p>
+                        金额
+                        <span class="layuiadmin-span-color">
+                  <!--13单-->
+                <i class="layui-inline layui-icon layui-icon-cart"></i></span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="layui-col-sm6 layui-col-md3">
+            <div class="layui-card">
+                <div class="layui-card-header">
+                    卡片订单
+                    <span class="layui-badge layui-bg-cyan layuiadmin-badge">个</span>
+                </div>
+                <div class="layui-card-body layuiadmin-card-list">
+                    <p class="layuiadmin-big-font">${countCardOrder}</p>
+                    <p>
+                        总数
+                        <span class="layuiadmin-span-color">
+                <!--23家-->
+                <i class="layui-inline layui-icon layui-icon-face-smile-b"></i></span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-header">订单交易</div>
+                <div class="layui-card-body">
+                    <div class="layui-carousel layadmin-carousel layadmin-backlog">
+                        <ul class="layui-row layui-col-space10">
+                            <li class="layui-col-xs3">
+                                <a href="javascript:" class="layadmin-backlog-body">
+                                    <h3>待发货</h3>
+                                    <p><cite>${countOrder2}</cite></p>
+                                </a>
+                            </li>
+                            <li class="layui-col-xs3">
+                                <a href="javascript:" class="layadmin-backlog-body">
+                                    <h3>已发货</h3>
+                                    <p><cite>${countOrder3}</cite></p>
+                                </a>
+                            </li>
+                            <li class="layui-col-xs3">
+                                <a href="javascript:" class="layadmin-backlog-body">
+                                    <h3>已完成</h3>
+                                    <p><cite>${countOrder4}</cite></p>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+</div>
+
+<script type="text/javascript">
+    var intervalId;
+    var win;
+    layui.use(['index', 'home'], function () {
+        var $ = layui.$
+            , layer = layui.layer
+            , laytpl = layui.laytpl
+            , setter = layui.setter
+            , view = layui.view
+            , admin = layui.admin;
+        // intervalId = setInterval(function () {
+        //     console.log(4);
+        //     top.tabHome();
+        // }, 3000);
+        // top.layer.close(win);
+        // win = top.layer.open({
+        //     type: 2,
+        //     isOutAnim: true,
+        //     title: "111111",
+        //     shade: 0.1,
+        //     maxmin: true, //开启最大化最小化按钮
+        //     area: calScreenSize(),
+        //     content: $ctx + '/FamilyDoctorGroup/toAdd',
+        // });
+        // layer.full(win);
+
+
+    });
+</script>
+
+</body>
+</html>

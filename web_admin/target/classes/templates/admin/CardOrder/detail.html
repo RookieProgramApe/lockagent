@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html style="background-color: #fff;">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>详情</title>
+    <%include("/includes/common.html"){}%>
+</head>
+<body class="childrenBody">
+<div class="layui-tab ">
+    <ul class="layui-tab-title">
+        <li class="layui-this">基础信息</li>
+        <li>已分配的卡片</li>
+        <li>处理流程记录</li>
+    </ul>
+    <div class="layui-tab-content">
+        <div class="layui-tab-item layui-show">
+            <div class="layui-form">
+                <table class="layui-table" lay-skin="" width="100%">
+                    <% if(isNotEmpty(Member)){ %>
+                    <tr>
+                        <th style="background-color: #BFEFFF;text-align: center;" colspan="4">微信信息</th>
+                    </tr>
+                    <tr>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">头像：</th>
+                        <td width="40" align="left">
+                            <img class="layui-circle" src="${Member.avatar}" style="height: 50px;"
+                                 onclick="LookPhoto(this.src)">
+                        </td>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">昵称：</th>
+                        <td width="40" align="left">${Member.nickname}</td>
+                    </tr>
+                    <tr>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">性别：</th>
+                        <td width="40" align="left" colspan="3">${Member.gender}</td>
+                    </tr>
+                    <tr>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">积分余额：</th>
+                        <td width="40" align="left">${Member.integral}</td>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">类型：</th>
+                        <td width="40" align="left">
+                            <%if(Member.isretailer==0){ %>
+                            普通会员
+                            <%}else if(Member.isretailer==1){%>
+                            代理商
+                            <%}%>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">创建时间：</th>
+                        <td width="40" align="left" colspan="3">${Member.createTime,dateFormat="yyyy-MM-dd HH:mm:ss"}
+                        </td>
+                    </tr>
+                    <% } %>
+                    <% if(isNotEmpty(Retailer)){ %>
+                    <tr>
+                        <th style="background-color: #BFEFFF;text-align: center;" colspan="4">合伙人信息</th>
+                    </tr>
+                    <tr>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">姓名：</th>
+                        <td width="40" align="left">${Retailer.name}</td>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">身份证号：</th>
+                        <td width="40" align="left">${Retailer.identity}</td>
+                    </tr>
+                    <tr>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">性别：</th>
+                        <td width="40" align="left">${Retailer.gender}</td>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">手机电话：</th>
+                        <td width="40" align="left">${Retailer.phone}</td>
+                    </tr>
+                    <tr>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">安装电话：</th>
+                        <td width="40" align="left">${Retailer.installerMobile}</td>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">地址：</th>
+                        <td width="40" align="left">${Retailer.city}</td>
+                    </tr>
+                    <tr>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">开户人：</th>
+                        <td width="40" align="left">${Retailer.bankHolder}</td>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">开户行：</th>
+                        <td width="40" align="left">${Retailer.bank}</td>
+                    </tr>
+                    <tr>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">银行卡号：</th>
+                        <td width="40" align="left">${Retailer.bankAccountNumber}</td>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">审核状态：</th>
+                        <td width="40" align="left">
+                            <% if(Retailer.status==0){%>
+                            待审核
+                            <% }else if(Retailer.status==1){%>
+                            审核通过
+                            <% }else if(Retailer.status==99){%>
+                            审核不通过
+                            <% }%>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">审核意见：</th>
+                        <td width="40" align="left">${Retailer.approvalComment}</td>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">钱包余额：</th>
+                        <td width="40" align="left">${Retailer.balance}</td>
+                    </tr>
+                    <tr>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">创建时间：</th>
+                        <td width="40" align="left" colspan="3">${Retailer.createTime,dateFormat="yyyy-MM-dd HH:mm:ss"}
+                        </td>
+                    </tr>
+                    <% } %>
+                    <% if(isNotEmpty(CardOrder)){ %>
+                    <tr>
+                        <th style="background-color: #BFEFFF;text-align: center;" colspan="4">卡片订单信息</th>
+                    </tr>
+                    <tr>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">购买数量：</th>
+                        <td width="40" align="left">${CardOrder.count}套</td>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">金额：</th>
+                        <td width="40" align="left">${CardOrder.totalPrice}</td>
+                    </tr>
+                    <tr>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">收件人：</th>
+                        <td width="40" align="left">${CardOrder.recipient}</td>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">收件人号码：</th>
+                        <td width="40" align="left">${CardOrder.mobile}</td>
+                    </tr>
+                    <tr>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">收件人地址：</th>
+                        <td width="40" align="left" colspan="3">${CardOrder.city}${CardOrder.address}</td>
+                    </tr>
+
+                    <tr>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">编号：</th>
+                        <td width="40" align="left">${CardOrder.sequence}</td>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">审核状态：</th>
+                        <td width="40" align="left">
+                            <%select(CardOrder.status){
+                                case 1:print("待审核");
+                                case 2:print("终审通过");
+                                case 3:print("拒绝");
+                                case 4:print("初审核通过");
+                                default:print("");
+                            }%>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">审核意见：</th>
+                        <td width="40" align="left" colspan="3">${CardOrder.reson}</td>
+                    </tr>
+                    <tr>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">创建时间：</th>
+                        <td width="40" align="left" colspan="3">${CardOrder.createTime,dateFormat="yyyy-MM-dd HH:mm:ss"}
+                        </td>
+                    </tr>
+                    <% } %>
+                </table>
+            </div>
+        </div>
+        <div class="layui-tab-item">
+            <div class="layui-inline">
+                <label class="layui-form-label" style="width:200px;">卡片总数：${cardNum}&nbsp;张</label>
+                <label class="layui-form-label" style="width:200px;">已使用：${cardNum1}&nbsp;张</label>
+                <label class="layui-form-label" style="width:200px;">未使用：${cardNum0}&nbsp;张</label>
+            </div>
+            <table id="dataList" lay-filter="dataList"></table>
+        </div>
+        <div class="layui-tab-item">
+            <table id="dataList1" lay-filter="dataList1"></table>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    layui.use(['index', 'layer', 'table', 'element', 'laytpl'], function () {
+        var table = layui.table, form = layui.form;
+        var admin = layui.admin;
+        var table1 = layui.table
+        /**创建表格*/
+        table.render({
+            elem: '#dataList',
+            url: $ctx + '/Giftcard/pageListOrder',
+            method: "POST",
+            page: true,
+            loading: true,
+            where: {
+                order_id: '${id}'
+            },
+            cols: [[
+                {field: 'serial', title: '卡号', width: 300},
+                {field: 'passcode', title: '提货码', width: 350},
+                {
+                    field: 'state', title: '状态', width: 100, templet: function (d) {
+                        switch (d.state) {
+                            case 0:
+                                return "<span style='color:red;'>未使用</span>";
+                                break;
+                            case 1:
+                                return "<span style='color:green;'>已使用</span>";
+                                break;
+                            default:
+                                return "";
+                        }
+                    }
+                }
+            ]]
+            , limit: 10
+            , text: {
+                none: '暂无相关数据' //默认：无数据。注：该属性为 layui 2.2.5 开始新增
+            }
+        });
+
+
+        table1.render({
+            elem: '#dataList1',
+            url: $ctx + '/CardOrderFlow/pageList',
+            where:{
+                lb:1
+            },
+            method: "POST",
+            page: true,
+            loading: true,
+            where: {
+                cardOrderId: '${id}'
+            },
+            cols: [[
+                {field: 'createTime', title: '处理时间', width: 200, align: 'left'},
+                {field: 'state', title: '处理结果', width: 150, align: 'center'},
+                {field: 'remark', title: '备注', width: 250, align: 'center'},
+                {field: 'realName', title: '处理人', width: 180, align: 'left'},
+            ]]
+            , limit: 50
+            , text: {
+                none: '暂无相关数据' //默认：无数据。注：该属性为 layui 2.2.5 开始新增
+            }
+        });
+        //刷新
+        admin.events.refresh = function () {
+            table.reload('dataList');
+        };
+        //监听工具条(编辑|删除)
+        table.on('tool(dataList)', function (obj) { //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
+            var data = obj.data; //获得当前行数据
+            var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+        });
+    })
+</script>
+</body>
+</html>
