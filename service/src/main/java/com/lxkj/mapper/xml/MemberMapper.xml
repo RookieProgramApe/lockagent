@@ -14,7 +14,12 @@
 
         <!-- 通用查询结果列 -->
         <sql id="Base_Column_List">
-        id, mobile, avatar, retailer_id, create_time, update_time
-    </sql>
+            id, mobile, avatar, retailer_id, create_time, update_time
+        </sql>
+
+        <update id="updateIntegral" parameterType="com.lxkj.entity.Member">
+            update member set integral=#{integral}
+            where id=#{id}
+        </update>
 
 </mapper>

@@ -5,9 +5,11 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.lxkj.entity.Config;
 import com.lxkj.entity.Member;
 import com.lxkj.mapper.MemberMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
@@ -25,7 +27,8 @@ public class MemberService extends ServiceImpl<MemberMapper, Member> {
     @Autowired
     private ConfigService configService;
 
-
+    @Resource
+    private MemberMapper memberMapper;
 
 
     public BigDecimal integralTransformYuan(String memberId) {
@@ -39,6 +42,15 @@ public class MemberService extends ServiceImpl<MemberMapper, Member> {
         }
     }
 
+    /**
+     * 更新积分
+     */
+    public int updateIntegral(Member member) {
+        if(StringUtils.isNotBlank(member.getId())){
+            return memberMapper.updateIntegral(member);
+        }else{
+            return 0;
+        }
 
-
+    }
 }

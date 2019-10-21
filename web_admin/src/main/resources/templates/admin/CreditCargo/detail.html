@@ -11,7 +11,7 @@
 <div class="layui-tab ">
     <ul class="layui-tab-title">
         <li class="layui-this">基础信息</li>
-        <li>规格列表</li>
+<!--        <li>规格列表</li>-->
         <li>交易列表</li>
     </ul>
     <div class="layui-tab-content">
@@ -20,7 +20,7 @@
               <table class="layui-table" lay-skin="" width="100%">
                     <tr>
                       <th width="100px" style="background-color: #f2f2f2;text-align: right;">商品名称：</th>
-                      <td width="400px" align="left" >${Cargo.name}</td>
+                      <td width="400px" align="left" >${CreditCargo.name}</td>
                     </tr>
                     <tr>
                         <th width="100px" style="background-color: #f2f2f2;text-align: right;">封面：</th>
@@ -42,25 +42,29 @@
                     <%}%>
                     <tr>
                         <th width="100px" style="background-color: #f2f2f2;text-align: right;">客服电话：</th>
-                        <td width="400px" align="left" colspan="3">${Cargo.tellphone}</td>
+                        <td width="400px" align="left" colspan="3">${CreditCargo.tellphone}</td>
 
                     </tr>
                     <tr>
                         <th width="100px" style="background-color: #f2f2f2;text-align: right;">虚拟销量：</th>
-                        <td width="400px" align="left" >${Cargo.baseSaleCount}</td>
+                        <td width="400px" align="left" >${CreditCargo.baseSaleCount}</td>
                     </tr>
                     <tr>
                         <th width="100px" style="background-color: #f2f2f2;text-align: right;">原价：</th>
-                        <td width="400px" align="left" >￥${Cargo.originalPrice}</td>
+                        <td width="400px" align="left" >￥${CreditCargo.originalPrice}</td>
 
                     </tr>
-                  <tr>
-                      <th width="100px" style="background-color: #f2f2f2;text-align: right;">现价：</th>
-                      <td width="400px" align="left" >￥${Cargo.salePrice}</td>
-                  </tr>
+                    <tr>
+                        <th width="100px" style="background-color: #f2f2f2;text-align: right;">现价：</th>
+                        <td width="400px" align="left" >￥${CreditCargo.salePrice}</td>
+                    </tr>
+                    <tr>
+                        <th width="100px" style="background-color: #f2f2f2;text-align: right;">所需积分：</th>
+                        <td width="400px" align="left" >￥${CreditCargo.point}</td>
+                    </tr>
                     <tr>
                         <th width="100px" style="background-color: #f2f2f2;text-align: right;">商品详情：</th>
-                        <td width="400px" align="left" > ${Cargo.description}</td>
+                        <td width="400px" align="left" > ${CreditCargo.description}</td>
                     </tr>
                 </table>
             </div>

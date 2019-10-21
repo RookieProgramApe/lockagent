@@ -41,29 +41,29 @@
         </div>
     </div>
     <div class="layui-form-item optitem">
-        <label class="layui-form-label">添加规格<font color="red">*</font></label>
-        <div class="layui-input-block">
-            <div class='layui-upload-list'>
-                <table class='layui-table' lay-size='sm'>
-                    <thead>
-                    <tr>
-                        <th>内容</th>
-                        <th style="width: 30px;text-align: center;">
-                            <!--<img height="25" width="25" style="cursor:pointer"  src="${ctxPath}/static/image/jia.png"  id="stepAdd">-->
-                        </th>
-                    </tr>
-                    <tr>
-                        <th>价格</th>
-                        <th style="width: 30px;text-align: center;">
-                            <img height="25" width="25" style="cursor:pointer"  src="${ctxPath}/static/image/jia.png"  id="stepAdd">
-                        </th>
-                    </tr>
-                    </thead>
-                    <tbody id="stepList">
-                    </tbody>
-                </table>
-            </div>
-        </div>
+<!--        <label class="layui-form-label">添加规格<font color="red">*</font></label>-->
+<!--        <div class="layui-input-block">-->
+<!--            <div class='layui-upload-list'>-->
+<!--                <table class='layui-table' lay-size='sm'>-->
+<!--                    <thead>-->
+<!--                    <tr>-->
+<!--                        <th>内容</th>-->
+<!--                        <th style="width: 30px;text-align: center;">-->
+<!--                            &lt;!&ndash;<img height="25" width="25" style="cursor:pointer"  src="${ctxPath}/static/image/jia.png"  id="stepAdd">&ndash;&gt;-->
+<!--                        </th>-->
+<!--                    </tr>-->
+<!--                    <tr>-->
+<!--                        <th>价格</th>-->
+<!--                        <th style="width: 30px;text-align: center;">-->
+<!--                            <img height="25" width="25" style="cursor:pointer"  src="${ctxPath}/static/image/jia.png"  id="stepAdd">-->
+<!--                        </th>-->
+<!--                    </tr>-->
+<!--                    </thead>-->
+<!--                    <tbody id="stepList">-->
+<!--                    </tbody>-->
+<!--                </table>-->
+<!--            </div>-->
+<!--        </div>-->
         <div class="layui-input-block" style="color: red;">
             * 用户下单必选
         </div>
@@ -107,6 +107,10 @@
         <label class="layui-form-label">现价<font color="red">*</font></label>
         <div class="layui-input-inline">
             <input type="text" name="salePrice" value="${CreditCargo.salePrice}" placeholder="￥" lay-verify="required|number" autocomplete="off"  class="layui-input">
+        </div>
+        <label class="layui-form-label">所需积分<font color="red">*</font></label>
+        <div class="layui-input-inline">
+            <input type="text" name="point" value="${CreditCargo.point}" placeholder="积分" lay-verify="required|number" autocomplete="off"  class="layui-input">
         </div>
     </div>
     <!--富文本 -->
@@ -179,20 +183,20 @@
             $("#stepList").append(html);
         });
         //获取选项  gai
-        $.asynPost('/CreditCargoSku/select1',{cargo_id:'${CreditCargo.id}'},function(res) {
-            var list=res.data;
-            for(var i=0;i<list.length;i++){
-                var obj=list[i];
-                var btnId="uploads_"+obj.id;
-                var html="<tr>" +
-                    "<td><input type='hidden' name='optionId'  value='"+obj.id+"' /><input class='layui-input' type='text'  name='content' value='"+obj.name+"'  lay-verify='required' lay-verType='tips' maxlength='200' ></td>" +
-                    "<td style='text-align: center;'>" +
-                    " <img height='30' width='30' style='cursor:pointer' src='${ctxPath}/static/image/jian.png' data-id='"+obj.id+"' onclick='addDel(this)'>" +
-                "</td>" +
-                "</tr>";
-                $("#stepList").append(html);
-            }
-        });
+        // $.asynPost('/CreditCargoSku/select1',{cargo_id:'${CreditCargo.id}'},function(res) {
+        //     var list=res.data;
+        //     for(var i=0;i<list.length;i++){
+        //         var obj=list[i];
+        //         var btnId="uploads_"+obj.id;
+        //         var html="<tr>" +
+        //             "<td><input type='hidden' name='optionId'  value='"+obj.id+"' /><input class='layui-input' type='text'  name='content' value='"+obj.name+"'  lay-verify='required' lay-verType='tips' maxlength='200' ></td>" +
+        //             "<td style='text-align: center;'>" +
+        //             " <img height='30' width='30' style='cursor:pointer' src='${ctxPath}/static/image/jian.png' data-id='"+obj.id+"' onclick='addDel(this)'>" +
+        //         "</td>" +
+        //         "</tr>";
+        //         $("#stepList").append(html);
+        //     }
+        // });
         //表单提交
         form.on('submit(save)', function (data) {
             var param = data.field;
@@ -202,25 +206,25 @@
                 layer.msg("请上封面图片", {icon: 5,time: 1000});
                 return false;
             }
-            var stepArr=new Array();
-            $("#stepList tr").each(function () {
-                var josn={};
-                var id=$(this).find('input:hidden[name="optionId"]').val()||"";
-                var content=$(this).find('input[name="content"]').val()||"";
-                var content2=$(this).find('input[name="content2"]').val()||"";
-                josn.id = id;
-                josn.content = content;
-                josn.content2 = content2;
-                stepArr.push(josn);
-            });
-            if(stepArr.length==0){
-                layer.msg("请添加规格", {icon: 5,time: 1000});
-                return false;
-            }
-            param.stepArr = JSON.stringify(stepArr);
-            if(delIds.length>0){
-                param.delIds = delIds.join(",");
-            }
+            // var stepArr=new Array();
+            // $("#stepList tr").each(function () {
+            //     var josn={};
+            //     var id=$(this).find('input:hidden[name="optionId"]').val()||"";
+            //     var content=$(this).find('input[name="content"]').val()||"";
+            //     var content2=$(this).find('input[name="content2"]').val()||"";
+            //     josn.id = id;
+            //     josn.content = content;
+            //     josn.content2 = content2;
+            //     stepArr.push(josn);
+            // });
+            // if(stepArr.length==0){
+            //     layer.msg("请添加规格", {icon: 5,time: 1000});
+            //     return false;
+            // }
+            // param.stepArr = JSON.stringify(stepArr);
+            // if(delIds.length>0){
+            //     param.delIds = delIds.join(",");
+            // }
             $.ajaxPost( "/Credit/save", param, function (res) {
                 getParentIframe().layui.table.reload('dataList');
                 winClose();

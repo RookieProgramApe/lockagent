@@ -78,10 +78,10 @@
 </script>
 
 <!-- 开关2 -->
-<script type="text/html" id="stateTp2">
-    <input type="checkbox" name="isMeal" data-id="{{d.id}}" lay-skin="switch"
-           lay-filter="stateFilter2" style="width:52px;" lay-text="是|否" {{d.isMeal== 1 ? 'checked' : '' }} />
-</script>
+<!--<script type="text/html" id="stateTp2">-->
+<!--    <input type="checkbox" name="isMeal" data-id="{{d.id}}" lay-skin="switch"-->
+<!--           lay-filter="stateFilter2" style="width:52px;" lay-text="是|否" {{d.isMeal== 1 ? 'checked' : '' }} />-->
+<!--</script>-->
 
 <!-- 头像 -->
 <script id="headUrl" type="text/html">
@@ -148,9 +148,16 @@
                         return "";
                     }
                     }},
-                {field: 'salePrice', title: '积分',width:100,align: 'right',sort: true, templet:function (d) {
+                {field: 'salePrice', title: '现价',width:100,align: 'right',sort: true, templet:function (d) {
                         if(d.salePrice!=null){
-                            return d.salePrice.toFixed(2)+"积分";
+                            return d.salePrice.toFixed(2)+"元";
+                        }else{
+                            return "";
+                        }
+                    }},
+                {field: 'point', title: '所需积分',width:200,align: 'right',sort: true, templet:function (d) {
+                        if(d.point!=null){
+                            return d.point.toFixed(2)+"积分";
                         }else{
                             return "";
                         }
@@ -158,7 +165,7 @@
                 {field: 'saleNum', title: '销量', width: 100,align: 'right',sort: true},
                 {field: 'status', title: '是否上架', templet: '#stateTpl', align: 'center', width: 120},
                 {field: 'sort', title: '排序', width: 90, templet: '#ordersTpl', align: 'center'},
-                {field: 'isMeal', title: '是否选择套餐', templet: '#stateTp2', width: 150, align: 'center'},
+                // {field: 'isMeal', title: '是否选择套餐', templet: '#stateTp2', width: 150, align: 'center'},
                 {field: 'tool', title: '操作', width: 200,align:'center', toolbar: '#toolbar1'}
             ]]
             , limit: 10
@@ -224,7 +231,7 @@
             var name = $(data.elem).attr("name"), id = $(data.elem).attr("data-id"),
                 obj = data.elem, isChecked = data.elem.checked, val = 0;
             if (isChecked) val = 1;
-            $.ajaxPost("/Cargo/update", {id: id, status: val});
+            $.ajaxPost("/Credit/update", {id: id, status: val});
         });
 
         //监听开/关/更新 是否套餐

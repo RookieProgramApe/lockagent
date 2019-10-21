@@ -119,6 +119,11 @@ public class CreditCargo extends Model<CreditCargo> {
   @ApiModelProperty(value = "0 下架，1 上架",hidden = true)
   @TableField("isdel")
   private Integer isdel;
+
+  @ApiModelProperty(value = "所需积分")
+  @TableField("point")
+  private BigDecimal point;
+
   @Override
   protected Serializable pkVal() {
     return this.id;

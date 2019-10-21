@@ -3,7 +3,7 @@ spring:
   datasource:
      url: jdbc:mysql://39.100.93.20:3306/lockershop?useUnicode=true&characterEncoding=utf8&useSSL=false
      username: lockershop
-     password: qq5022311
+     password: tanzhikeji
 #     url: jdbc:mysql://localhost:3306/lockershop?useUnicode=true&characterEncoding=utf8&useSSL=false
 #     username: root
 #     password: 123456
