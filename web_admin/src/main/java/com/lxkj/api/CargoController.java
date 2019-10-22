@@ -77,6 +77,7 @@ public class CargoController extends BaseController {
                 new Page<Cargo>(page != null ? page : 1, limit != null ? limit : 10),
                 new QueryWrapper<Cargo>()
                         .eq("status", 1)
+                        .eq("type", 1)
                         .eq("isdel", 0)
                         .like(StringUtils.isNotBlank(keyword), "name", keyword)
                         .orderByAsc("sort"));

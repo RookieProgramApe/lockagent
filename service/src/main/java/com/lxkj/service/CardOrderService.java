@@ -206,14 +206,17 @@ public class CardOrderService extends ServiceImpl<CardOrderMapper, CardOrder> {
                 }
             }
             //更新库存
-            var i = warehousingMapper.sumSku(o.getSkuId());
-            //砍价订单更新状态
-            if(o.getType()==2&&StringUtils.isNotBlank(o.getBargainOrderId())){
-                bargainOrderService.update(new UpdateWrapper<BargainOrder>()
-                        .set("status",2)
-                        .eq("id",o.getBargainOrderId()));
+            if(!o.getSkuId().equals("-1")){
+                var i = warehousingMapper.sumSku(o.getSkuId());
+                //砍价订单更新状态
+                if(o.getType()==2&&StringUtils.isNotBlank(o.getBargainOrderId())){
+                    bargainOrderService.update(new UpdateWrapper<BargainOrder>()
+                            .set("status",2)
+                            .eq("id",o.getBargainOrderId()));
+                }
+                new CargoSku().setId(o.getSkuId()).setInventory(i == null ? 0 : i).updateById();
             }
-            new CargoSku().setId(o.getSkuId()).setInventory(i == null ? 0 : i).updateById();
+
         }
     }
 

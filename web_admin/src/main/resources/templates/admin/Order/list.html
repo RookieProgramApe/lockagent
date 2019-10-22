@@ -16,6 +16,17 @@
         <div class="layui-card-header layuiadmin-card-header-auto layui-row">
             <div class="layui-form-item">
                 <div class="layui-inline">
+                    <label class="layui-form-label">订单类型</label>
+                    <div class="layui-input-block">
+                        <select name="type" lay-search="" class="layui-select">
+                            <option value="">-全部-</option>
+                            <option value="1">零售订单</option>
+                            <option value="2">砍价订单</option>
+                            <option value="3">积分商品订单</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-inline">
                     <label class="layui-form-label">订单号</label>
                     <div class="layui-input-block">
                         <input type="text" name="ordernum" value="" placeholder="请输入" class="layui-input">
@@ -114,14 +125,16 @@
                    {field: 'cargoName', title: '商品名称', width: 100},
                     {field: 'ordernum', title: '订单号', width: 250},
                    {field: 'skuName', title: '商品规格', width: 100},
-                   {field: 'type', title: '订单类型', width: 100,templet:function(d){
+                   {field: 'type', title: '订单类型', width: 150,templet:function(d){
                          if(d.type==1){
                              return "零售订单";
                          }else if(d.type==2){
                              return "砍价订单";
+                         }else if(d.type==3){
+                             return "积分商品订单";
                          }else{
                              return "";
-                           }
+                         }
                        }},
                    {field: 'count', title: '购买数量', width: 100},
                    {field: 'totalPrice', title: '金额', width: 100},

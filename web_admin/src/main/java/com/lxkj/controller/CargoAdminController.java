@@ -72,6 +72,7 @@ public class CargoAdminController extends BaseController {
         IPage<Cargo> page=cargoService.page(new Page<Cargo>(params.getInteger("page"),params.getInteger("limit")),
                 new QueryWrapper<Cargo>()
                         .eq("isdel",0)
+                        .eq("type", 1)
                         .like(StringUtils.isNotBlank(keyword),"name",keyword)
                         .orderByAsc("sort"));
         page.getRecords().stream().forEach(p->{
@@ -93,6 +94,7 @@ public class CargoAdminController extends BaseController {
         List<Cargo> page=cargoService.list(
                 new QueryWrapper<Cargo>()
                         .eq("isdel",0)
+                        .eq("type", 1)
                         .ne("id",csid)
                         .orderByAsc("sort"));
         DataGridModel<Cargo> grid=new DataGridModel(page,Long.valueOf(page.size()));
@@ -126,6 +128,7 @@ public class CargoAdminController extends BaseController {
         IPage<Cargo> page=cargoService.page(new Page<Cargo>(params.getInteger("page"),params.getInteger("limit")),
                 new QueryWrapper<Cargo>()
                         .eq("isdel",0)
+                        .eq("type", 1)
                         .select("cargo.*"
                                 ,"(select figure from retailer_reward where cargo_id=cargo.id and retailer_id='"+retailer_id+"') as figure"
                                 ,"(select id from retailer_reward where cargo_id=cargo.id and retailer_id='"+retailer_id+"') as retailerRewardId "

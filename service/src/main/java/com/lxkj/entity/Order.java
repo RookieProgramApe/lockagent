@@ -84,6 +84,10 @@ public class Order extends Model<Order> {
     @TableField("total_price")
     private BigDecimal totalPrice;
 
+    @ApiModelProperty(value = "使用积分")
+    @TableField("point")
+    private BigDecimal point;
+
 
     @ApiModelProperty(value = "2 已支付，3 已发货，4 已完成")
     @TableField("status")

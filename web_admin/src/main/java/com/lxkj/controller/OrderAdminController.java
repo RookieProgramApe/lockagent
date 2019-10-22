@@ -133,12 +133,13 @@ public class OrderAdminController extends BaseController {
      */
     @RequestMapping("/pageList")
     @ResponseBody
-    public DataGridModel<Order> pageList(String ordernum,String status) {
+    public DataGridModel<Order> pageList(String ordernum,String status, String type) {
         PageData params=this.getPageData();
         IPage<Order> page=orderService.page(new Page<Order>(params.getInteger("page"),params.getInteger("limit")),
                 new QueryWrapper<Order>()
                         .like(StringUtils.isNotBlank(ordernum),"ordernum",ordernum)
                         .like(StringUtils.isNotBlank(status),"status",status)
+                        .like(StringUtils.isNotBlank(type), "type", type)
                         .orderByDesc("create_time"));
         page.getRecords().stream().forEach(p->{
             if(StringUtils.isNotBlank(p.getMemberId())){

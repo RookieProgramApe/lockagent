@@ -117,6 +117,15 @@ public class Cargo extends Model<Cargo> {
   @ApiModelProperty(value = "0 下架，1 上架",hidden = true)
   @TableField("isdel")
   private Integer isdel;
+
+  @ApiModelProperty(value = "1普通商品，2积分商品")
+  @TableField("`type`")
+  private Integer type;
+
+  @ApiModelProperty(value = "积分")
+  @TableField("point")
+  private BigDecimal point;
+
   @Override
   protected Serializable pkVal() {
     return this.id;

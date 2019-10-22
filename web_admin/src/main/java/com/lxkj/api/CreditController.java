@@ -72,15 +72,16 @@ public class CreditController extends BaseController {
             @ApiImplicitParam(paramType = "query", dataType = "Long", name = "limit", value = "每页记录数", required = true),
     })
     @PostMapping("/all")
-    public JsonResults<List<CreditCargo>> queryCreditList(Long page, Long limit, String keyword) {
-        IPage<CreditCargo> data = this.creditCargoService.page(
-                new Page<CreditCargo>(page != null ? page : 1, limit != null ? limit : 10),
-                new QueryWrapper<CreditCargo>()
+    public JsonResults<List<Cargo>> queryCreditList(Long page, Long limit, String keyword) {
+        IPage<Cargo> data = this.cargoService.page(
+                new Page<Cargo>(page != null ? page : 1, limit != null ? limit : 10),
+                new QueryWrapper<Cargo>()
                         .eq("status", 1)
                         .eq("isdel", 0)
+                        .eq("type", 2)
                         .like(StringUtils.isNotBlank(keyword), "name", keyword)
                         .orderByAsc("sort"));
-        data.getRecords().forEach(p -> creditCargoService.getData(p));
+        data.getRecords().forEach(p -> cargoService.getData(p));
         return BuildSuccessJson(data.getRecords(), data.getPages(), "查询成功");
     }
 
@@ -89,9 +90,9 @@ public class CreditController extends BaseController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", dataType = "String", value = "商品ID", required = true)
     })
-    public JsonResults<CreditCargo> queryCreditDetail(@RequestParam String id) {
-        CreditCargo data = this.creditCargoService.getById(id);
-        creditCargoService.getData(data);
+    public JsonResults<Cargo> queryCreditDetail(@RequestParam String id) {
+        Cargo data = this.cargoService.getById(id);
+        cargoService.getData(data);
         return BuildSuccessJson(data, "查询成功");
     }
 
@@ -135,7 +136,7 @@ public class CreditController extends BaseController {
                            String cardPwd,
                            String remark) {
         String memberId = this.getToken();
-        var cargo = creditCargoService.getById(cargoId);//商品
+        var cargo = cargoService.getById(cargoId);//商品
 
         var adddr = memberAddressService.getById(addressId);//收货地址
         var member = memberService.getById(memberId);
@@ -170,7 +171,12 @@ public class CreditController extends BaseController {
         order.setCargoName(cargo.getName());
 //        order.setSkuId(cargoSku.getId());
 //        order.setSkuName(cargoSku.getName());
-        order.setType(1);
+        //积分商品没有规格
+        order.setSkuId("-1");
+        //设置订单积分
+        order.setPoint(cargo.getPoint());
+        // 设置订单类型
+        order.setType(3);
         order.setMemberId(memberId);
         order.setRemark(remark);
         order.setCreateTime(new Date());
@@ -245,101 +251,10 @@ public class CreditController extends BaseController {
             credit1.setOrderId(order.getId());
             credit1.setPoint(point);
             credit1.setType(-1);
-            credit1.setTitle("兑换了商品，" + cargo.getName());
+            credit1.setTitle("兑换了商品：" + cargo.getName());
             credit1.setCreateTime(new Date());
             credit1.insert();
 
-            return BuildSuccessJson(Map.of("payload", response, "ret_code", "0000"), "下单成功");
-        } catch (WxPayException e) {
-            e.printStackTrace();
-        }
-        return BuildFailJson("下单失败");
-
-    }
-
-
-
-    @ApiOperation("砍价商品下单(支付)")
-    @LoginRequired
-    @PostMapping("/payByBargain")
-    @ApiImplicitParams({
-            @ApiImplicitParam(paramType = "header", dataType = "String", name = "token", value = "用户token值", required = true),
-            @ApiImplicitParam(name = "cargoId", dataType = "String", value = "商品ID", required = true),
-            @ApiImplicitParam(name = "skuId", dataType = "String", value = "商品规格ID", required = true),
-            @ApiImplicitParam(name = "addressId", dataType = "String", value = "收货地址ID", required = true),
-            @ApiImplicitParam(name = "bargainOrderId", dataType = "String", value = "砍价订单ID", required = true),
-            @ApiImplicitParam(name = "remark", dataType = "String", value = "备注"),
-    })
-    @Transactional
-    public JsonResults payByBargain(@RequestParam String cargoId,
-                                    @RequestParam String skuId,
-                                    @RequestParam String addressId,
-                                    @RequestParam String bargainOrderId,
-                                    String remark) {
-        String memberId = this.getToken();
-        var cargo = cargoService.getById(cargoId);//商品
-        var cargoSku = cargoSkuService.getById(skuId);//规格
-        var adddr = memberAddressService.getById(addressId);//收货地址
-        var member = memberService.getById(memberId);
-        /* 校验规则**/
-        if (cargoSku.getInventory() <= 0) {//库存不足
-            return BuildFailJson("该规格得商品库存不足");
-        }
-        /* 创建业务提货订单****/
-        Order order = new Order();
-        order.setCargoId(cargo.getId());
-        order.setCargoName(cargo.getName());
-        order.setSkuId(cargoSku.getId());
-        order.setSkuName(cargoSku.getName());
-        order.setType(2);
-        order.setMemberId(memberId);
-        order.setRemark(remark);
-        order.setCreateTime(new Date());
-        order.setCredit(BigDecimal.ZERO);
-        order.setCreditDiscount(BigDecimal.ZERO);
-        order.setCount(1);//数量
-        order.setUnitPrice(cargo.getSalePrice());//原价
-        //已砍金额
-        var ykPrice=bargainService.Yk_Amount(bargainOrderId);
-        order.setBargainOrderId(bargainOrderId);
-        order.setTotalPrice(cargo.getSalePrice().subtract(ykPrice));//实际成交价格
-        order.setStatus(1);
-        order.setRecipient(adddr.getRecipient());
-        order.setMobile(adddr.getMobile());
-        order.setCity(adddr.getCity());
-        order.setProvince(adddr.getProvince());
-        order.setCounty(adddr.getCounty());
-        order.setAddress(adddr.getAddress());
-        order.setOrdernum(ID.nextGUID());
-        String nextSequence = this.jdbcTemplate.queryForObject("select next_sequence_text('delivery') from dual", String.class);
-        order.setSequence(nextSequence);
-        order.setIpaddr(getIpAddr(getRequest()));
-        order.insert();
-        /* ******************连连-第三方支付接口**************************/
-//            var data = this.lianpayService.prepay(order,order.getIpaddr());
-//            if (data == null) {
-//                return BuildFailJson("下单失败，可能支付有问题，请联系平台管理");
-//            }
-//            String ret_code = data.getOrDefault("ret_code", "999").toString();
-//            if (ret_code.equals("0000")) {//成功
-//                String payload = data.get("payload").toString();
-//                JSONObject jsonObj = JSONObject.parseObject(payload);
-//                return BuildSuccessJson(Map.of("payload", jsonObj, "ret_code", "0000"), "下单成功");
-//            } else {
-//                String ret_msg = data.getOrDefault("ret_msg", "下单失败").toString();
-//                return BuildFailJson(ret_msg);
-//            }
-        /* *****************微信支付支付接口**************************/
-        WxPayUnifiedOrderRequest request = new WxPayUnifiedOrderRequest();
-        request.setAttach("order");
-        request.setBody("商品支付");
-        request.setOutTradeNo(order.getOrdernum());
-        request.setTotalFee(BaseWxPayRequest.yuanToFen(order.getTotalPrice().toString()));
-        request.setOpenid(member.getOpenId());
-        request.setSpbillCreateIp("127.0.0.1");
-        request.setTimeStart(DateUtil.DateToString(new Date(), "yyyyMMddHHmmss"));
-        try {
-            Object response = this.wxPayService.createOrder(request);
             return BuildSuccessJson(Map.of("payload", response, "ret_code", "0000"), "下单成功");
         } catch (WxPayException e) {
             e.printStackTrace();
