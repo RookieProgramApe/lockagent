@@ -220,6 +220,84 @@ public class CardOrderService extends ServiceImpl<CardOrderMapper, CardOrder> {
         }
     }
 
+    /**
+     * 完成提货订单-（更改为已支付、提货奖励、库存减少、增加积分、消费积分）  积分兑换
+     * @param no_order
+     */
+    @Transactional
+    public void finishOrder1(String no_order) {
+        var o = orderService.getOne(new QueryWrapper<Order>().eq("ordernum", no_order));
+        if (o != null && o.getStatus() == 1) {//待支付
+            var member = mmberService.getById(o.getMemberId());
+            //更新订单状态
+            orderService.update(new UpdateWrapper<Order>().set("status", 2).eq("id", o.getId()));
+            //更新卡片状态
+            if(StringUtils.isNotBlank(o.getGiftcardId())){
+                retailerGiftcardService.update(new UpdateWrapper<RetailerGiftcard>().set("`use`", 1).eq("giftcard_id", o.getGiftcardId()));
+                giftcardService.update(new UpdateWrapper<Giftcard>().set("`use`", 1).eq("id", o.getGiftcardId()));
+            }
+            //奖励积分
+            BigDecimal credit_reward_rate = this.configService.queryForDecimal("credit_reward_rate");
+            var integral = member.getIntegral();
+            if (credit_reward_rate.compareTo(BigDecimal.ZERO) > 0) {
+                var addCredit = o.getTotalPrice().multiply(credit_reward_rate);
+                integral = integral.add(addCredit);
+                mmberService.update(new UpdateWrapper<Member>().set("integral", integral).eq("id", member.getId()));
+                new MemberCredit()
+                        .setMemberId(member.getId())
+                        .setTitle("获得消费积分")
+                        .setType(1)
+                        .setOrderId(o.getId())
+                        .setAmount(o.getTotalPrice())
+                        .setPoint(addCredit)
+                        .insert();
+            }
+            //增加消费积分流水
+            if (o.getCredit().compareTo(BigDecimal.ZERO) > 0) {
+                integral = integral.subtract(o.getCredit());
+                mmberService.update(new UpdateWrapper<Member>().set("integral", integral).eq("id", member.getId()));
+                new MemberCredit()
+                        .setMemberId(member.getId())
+                        .setTitle("积分消费")
+                        .setType(-1)
+                        .setOrderId(o.getId())
+                        .setAmount(o.getCreditDiscount())
+                        .setPoint(o.getCredit())
+                        .insert();
+            }
+            //提货奖励
+            if(StringUtils.isNotBlank(o.getGiftcardId())){
+                var retailerGiftcard = retailerGiftcardService.getOne(new QueryWrapper<RetailerGiftcard>().eq("giftcard_id", o.getGiftcardId()));//卡的代理商
+                if (retailerGiftcard != null) {
+                    var retailerReward = retailerRewardService.getOne(new QueryWrapper<RetailerReward>().eq("member_id", retailerGiftcard.getMemberId()).eq("cargo_id", o.getCargoId()));
+                    if (retailerReward != null && retailerReward.getFigure().compareTo(BigDecimal.ZERO) > 0) {
+                        Retailer retailer = this.rtailerService.getById(retailerReward.getRetailerId());
+                        rtailerService.update(new UpdateWrapper<Retailer>().set("balance", retailer.getBalance().add(retailerReward.getFigure())).eq("id", retailer.getId()));
+                        Transaction transaction = new Transaction();
+                        transaction.setMemberId(retailer.getMemberId());
+                        transaction.setOrderId(o.getId());
+                        transaction.setType(81);
+                        transaction.setAmount(retailerReward.getFigure());
+                        transaction.setStatus(1);
+                        transactionService.save(transaction);
+                    }
+                }
+            }
+            //更新库存
+            if(!o.getSkuId().equals("-1")){
+                var i = warehousingMapper.sumSku(o.getSkuId());
+                //砍价订单更新状态
+                if(o.getType()==2&&StringUtils.isNotBlank(o.getBargainOrderId())){
+                    bargainOrderService.update(new UpdateWrapper<BargainOrder>()
+                            .set("status",2)
+                            .eq("id",o.getBargainOrderId()));
+                }
+                new CargoSku().setId(o.getSkuId()).setInventory(i == null ? 0 : i).updateById();
+            }
+
+        }
+    }
+
 
     /**
      * 提现处理

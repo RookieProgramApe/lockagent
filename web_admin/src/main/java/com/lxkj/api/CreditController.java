@@ -40,26 +40,18 @@ public class CreditController extends BaseController {
 
     @Autowired
     private CargoService cargoService;
-
     @Autowired
-    private CargoSkuService cargoSkuService;
-    @Autowired
-    private BargainService bargainService;
+    private OrderService orderService;
     @Autowired
     private MemberService memberService;
+    @Autowired
+    private CardOrderService cardOrderService;
 
     @Autowired
     private GiftcardService giftcardService;
 
     @Autowired
     private MemberAddressService memberAddressService;
-    @Autowired
-    private MemberCreditService memberCreditService;
-
-    @Autowired
-    private CargoCategoryService cargoCategoryService;
-    @Autowired
-    private CreditCargoService creditCargoService;
     @Autowired
     private ConfigService configService;
     @Autowired
@@ -160,8 +152,8 @@ public class CreditController extends BaseController {
             if (card == null) {
                 return BuildFailJson("您输入的卡号或卡密不正确");
             } else {
-                if (card.getStatus() == 3) {
-                    return BuildFailJson("该卡片已被使用，请换一个吧~");
+                if (card.getUse() == 1) {
+                    return BuildFailJson("该卡片已被兑换，请换一个吧~");
                 }
                 order.setGiftcardId(card.getId());
             }
@@ -227,17 +219,44 @@ public class CreditController extends BaseController {
 //                return BuildFailJson(ret_msg);
 //            }
         /* *****************微信支付支付接口**************************/
-        WxPayUnifiedOrderRequest request = new WxPayUnifiedOrderRequest();
-        request.setBody("商品支付");
-        request.setAttach("order");
-        request.setOutTradeNo(order.getOrdernum());
-        request.setTotalFee(BaseWxPayRequest.yuanToFen(order.getTotalPrice().toString()));
-        request.setOpenid(member.getOpenId());
-        request.setSpbillCreateIp("127.0.0.1");
-        request.setTimeStart(DateUtil.DateToString(new Date(), "yyyyMMddHHmmss"));
-        try {
-            Object response = this.wxPayService.createOrder(request);
+        if(order.getTotalPrice().compareTo(BigDecimal.ZERO) == 1) {
+            WxPayUnifiedOrderRequest request = new WxPayUnifiedOrderRequest();
+            request.setBody("商品支付");
+            request.setAttach("order");
+            request.setOutTradeNo(order.getOrdernum());
+            request.setTotalFee(BaseWxPayRequest.yuanToFen(order.getTotalPrice().toString()));
+            request.setOpenid(member.getOpenId());
+            request.setSpbillCreateIp("127.0.0.1");
+            request.setTimeStart(DateUtil.DateToString(new Date(), "yyyyMMddHHmmss"));
+            //if()
+            try {
+                Object response = this.wxPayService.createOrder(request);
+                order.insert();
+
+                //扣除积分
+                BigDecimal point = cargo.getPoint();
+                member.setIntegral(member.getIntegral().subtract(point));
+                memberService.updateIntegral(member);
+
+                //积分表插入一条数据
+                MemberCredit credit1 = new MemberCredit();
+                credit1.setAmount(cargo.getSalePrice());
+                credit1.setMemberId(member.getId());
+                credit1.setOrderId(order.getId());
+                credit1.setPoint(point);
+                credit1.setType(-1);
+                credit1.setTitle("兑换了商品：" + cargo.getName());
+                credit1.setCreateTime(new Date());
+                credit1.insert();
+
+                return BuildSuccessJson(Map.of("payload", response, "ret_code", "0000"), "下单成功");
+            } catch (WxPayException e) {
+                e.printStackTrace();
+            }
+            return BuildFailJson("下单失败");
+        }else{
             order.insert();
+            cardOrderService.finishOrder1(order.getOrdernum());
 
             //扣除积分
             BigDecimal point = cargo.getPoint();
@@ -251,15 +270,12 @@ public class CreditController extends BaseController {
             credit1.setOrderId(order.getId());
             credit1.setPoint(point);
             credit1.setType(-1);
-            credit1.setTitle("兑换了商品：" + cargo.getName());
+            credit1.setTitle("领取了免费礼品：" + cargo.getName());
             credit1.setCreateTime(new Date());
             credit1.insert();
 
-            return BuildSuccessJson(Map.of("payload", response, "ret_code", "0000"), "下单成功");
-        } catch (WxPayException e) {
-            e.printStackTrace();
+            return BuildSuccessJson(Map.of("ret_code", "1111"), "下单成功");
         }
-        return BuildFailJson("下单失败");
 
     }
 }

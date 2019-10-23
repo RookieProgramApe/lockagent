@@ -62,6 +62,10 @@ private static final long serialVersionUID = 1L;
     @TableField(exist=false)
     private Integer state;
 
+    @ApiModelProperty(value = "0未兑换 1已兑换")
+    @TableField("`use`")
+    private Integer use;
+
 
     @Override
 protected Serializable pkVal() {

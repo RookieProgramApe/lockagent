@@ -63,6 +63,11 @@ public class RetailerGiftcard extends Model<RetailerGiftcard> {
     @ApiModelProperty(value = "0:免费(不计分销) 1:收费(计分销)")
     @TableField("lb")
     private Integer lb;
+
+    @ApiModelProperty(value = "0:未兑换 1:已兑换")
+    @TableField("`use`")
+    private Integer use;
+
     @Override
     protected Serializable pkVal() {
         return this.id;
