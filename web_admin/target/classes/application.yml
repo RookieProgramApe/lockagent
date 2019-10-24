@@ -66,6 +66,9 @@ wechat:
   mp:
     appid: wxb60e3a8b79f4e69a
     secret: 1e02ffabf4aed84e5ab6aad67d713c5e
+#    callback-url: http://192.168.3.74:8088/lockagent/api/pay/callback
+#    callback-url2: http://192.168.3.74:8088/lockagent/api/pay/callback2
+#    wxcallback-url: http://192.168.3.74:8088/lockagent/api/pay/wxcallback
     callback-url: https://aw.wisehuitong.com/lockagent/api/pay/callback
     callback-url2: https://aw.wisehuitong.com/lockagent/api/pay/callback2
     wxcallback-url: https://aw.wisehuitong.com/lockagent/api/pay/wxcallback

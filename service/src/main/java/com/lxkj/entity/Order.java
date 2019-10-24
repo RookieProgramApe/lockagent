@@ -231,6 +231,10 @@ public class Order extends Model<Order> {
     @TableField(exist=false)
     private String phone;
 
+    @ApiModelProperty(value = "是否已评价（0未评价 1已评价）")
+    @TableField("is_appraise")
+    private String isAppraise;
+
     @Override
     protected Serializable pkVal() {
         return this.id;
