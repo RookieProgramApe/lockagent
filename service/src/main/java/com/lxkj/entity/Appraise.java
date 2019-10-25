@@ -9,6 +9,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
+import java.io.Serializable;
+import java.util.Date;
+
 /**
  * @author Zhanqian
  * @date 2019/10/23 17:08
@@ -23,12 +26,12 @@ public class Appraise extends Model<Appraise> {
     private static final long serialVersionUID = 1L;
 
     @ApiModelProperty(value = "评价id")
-    @TableId(value = "id", type = IdType.UUID)
+    @TableId(value = "`id`", type = IdType.UUID)
     private String id;
 
     @ApiModelProperty(value = "描述")
-    @TableId(value = "describe")
-    private String describe;
+    @TableId(value = "`remark`")
+    private String remark;
 
     @ApiModelProperty(value = "匿名状态（0匿名 1非匿名）")
     @TableId(value = "status")
@@ -36,11 +39,11 @@ public class Appraise extends Model<Appraise> {
 
     @ApiModelProperty(value = "星级")
     @TableId(value = "star")
-    private String star;
+    private Integer star;
 
     @ApiModelProperty(value = "创建时间")
     @TableId(value = "create_time")
-    private String createTime;
+    private Date createTime;
 
     @ApiModelProperty(value = "是否删除（0未删除 1已删除）", hidden = true)
     @TableId(value = "is_del")
@@ -61,4 +64,13 @@ public class Appraise extends Model<Appraise> {
     @ApiModelProperty(value = "订单id")
     @TableId(value = "order_id")
     private String orderId;
+
+//    @ApiModelProperty(value = "评论人")
+//    @TableId(value = "member_name")
+//    private String orderId;
+
+    @Override
+    protected Serializable pkVal() {
+        return this.id;
+    }
 }

@@ -232,8 +232,8 @@ public class Order extends Model<Order> {
     private String phone;
 
     @ApiModelProperty(value = "是否已评价（0未评价 1已评价）")
-    @TableField("is_appraise")
-    private String isAppraise;
+    @TableField("appraise_id")
+    private String appraiseId;
 
     @Override
     protected Serializable pkVal() {

@@ -21,6 +21,7 @@ D:\softwares\lockagent\lockagent\service\src\main\java\com\lxkj\mapper\GiftcardM
 D:\softwares\lockagent\lockagent\service\src\main\java\com\lxkj\service\CreditCargoService.java
 D:\softwares\lockagent\lockagent\service\src\main\java\com\lxkj\mapper\SysUserMapper.java
 D:\softwares\lockagent\lockagent\service\src\main\java\com\lxkj\service\CreditOrderService.java
+D:\softwares\lockagent\lockagent\service\src\main\java\com\lxkj\mapper\AppraiseMapper.java
 D:\softwares\lockagent\lockagent\service\src\main\java\com\lxkj\service\BargainOrderService.java
 D:\softwares\lockagent\lockagent\service\src\main\java\com\lxkj\mapper\MemberSubordinateMapper.java
 D:\softwares\lockagent\lockagent\service\src\main\java\com\lxkj\mapper\SysUserRoleRefMapper.java
@@ -28,6 +29,7 @@ D:\softwares\lockagent\lockagent\service\src\main\java\com\lxkj\entity\SysRole.j
 D:\softwares\lockagent\lockagent\service\src\main\java\com\lxkj\mapper\CargoAttachmentMapper.java
 D:\softwares\lockagent\lockagent\service\src\main\java\com\lxkj\service\CardOrderFlowFileService.java
 D:\softwares\lockagent\lockagent\service\src\main\java\com\lxkj\entity\BargainStep.java
+D:\softwares\lockagent\lockagent\service\src\main\java\com\lxkj\service\AppraiseService.java
 D:\softwares\lockagent\lockagent\service\src\main\java\com\lxkj\entity\RetailerReward.java
 D:\softwares\lockagent\lockagent\service\src\main\java\com\lxkj\service\ConfigService.java
 D:\softwares\lockagent\lockagent\service\src\main\java\com\lxkj\entity\Transaction.java
@@ -63,6 +65,7 @@ D:\softwares\lockagent\lockagent\service\src\main\java\com\lxkj\service\CargoAtt
 D:\softwares\lockagent\lockagent\service\src\main\java\com\lxkj\service\InstallerOrderService.java
 D:\softwares\lockagent\lockagent\service\src\main\java\com\lxkj\service\BulletinService.java
 D:\softwares\lockagent\lockagent\service\src\main\java\com\lxkj\mapper\CargoMapper.java
+D:\softwares\lockagent\lockagent\service\src\main\java\com\lxkj\entity\Appraise.java
 D:\softwares\lockagent\lockagent\service\src\main\java\com\lxkj\service\CreditCargoSkuService.java
 D:\softwares\lockagent\lockagent\service\src\main\java\com\lxkj\entity\MaterialInfo.java
 D:\softwares\lockagent\lockagent\service\src\main\java\com\lxkj\entity\CreditCargo.java

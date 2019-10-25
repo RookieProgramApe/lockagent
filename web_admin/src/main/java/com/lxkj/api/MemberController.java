@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -44,6 +45,17 @@ public class MemberController extends BaseController {
     public JsonResults<Member> myInfo() {
         String memberId = this.getToken();
         var member = memberService.getById(memberId);
+        return BuildSuccessJson(member, "查询成功");
+    }
+
+    @ApiOperation(value = "根据id获取用户信息")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", dataType = "String", value = "用户id", required = true)
+    })
+    @PostMapping("/getMemberById")
+    @LoginRequired
+    public JsonResults<Member> getMemberById(@RequestParam String id) {
+        var member = memberService.getById(id);
         return BuildSuccessJson(member, "查询成功");
     }
 
