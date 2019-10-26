@@ -102,7 +102,8 @@ public class AppraiseController extends BaseController {
         var data = this.appraiseService.page(new Page<Appraise>(page != null ? page : 1, limit != null ? limit : 10),
                 new QueryWrapper<Appraise>().eq("member_id", memberId)
                         .in("is_del", 0)
-                        .orderByDesc("create_time"));
+                        .orderByDesc("create_time")
+                        .orderByDesc("is_top"));
         return BuildSuccessJson(data.getRecords(), data.getPages(), "查询成功");
     }
 
@@ -120,7 +121,8 @@ public class AppraiseController extends BaseController {
                         .eq("is_del", 0)
                         .eq("cargo_id", id)
                         .eq("status", 0)
-                        .orderByDesc("create_time"));
+                        .orderByDesc("create_time")
+                        .orderByDesc("is_top"));
         return BuildSuccessJson(data.getRecords(), data.getPages(), "查询成功");
     }
 

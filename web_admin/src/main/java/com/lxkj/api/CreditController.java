@@ -233,21 +233,21 @@ public class CreditController extends BaseController {
                 Object response = this.wxPayService.createOrder(request);
                 order.insert();
 
-                //扣除积分
-                BigDecimal point = cargo.getPoint();
-                member.setIntegral(member.getIntegral().subtract(point));
-                memberService.updateIntegral(member);
-
-                //积分表插入一条数据
-                MemberCredit credit1 = new MemberCredit();
-                credit1.setAmount(cargo.getSalePrice());
-                credit1.setMemberId(member.getId());
-                credit1.setOrderId(order.getId());
-                credit1.setPoint(point);
-                credit1.setType(-1);
-                credit1.setTitle("兑换了商品：" + cargo.getName());
-                credit1.setCreateTime(new Date());
-                credit1.insert();
+//                //扣除积分
+//                BigDecimal point = cargo.getPoint();
+//                member.setIntegral(member.getIntegral().subtract(point));
+//                memberService.updateIntegral(member);
+//
+//                //积分表插入一条数据
+//                MemberCredit credit1 = new MemberCredit();
+//                credit1.setAmount(cargo.getSalePrice());
+//                credit1.setMemberId(member.getId());
+//                credit1.setOrderId(order.getId());
+//                credit1.setPoint(point);
+//                credit1.setType(-1);
+//                credit1.setTitle("兑换了商品：" + cargo.getName());
+//                credit1.setCreateTime(new Date());
+//                credit1.insert();
 
                 return BuildSuccessJson(Map.of("payload", response, "ret_code", "0000"), "下单成功");
             } catch (WxPayException e) {
