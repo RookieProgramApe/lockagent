@@ -65,9 +65,29 @@ public class Appraise extends Model<Appraise> {
     @TableId(value = "order_id")
     private String orderId;
 
-//    @ApiModelProperty(value = "评论人")
-//    @TableId(value = "member_name")
-//    private String orderId;
+    @ApiModelProperty(value = "评论人")
+    @TableId(value = "member_name")
+    private String memberName;
+
+    @ApiModelProperty(value = "评论人头像")
+    @TableId(value = "member_avatar")
+    private String memberAvatar;
+
+    @ApiModelProperty(value = "商品名称")
+    @TableId(value = "cargo_name")
+    private String cargoName;
+
+    @ApiModelProperty(value = "商品规格")
+    @TableId(value = "sku_name")
+    private String skuName;
+
+    @ApiModelProperty(value = "商品套餐")
+    @TableId(value = "cate_name")
+    private String cateName;
+
+    @ApiModelProperty(value = "商品封面")
+    @TableId(value = "cargo_img")
+    private String cargoImg;
 
     @Override
     protected Serializable pkVal() {

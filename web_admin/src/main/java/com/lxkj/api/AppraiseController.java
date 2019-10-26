@@ -124,4 +124,23 @@ public class AppraiseController extends BaseController {
         return BuildSuccessJson(data.getRecords(), data.getPages(), "查询成功");
     }
 
+    @ApiOperation("根据商品查询热门评价")
+    @PostMapping("/queryTopAppraiseByCargo")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "token", value = "用户token值", required = true),
+            @ApiImplicitParam(paramType = "query", dataType = "Long", name = "page", value = " 页码", required = true),
+            @ApiImplicitParam(paramType = "query", dataType = "Long", name = "limit", value = "每页记录数", required = true),
+            @ApiImplicitParam(paramType = "query", dataType = "String", name = "id", value = "商品id", required = true),
+    })
+    public JsonResults<List<Appraise>> queryTopAppraiseByCargo(Long page, Long limit, String id) {
+        var data = this.appraiseService.page(new Page<Appraise>(page != null ? page : 1, limit != null ? limit : 10),
+                new QueryWrapper<Appraise>()
+                        .eq("is_del", 0)
+                        .eq("is_top", 1)
+                        .eq("cargo_id", id)
+                        .eq("status", 0)
+                        .orderByDesc("create_time"));
+        return BuildSuccessJson(data.getRecords(), data.getPages(), "查询成功");
+    }
+
 }
