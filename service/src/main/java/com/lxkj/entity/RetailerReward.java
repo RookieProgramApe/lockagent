@@ -49,9 +49,17 @@ public class RetailerReward extends Model<RetailerReward> {
     private String retailerId;
 
 
-    @ApiModelProperty(value = "分销奖励数值")
+    @ApiModelProperty(value = "轻奢卡分销奖励数值")
     @TableField("figure")
     private BigDecimal figure;
+
+    @ApiModelProperty(value = "贵族卡分销奖励数值")
+    @TableField("figureb")
+    private BigDecimal figureb;
+
+    @ApiModelProperty(value = "至尊卡分销奖励数值")
+    @TableField("figurec")
+    private BigDecimal figurec;
 
 
     @Override

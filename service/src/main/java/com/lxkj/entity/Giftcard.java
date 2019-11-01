@@ -66,6 +66,10 @@ private static final long serialVersionUID = 1L;
     @TableField("`use`")
     private Integer use;
 
+    @ApiModelProperty(value = "卡片类型 1白银来福卡 2黄金来福卡 3钻石来福卡")
+    @TableField("`type`")
+    private Integer type;
+
 
     @Override
 protected Serializable pkVal() {

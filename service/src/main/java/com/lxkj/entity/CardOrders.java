@@ -16,7 +16,7 @@ import java.util.Date;
 
 /**
  * <p>
- * 卡片订单
+ * 商家的卡片订单
  * </p>
  *
  * @author 一个烧包
@@ -25,8 +25,8 @@ import java.util.Date;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@ApiModel(value = "CardOrder对象", description = "卡片订单")
-public class CardOrder extends Model<CardOrder> {
+@ApiModel(value = "CardOrders对象", description = "商家卡片订单")
+public class CardOrders extends Model<CardOrders> {
 
     private static final long serialVersionUID = 1L;
 
@@ -44,66 +44,35 @@ public class CardOrder extends Model<CardOrder> {
     @TableField("member_id")
     private String memberId;
 
-    @ApiModelProperty(value = "代理商ID")
+    @ApiModelProperty(value = "商家ID")
     @TableField("retailer_id")
     private String retailerId;
 
-    @ApiModelProperty(value = "购买数量(套)")
-    @TableField("count")
-    private Integer count;
+    @ApiModelProperty(value = "轻奢卡购买数量(套)")
+    @TableField("count_a")
+    private Integer countA;
 
-    @ApiModelProperty(value = "订单类型")
-    @TableField("order_type")
-    private Integer orderType;
+    @ApiModelProperty(value = "轻奢卡购买数量(套)")
+    @TableField("count_b")
+    private Integer countB;
+
+    @ApiModelProperty(value = "轻奢卡购买数量(套)")
+    @TableField("count_c")
+    private Integer countC;
 
     @ApiModelProperty(value = "金额")
     @TableField("total_price")
     private BigDecimal totalPrice;
 
 
-    @ApiModelProperty(value = "1 待审核，2 终审已通过，3 拒绝  4完成初审核")
+    @ApiModelProperty(value = "0 待审核，1终审已通过")
     @TableField("status")
     private Integer status;
-
-    @ApiModelProperty(value = "卡片类型 1轻奢卡 2贵族卡 3至尊卡")
-    @TableField("card_type")
-    private Integer cardType;
 
 
     @ApiModelProperty(value = "审核意见")
     @TableField("reson")
     private String reson;
-
-
-    @ApiModelProperty(value = "快递公司")
-    @TableField("delivery_provider")
-    private String deliveryProvider;
-
-
-    @ApiModelProperty(value = "运单号")
-    @TableField("delivery_track")
-    private String deliveryTrack;
-
-
-    @ApiModelProperty(value = "收件人")
-    @TableField("recipient")
-    private String recipient;
-
-
-    @ApiModelProperty(value = "收件人号码")
-    @TableField("mobile")
-    private String mobile;
-
-
-    @ApiModelProperty(value = "收件地区")
-    @TableField("city")
-    private String city;
-
-
-    @ApiModelProperty(value = "收件详细地址")
-    @TableField("address")
-    private String address;
-
 
     @ApiModelProperty(value = "备注")
     @TableField("remark")
@@ -113,18 +82,6 @@ public class CardOrder extends Model<CardOrder> {
     @ApiModelProperty(value = "创建时间")
     @TableField("create_time")
     private Date createTime;
-
-    @ApiModelProperty(value = "0自发 1代发")
-    @TableField("lb")
-    private Integer lb;
-
-
-    @ApiModelProperty(value = "0未知  1已收费(可计分销)  2免费(不计分销)")
-    @TableField("retailstate")
-    private Integer retailstate;
-
-    @TableField(exist = false)
-    private String fileUrl;
 
     @Override
     protected Serializable pkVal() {

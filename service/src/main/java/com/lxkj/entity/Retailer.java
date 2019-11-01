@@ -111,12 +111,12 @@ public class Retailer extends Model<Retailer> {
     @TableField("create_time")
     private Date createTime;
 
-    @ApiModelProperty(value = "卡片一级分销奖励金额",hidden = true)
+    @ApiModelProperty(value = "轻奢卡一级分销奖励金额",hidden = true)
     @TableField("first_award")
     private BigDecimal firstAward;
 
 
-    @ApiModelProperty(value = "卡片二级分销奖励金额",hidden = true)
+    @ApiModelProperty(value = "轻奢卡二级分销奖励金额",hidden = true)
     @TableField("second_award")
     private BigDecimal secondAward;
 
@@ -155,6 +155,10 @@ public class Retailer extends Model<Retailer> {
     @TableField(exist = false)
     private Integer dinateCount;
 
+    @ApiModelProperty(value = "类型")
+    @TableField("`type`")
+    private Integer type;
+
     
     @TableField(exist = false)
     private String remark;
@@ -162,7 +166,23 @@ public class Retailer extends Model<Retailer> {
     @TableField(exist = false)
     private String fileUrl;
 
+    @ApiModelProperty(value = "贵族卡一级分销奖励金额",hidden = true)
+    @TableField("first_awardb")
+    private BigDecimal firstAwardb;
 
+
+    @ApiModelProperty(value = "贵族卡二级分销奖励金额",hidden = true)
+    @TableField("second_awardb")
+    private BigDecimal secondAwardb;
+
+    @ApiModelProperty(value = "至尊卡一级分销奖励金额",hidden = true)
+    @TableField("first_awardc")
+    private BigDecimal firstAwardc;
+
+
+    @ApiModelProperty(value = "至尊卡二级分销奖励金额",hidden = true)
+    @TableField("second_awardc")
+    private BigDecimal secondAwardc;
 
     @Override
     protected Serializable pkVal() {

@@ -114,6 +114,14 @@ public class Cargo extends Model<Cargo> {
   @TableField(exist = false)
   private BigDecimal figure;
 
+  @ApiModelProperty(value = "奖励金额")
+  @TableField(exist = false)
+  private BigDecimal figureb;
+
+  @ApiModelProperty(value = "奖励金额")
+  @TableField(exist = false)
+  private BigDecimal figurec;
+
   @ApiModelProperty(value = "0 下架，1 上架",hidden = true)
   @TableField("isdel")
   private Integer isdel;
@@ -125,6 +133,22 @@ public class Cargo extends Model<Cargo> {
   @ApiModelProperty(value = "积分")
   @TableField("point")
   private BigDecimal point;
+
+  @ApiModelProperty(value = "是否热销 0 不热销，1 热销")
+  @TableField("is_hot")
+  private Integer isHot;
+
+  @ApiModelProperty(value = "是否上新 0 不上新，1 上新")
+  @TableField("is_new")
+  private Integer isNew;
+
+  @ApiModelProperty(value = "是否预售 （0不预售 1预售）")
+  @TableField("is_adv")
+  private Integer isAdv;
+
+  @ApiModelProperty(value = "卡片类型 （0全部 1白银 2黄金 3钻石）")
+  @TableField("card_type")
+  private Integer cardType;
 
   @Override
   protected Serializable pkVal() {
