@@ -89,6 +89,15 @@
         </div>
     </div>
     <div class="layui-form-item">
+        <label class="layui-form-label">卡片类型</label>
+        <div class="layui-input-block">
+            <input type="radio" name="cardType" value="0" title="全部"  ${CreditCargo.cardType==0||CreditCargo.cardType==null?'checked':''}>
+            <input type="radio" name="cardType" value="1" title="轻奢来福卡"  ${CreditCargo.cardType==1?'checked':''} >
+            <input type="radio" name="cardType" value="2" title="贵族来福卡"  ${CreditCargo.cardType==2?'checked':''} >
+            <input type="radio" name="cardType" value="3" title="至尊来福卡"  ${CreditCargo.cardType==3?'checked':''} >
+        </div>
+    </div>
+    <div class="layui-form-item">
         <label class="layui-form-label">客服电话<font color="red">*</font></label>
         <div class="layui-input-inline">
             <input type="text" name="tellphone"  value="${CreditCargo.tellphone}" lay-verify="required" autocomplete="off" id="tellphone" class="layui-input" >

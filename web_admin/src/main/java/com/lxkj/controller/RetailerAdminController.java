@@ -68,6 +68,12 @@ public class RetailerAdminController extends BaseController {
         return model;
     }
 
+    @RequestMapping("/list2")
+    public ModelAndView list2(ModelAndView model) {
+        model.setViewName("/admin/Retailer/storeList");
+        return model;
+    }
+
     /**
      * 跳转审核页面
      *
@@ -118,6 +124,29 @@ public class RetailerAdminController extends BaseController {
     }
 
     /**
+     * 商家分页列表
+     *
+     * @return
+     */
+    @RequestMapping("/storeList")
+    @ResponseBody
+    public DataGridModel<Retailer> storeList(String keyword) {
+        PageData params = this.getPageData();
+        IPage<Retailer> page = retailerService.page(new Page<Retailer>(params.getInteger("page"), params.getInteger("limit")),
+                new QueryWrapper<Retailer>()
+                        .eq("`type`", 3)
+                        .nested(StringUtils.isNotBlank(keyword), i -> i.like("name", keyword).or().like("identity", keyword).or().like("phone", keyword))
+                        .in("status", 1, 2)
+                        .orderByDesc("create_time"));
+        page.getRecords().stream().forEach(p -> {
+            int i = jdbcTemplate.queryForObject("select count(1) from retailer where parent_member_id=?", Integer.class, p.getMemberId());
+            p.setSubordinateCount(i);
+        });
+        DataGridModel<Retailer> grid = new DataGridModel(page.getRecords(), page.getTotal());
+        return grid;
+    }
+
+    /**
      * 终审-分页列表
      *
      * @return
@@ -129,6 +158,7 @@ public class RetailerAdminController extends BaseController {
         String status = params.getString("status");
         IPage<Retailer> page = retailerService.page(new Page<Retailer>(params.getInteger("page"), params.getInteger("limit")),
                 new QueryWrapper<Retailer>()
+                        .eq("`type`", 1)
                         .nested(StringUtils.isNotBlank(keyword), i -> i.like("name", keyword).or().like("identity", keyword).or().like("phone", keyword))
                         .in("status", 1, 2)
                         .orderByDesc("create_time"));
@@ -152,6 +182,7 @@ public class RetailerAdminController extends BaseController {
         String status = params.getString("status");
         IPage<Retailer> page = retailerService.page(new Page<Retailer>(params.getInteger("page"), params.getInteger("limit")),
                 new QueryWrapper<Retailer>()
+                        .eq("`type`", 1)
                         .nested(StringUtils.isNotBlank(keyword), i -> i.like("name", keyword).or().like("identity", keyword).or().like("phone", keyword))
                         .eq(StringUtils.isNotBlank(status), "status", params.getInteger("status"))
                         .orderByDesc("create_time"));

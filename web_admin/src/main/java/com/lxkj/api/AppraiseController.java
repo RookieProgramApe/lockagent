@@ -7,7 +7,9 @@ import com.lxkj.annotation.LoginRequired;
 import com.lxkj.common.bean.BaseController;
 import com.lxkj.common.bean.JsonResults;
 import com.lxkj.entity.Appraise;
+import com.lxkj.entity.AppraiseAttachment;
 import com.lxkj.entity.Order;
+import com.lxkj.service.AppraiseAttachmentService;
 import com.lxkj.service.AppraiseService;
 import com.lxkj.service.OrderService;
 import io.swagger.annotations.Api;
@@ -36,6 +38,9 @@ public class AppraiseController extends BaseController {
 
     @Autowired
     private OrderService orderService;
+
+    @Autowired
+    private AppraiseAttachmentService appraiseAttachmentService;
 
 //    @ApiOperation("评价新增功能")
 //    @PostMapping("/save")
@@ -75,6 +80,8 @@ public class AppraiseController extends BaseController {
     public JsonResults<Appraise> getByOrderId(@RequestParam String id) {
         System.out.println("id=======" + id);
         Appraise appraise = appraiseService.getOne(new QueryWrapper<Appraise>().eq("order_id", id));
+        // 查询商品评价
+        appraise.setImgs(appraiseAttachmentService.list(new QueryWrapper<AppraiseAttachment>().eq("appraise_id", appraise.getId())));
         return BuildSuccessJson(appraise,"保存成功");
     }
 
@@ -86,6 +93,8 @@ public class AppraiseController extends BaseController {
     public JsonResults<Appraise> getAppraiseById(@RequestParam String id) {
         System.out.println("id==============" + id);
         Appraise appraise = appraiseService.getById(id);
+        // 查询商品评价
+        appraise.setImgs(appraiseAttachmentService.list(new QueryWrapper<AppraiseAttachment>().eq("appraise_id", appraise.getId())));
         return BuildSuccessJson(appraise,"保存成功");
     }
 
@@ -104,6 +113,10 @@ public class AppraiseController extends BaseController {
                         .in("is_del", 0)
                         .orderByDesc("create_time")
                         .orderByDesc("is_top"));
+        // 查询评价的图片
+        data.getRecords().forEach(item -> {
+            item.setImgs(appraiseAttachmentService.list(new QueryWrapper<AppraiseAttachment>().eq("appraise_id", item.getId())));
+        });
         return BuildSuccessJson(data.getRecords(), data.getPages(), "查询成功");
     }
 
@@ -123,6 +136,10 @@ public class AppraiseController extends BaseController {
                         .eq("status", 0)
                         .orderByDesc("create_time")
                         .orderByDesc("is_top"));
+        // 查询评价的图片
+        data.getRecords().forEach(item -> {
+            item.setImgs(appraiseAttachmentService.list(new QueryWrapper<AppraiseAttachment>().eq("appraise_id", item.getId())));
+        });
         return BuildSuccessJson(data.getRecords(), data.getPages(), "查询成功");
     }
 
@@ -135,13 +152,17 @@ public class AppraiseController extends BaseController {
             @ApiImplicitParam(paramType = "query", dataType = "String", name = "id", value = "商品id", required = true),
     })
     public JsonResults<List<Appraise>> queryTopAppraiseByCargo(Long page, Long limit, String id) {
-        var data = this.appraiseService.page(new Page<Appraise>(page != null ? page : 1, limit != null ? limit : 10),
+        var data = this.appraiseService.page(new Page<Appraise>(page != null ? page : 1, limit != null ? limit : 3),
                 new QueryWrapper<Appraise>()
                         .eq("is_del", 0)
                         .eq("is_top", 1)
                         .eq("cargo_id", id)
                         .eq("status", 0)
                         .orderByDesc("create_time"));
+        // 查询评价的图片
+        data.getRecords().forEach(item -> {
+            item.setImgs(appraiseAttachmentService.list(new QueryWrapper<AppraiseAttachment>().eq("appraise_id", item.getId())));
+        });
         return BuildSuccessJson(data.getRecords(), data.getPages(), "查询成功");
     }
 

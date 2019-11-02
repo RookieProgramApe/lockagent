@@ -147,7 +147,15 @@
                    {field: 'nickname', title: '昵称',width:100, align: 'center'},
                    {field: 'name', title: '姓名', width: 100},
                    // {field: 'phone', title: '手机号码', width: 100},
-                   {field: 'count', title: '购买数量(套)',width:120,align: 'right',sort: true},
+                   {field: 'count', title: '卡片数量(套)',width:120,align: 'right',sort: true},
+                    {field: 'card_type', title: '卡片类型', width: 100, templet:function(d){
+                            switch(d.card_type){
+                                case 1:return "<span style='color:green;'>轻奢卡</span>";break;
+                                case 2:return "<span style='color:red;'>贵族卡</span>";break;
+                                case 3:return "<span style='color:blue;'>至尊卡</span>";break;
+                                default:return "其他卡";
+                            }
+                        }},
                    {field: 'total_price', title: '金额(元)', width: 100,templet:function (d) {
                         if(d.total_price != null){
                             return d.total_price.toFixed(2);

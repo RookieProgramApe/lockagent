@@ -133,7 +133,7 @@ public class CreditController extends BaseController {
         var adddr = memberAddressService.getById(addressId);//收货地址
         var member = memberService.getById(memberId);
         if(member.getIntegral().compareTo(cargo.getPoint()) == -1){
-            return BuildFailJson("您的积分余额不足");
+            return BuildFailJson("亲，您的安心值余额不足，购物可以获得安心值哦！");
         }
         /* 校验规则**/
 //        if (cargoSku.getInventory() <= 0) {//库存不足
@@ -155,7 +155,24 @@ public class CreditController extends BaseController {
                 if (card.getUse() == 1) {
                     return BuildFailJson("该卡片已被兑换，请换一个吧~");
                 }
-                order.setGiftcardId(card.getId());
+
+                // 判断允许购买的卡片类型和使用的卡片类型是否相同
+                Integer type = cargo.getCardType();
+                if(type.equals(0) || type.equals(card.getType())){
+                    order.setGiftcardId(card.getId());
+                }else{
+                    // 不同则返回
+                    if(type.equals(1)) {
+                        return BuildFailJson("亲，需要白银会员才可以兑换哦！");
+                    } else if(type.equals(2)) {
+                        return BuildFailJson("亲，需要黄金会员才可以兑换哦！");
+                    } else if(type.equals(3)) {
+                        return BuildFailJson("亲，需要钻石会员才可以兑换哦！");
+                    } else {
+                        return BuildFailJson("亲，现在还无法兑换哦！");
+                    }
+
+                }
             }
         }
 

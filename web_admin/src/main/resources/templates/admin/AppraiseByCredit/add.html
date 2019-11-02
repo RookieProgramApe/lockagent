@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html style="background-color: #fff;">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>编辑内容</title>
+    <%include("/includes/common.html"){}%>
+    <%include("/includes/ueditor.html"){}%>
+    <%include("/includes/webuploader.html"){}%>
+</head>
+<body class="childrenBody">
+    <form class="layui-form" id="addForm" >
+        <div class="layui-form-item">
+            <label class="layui-form-label">选择商品<font color="red">*</font></label>
+            <div class="layui-input-block">
+                <select name="cargoId" lay-search="" id="cargoId" lay-verify="required" lay-filter="cargoId"></select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">选择评论人<font color="red">*</font></label>
+            <div class="layui-input-block">
+                <select name="memberId" lay-search="" id="memberId" lay-verify="required" lay-filter="memberId"></select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">评级<font color="red">*</font></label>
+            <div class="layui-input-inline">
+                <input type="text" name="star" value="${appraise.star}" placeholder="评价星级" lay-verify="required|number" autocomplete="off"  class="layui-input" >
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">评价内容<font color="red">*</font></label>
+            <div class="layui-input-block">
+                <input type="text" name="remark"  value="${appraise.remark}" lay-verify="required" autocomplete="off" id="shareContent" class="layui-input" >
+            </div>
+        </div>
+        <!--附件上传 -->
+        <div class="layui-form-item">
+            <label class="layui-form-label">照片</label>
+            <div class="layui-input-block">
+                <div id="picker"><i class="layui-icon">&#xe67c;</i>选择图片</div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">是否置顶</label>
+            <div class="layui-input-block">
+                <input type="radio" name="isTop" value="1" title="置顶"  ${appraise.isTop==1||appraise.isTop==null?'checked':''} >
+                <input type="radio" name="isTop" value="0" title="关闭"  ${appraise.isTop==0?'checked':''}>
+            </div>
+        </div>
+        <!--隐藏域-不用乱动 -->
+        <div class="layui-form-item layui-hide">
+            <button class="layui-btn" lay-submit="" lay-filter="save" id="save">确认</button>
+            <input type="hidden" name="id"  value="${appraise.id}">
+        </div>
+    </form>
+<script type="text/javascript">
+    layui.use(['index','layer', 'table', 'element', 'form', 'laytpl','laydate'], function () {
+        var form = layui.form;
+        var admin = layui.admin;
+        //Select动态
+        $("#cargoId").Select({
+            url: $ctx + '/Bargain/selectGoods',
+            data:{},
+            valueName:'id',
+            labelName:'name',
+            def:'${appraise.cargoId}'
+        });
+        $("#memberId").Select({
+            url: $ctx + '/Appraise/selectGoods',
+            data:{},
+            valueName:'id',
+            labelName:'nickname',
+            def:'${appraise.memberId}'
+        });
+        //附件上传
+        $("#picker").uploadFile({//封面
+            loadUrl:$ctx + '/Appraise/selectAppraiseAttachment?appraiseId=${appraise.id}',
+            name: "url1",//隐藏域 input[name=fileUrl],通过js方法 getFileUrls("fileUrl")获取数组
+            size: 2,//单个附件不能超过200MB
+            number: 6,//附件不能超过3个
+            model: 'Appraise',//新文件目录
+            type: 'image'//所有类型  image:图片类型 ,video:视频,file:所有
+        });
+        //表单提交
+        form.on('submit(save)', function (data) {
+            var param = data.field;
+            if(param.star < 1 || param.star > 5){
+                layer.msg("评级只能是1~5的整数", {icon: 5,time: 1000});
+                return false;
+            }
+            var fileArr=getFileUrls("url1");
+            param.picArr = JSON.stringify(fileArr);
+            param.type = 2;
+            $.ajaxPost( "/Appraise/save", param, function (res) {
+                getParentIframe().layui.table.reload('dataList');
+                winClose();
+            });
+            return false;
+        });
+        form.render();
+     })
+     function aClick() {
+        window.open("http://lbs.qq.com/tool/getpoint/", "_blank")
+     }
+    function del(obj){
+        $(obj).parent().parent().remove();
+    }
+    //历史删除
+    function addDel(obj){
+        var id=$(obj).attr("data-id");
+        delIds.push(id);
+        $(obj).parent().parent().remove();
+    }
+</script>
+</body>
+</html>

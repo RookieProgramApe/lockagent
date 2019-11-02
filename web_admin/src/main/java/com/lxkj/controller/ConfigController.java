@@ -119,7 +119,6 @@ public class ConfigController extends BaseController {
         model.setViewName("/admin/Config/add3");
         return model;
     }
-
     /**
      * 卡片
      * @param model
@@ -129,6 +128,10 @@ public class ConfigController extends BaseController {
     public ModelAndView toAdd4(ModelAndView model) {
         model.addObject("card_price",configService.getOne(Wrappers.<Config>query().eq("`key`","card_price")));
         model.addObject("card_note",configService.getOne(Wrappers.<Config>query().eq("`key`","card_note")));
+        model.addObject("card_price_b",configService.getOne(Wrappers.<Config>query().eq("`key`","card_price_b")));
+        model.addObject("card_note_b",configService.getOne(Wrappers.<Config>query().eq("`key`","card_note_b")));
+        model.addObject("card_price_c",configService.getOne(Wrappers.<Config>query().eq("`key`","card_price_c")));
+        model.addObject("card_note_c",configService.getOne(Wrappers.<Config>query().eq("`key`","card_note_c")));
         model.setViewName("/admin/Config/add4");
         return model;
     }

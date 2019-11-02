@@ -22,7 +22,15 @@
         </div>
     </div>
     <div class="layui-form-item">
-        <label class="layui-form-label">卡片量(套)<font color="red">*</font></label>
+        <label class="layui-form-label">卡片数量(套)<font color="red">*</font></label>
+        <div class="layui-input-inline">
+            <input type="radio" name="cardType" value="1" title="轻奢来福卡" checked>
+            <input type="radio" name="cardType" value="2" title="贵族来福卡">
+            <input type="radio" name="cardType" value="3" title="至尊来福卡" >
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">卡片数量(套)<font color="red">*</font></label>
         <div class="layui-input-inline">
             <input type="text" name="count"  lay-verify="required|number" autocomplete="off"  class="layui-input">
         </div>

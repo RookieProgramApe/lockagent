@@ -111,20 +111,22 @@
                         <th style="background-color: #BFEFFF;text-align: center;" colspan="4">卡片订单信息</th>
                     </tr>
                     <tr>
-                        <th width="10" style="background-color: #f2f2f2;text-align: right;">购买数量：</th>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">卡片数量：</th>
                         <td width="40" align="left">${CardOrder.count}套</td>
-                        <th width="10" style="background-color: #f2f2f2;text-align: right;">金额：</th>
-                        <td width="40" align="left">${CardOrder.totalPrice}</td>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">卡片类型：</th>
+                        <td width="40" align="left">${CardOrder.cardType==1?'轻奢卡':CardOrder.cardType==2?'贵族卡':CardOrder.cardType==3?'至尊卡':'其他卡'}</td>
                     </tr>
                     <tr>
-                        <th width="10" style="background-color: #f2f2f2;text-align: right;">收件人：</th>
-                        <td width="40" align="left">${CardOrder.recipient}</td>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">总金额：</th>
+                        <td width="40" align="left">${CardOrder.totalPrice}</td>
                         <th width="10" style="background-color: #f2f2f2;text-align: right;">收件人号码：</th>
                         <td width="40" align="left">${CardOrder.mobile}</td>
                     </tr>
                     <tr>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">收件人：</th>
+                        <td width="40" align="left">${CardOrder.recipient}</td>
                         <th width="10" style="background-color: #f2f2f2;text-align: right;">收件人地址：</th>
-                        <td width="40" align="left" colspan="3">${CardOrder.city}${CardOrder.address}</td>
+                        <td width="40" align="left">${CardOrder.city}${CardOrder.address}</td>
                     </tr>
 
                     <tr>

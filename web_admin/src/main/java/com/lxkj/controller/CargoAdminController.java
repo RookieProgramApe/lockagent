@@ -131,6 +131,8 @@ public class CargoAdminController extends BaseController {
                         .eq("type", 1)
                         .select("cargo.*"
                                 ,"(select figure from retailer_reward where cargo_id=cargo.id and retailer_id='"+retailer_id+"') as figure"
+                                ,"(select figureb from retailer_reward where cargo_id=cargo.id and retailer_id='"+retailer_id+"') as figureb"
+                                ,"(select figurec from retailer_reward where cargo_id=cargo.id and retailer_id='"+retailer_id+"') as figurec"
                                 ,"(select id from retailer_reward where cargo_id=cargo.id and retailer_id='"+retailer_id+"') as retailerRewardId "
                         )
                         .eq("status",1)

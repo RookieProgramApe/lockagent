@@ -26,12 +26,6 @@
         <!--按钮组-->
         <div class="layui-row list_btnGroup">
             <div style="float: left;">
-                <div class="layui-inline">
-                    <label class="layui-form-label" style="width:200px;">已购卡片：${cardNum}&nbsp;张</label>
-                    <label class="layui-form-label" style="width:200px;">已使用：${cardNum1}&nbsp;张</label>
-                    <label class="layui-form-label" style="width:200px;">未使用：${cardNum0}&nbsp;张</label>
-                    <label class="layui-form-label" style="width:200px;">总销售额：￥${sumPrice}&nbsp;元</label>
-                </div>
                 <!--<button class="layui-btn layui-btn-sm" layadmin-event="add">添加</button>-->
                 <!--<button class="layui-btn layui-btn-sm layui-btn-danger" layadmin-event="delete">删除</button>-->
             </div>
@@ -104,7 +98,7 @@
         /**创建表格*/
         table.render({
             elem: '#dataList',
-            url: $ctx + '/CardOrder/pageList2',
+            url: $ctx + '/CardOrder/storeCardList',
             method: "POST",
             page: true,
             loading: true,
@@ -117,13 +111,10 @@
                                 return "待审核";
                                 break;
                             case 2:
-                                return "<span style='color:green;'><b>终审通过</b></span>";
+                                return "<span style='color:green;'><b>审核通过</b></span>";
                                 break;
                             case 3:
                                 return "<span style='color:red;'>拒绝</span>";
-                                break;
-                            case 4:
-                                return "<span style='color:green;'>初审通过</span>";
                                 break;
                             default:
                                 return "";
@@ -134,7 +125,7 @@
                 {field: 'nickname', title: '昵称', width: 100, align: 'center'},
                 {field: 'name', title: '姓名', width: 100},
                 {field: 'phone', title: '手机号码', width: 120,templet:'#phone'},
-                {field: 'count', title: '购买数量(套)', width: 120, align: 'right', sort: true},
+                {field: 'count', title: '购买数量(张)', width: 150, align: 'right', sort: true},
                 {field: 'card_type', title: '卡片类型', width: 100, templet:function(d){
                         switch(d.card_type){
                             case 1:return "<span style='color:green;'>轻奢卡</span>";break;
@@ -143,32 +134,15 @@
                             default:return "其他卡";
                         }
                     }},
-                {
-                    field: 'total_price', title: '金额(元)', width: 100, templet: function (d) {
-                        if (d.total_price != null) {
-                            return d.total_price.toFixed(2);
-                        } else {
-                            return "";
-                        }
-                    }
-                },
-                {
-                    field: 'retailstate', title: '交易结果', width: 100, templet: function (d) {
-                        switch (d.retailstate) {
-                            case 0:
-                                return "-";
-                                break;
-                            case 2:
-                                return "<span style='color:red;'>免费</span>";
-                                break;
-                            case 1:
-                                return "<span style='color:green;'>已收费</span>";
-                                break;
-                            default:
-                                return "-";
-                        }
-                    }
-                },
+                // {
+                //     field: 'total_price', title: '金额(元)', width: 100, templet: function (d) {
+                //         if (d.total_price != null) {
+                //             return d.total_price.toFixed(2);
+                //         } else {
+                //             return "";
+                //         }
+                //     }
+                // },
                 {field: 'create_time', title: '创建时间', width: 200}
 
             ]]

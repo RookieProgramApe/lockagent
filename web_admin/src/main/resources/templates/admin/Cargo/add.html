@@ -101,6 +101,27 @@
         </div>
     </div>
     <div class="layui-form-item">
+        <label class="layui-form-label">是否热销</label>
+        <div class="layui-input-block">
+            <input type="radio" name="isHot" value="1" title="热销"  ${Cargo.isHot==1?'checked':''} >
+            <input type="radio" name="isHot" value="0" title="关闭"  ${Cargo.isHot==0||Cargo.isHot==null?'checked':''}>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">是否上新</label>
+        <div class="layui-input-block">
+            <input type="radio" name="isNew" value="1" title="上新"  ${Cargo.isNew==1?'checked':''} >
+            <input type="radio" name="isNew" value="0" title="关闭"  ${Cargo.isNew==0||Cargo.isNew==null?'checked':''}>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">是否预售</label>
+        <div class="layui-input-block">
+            <input type="radio" name="isAdv" value="1" title="预售"  ${Cargo.isAdv==1?'checked':''} >
+            <input type="radio" name="isAdv" value="0" title="关闭"  ${Cargo.isAdv==0||Cargo.isAdv==null?'checked':''}>
+        </div>
+    </div>
+    <div class="layui-form-item">
         <label class="layui-form-label">客服电话<font color="red">*</font></label>
         <div class="layui-input-inline">
             <input type="text" name="tellphone"  value="${Cargo.tellphone}" lay-verify="required" autocomplete="off" id="tellphone" class="layui-input" >

@@ -89,8 +89,12 @@ public class RetailerRewardController extends BaseController {
         model.addObject("cargo_id",cargo_id);
         if(rr!=null&&rr.getFigure()!=null){
             model.addObject("figure",rr.getFigure());
+            model.addObject("figureb",rr.getFigureb());
+            model.addObject("figurec",rr.getFigurec());
         }else{
             model.addObject("figure",0.00);
+            model.addObject("figureb",0.00);
+            model.addObject("figurec",0.00);
         }
         model.setViewName("/admin/Retailer/setCargoReward");
         return model;

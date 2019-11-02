@@ -20,6 +20,7 @@ import com.lxkj.mapper.MemberSubordinateMapper;
 import com.lxkj.mapper.RetailerMapper;
 import com.lxkj.service.*;
 import io.swagger.annotations.*;
+import jodd.util.Util;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.mp.api.WxMpQrcodeService;
@@ -38,6 +39,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -77,6 +80,10 @@ public class RetailerController extends BaseController {
     private MemberSubordinateMapper memberSubordinateMapper;
     @Resource
     private RetailerMapper retailerMapper;
+    @Autowired
+    private GiftcardService giftcardService;
+    @Autowired
+    private CardOrdersService cardOrdersService;
 
     @Value("${picture.baillUrl}")
     private String baillUrl;
@@ -119,10 +126,10 @@ public class RetailerController extends BaseController {
         int giftcardCount = this.retailerGiftcardService.count(Wrappers.<RetailerGiftcard>query().eq("member_id", memberId).eq("state", 0));
         retailer.setGiftcardCount(giftcardCount);
         // 直属团队数量
-        int subordinateCount = this.retailerService.count(Wrappers.<Retailer>query().eq("parent_member_id", memberId));
+        int subordinateCount = this.retailerService.count(Wrappers.<Retailer>query().eq("parent_member_id", memberId).eq("`type`", 1));
         retailer.setSubordinateCount(subordinateCount);
         //次属团队数量
-        int dinateCount = this.jdbcTemplate.queryForObject("select count(1) from retailer where parent_member_id in (select member_id from retailer where  parent_member_id=?)",Integer.class,memberId);
+        int dinateCount = this.jdbcTemplate.queryForObject("select count(1) from retailer where parent_member_id in (select member_id from retailer where  parent_member_id=? and `type`=1)",Integer.class,memberId);
         retailer.setDinateCount(dinateCount);
         return BuildSuccessJson(retailer, "查询成功");
     }
@@ -184,6 +191,71 @@ public class RetailerController extends BaseController {
         }
         this.retailerService.saveOrUpdate(retailer);
         this.memberService.update(Wrappers.<Member>update().set("retailer_id", retailer.getId()).eq("id", memberId));
+        return BuildSuccessJson("操作成功");
+    }
+
+    @ApiOperation(value = "申请加入商家", notes = "商家二维码邀请界面接口、申请加入商家接口、重新提交资料")
+    @PostMapping("/joinStore")
+    @LoginRequired
+    @Transactional
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "token", value = "用户token值", required = true),
+            @ApiImplicitParam(paramType = "query", dataType = "String", name = "parentMemberId", value = " 邀请人ID(可填)", required = true),
+            @ApiImplicitParam(paramType = "query", dataType = "String", name = "phone", value = "手机号(首次必填，下一次不需要填)"),
+            @ApiImplicitParam(paramType = "query", dataType = "String", name = "name", value = " 姓名", required = true),
+            @ApiImplicitParam(paramType = "query", dataType = "String", name = "gender", value = "性别", required = true),
+            @ApiImplicitParam(paramType = "query", dataType = "String", name = "identity", value = "身份证号", required = true),
+            @ApiImplicitParam(paramType = "query", dataType = "String", name = "city", value = "所在的地区", required = true)
+    })
+    public JsonResults<?> joinStore(
+            @RequestParam String parentMemberId,
+            String phone,
+            @RequestParam String name,
+            @RequestParam String gender,
+            @RequestParam String identity,
+            @RequestParam String city) {
+        String memberId = this.getToken();
+        Retailer retailer = retailerService.getOne(new QueryWrapper<Retailer>().eq("member_id", memberId));
+        if (retailer == null) {
+            if (StringUtils.isBlank(phone)) {
+                return BuildFailJson("手机号不能为空");
+            }
+            retailer = new Retailer();
+            retailer.setPhone(phone);
+        }
+        retailer.setType(3);
+        retailer.setName(name);
+        retailer.setGender(gender);
+        retailer.setIdentity(identity);
+        retailer.setCity(city);
+        retailer.setMemberId(memberId);
+
+        // 商家不需要审核
+        retailer.setStatus(1);
+
+        //有邀请人
+        if (StringUtils.isNotBlank(parentMemberId)) {
+            retailer.setParentMemberId(parentMemberId);
+//            MemberSubordinate ms1 = new MemberSubordinate();
+//            ms1.setLevel(1);
+//            ms1.setMemberId(parentMemberId);
+//            ms1.setSubordinateMemberId(memberId);
+//            this.memberSubordinateService.save(ms1);
+//            MemberSubordinate grandParent = this.memberSubordinateService.getOne(Wrappers.<MemberSubordinate>query()
+//                    .eq("subordinate_member_id", parentMemberId)
+//                    .eq("`level`", 1));
+//            if (grandParent != null) {
+//                MemberSubordinate ms2 = new MemberSubordinate();
+//                ms2.setLevel(2);
+//                ms2.setMemberId(grandParent.getMemberId());
+//                ms2.setSubordinateMemberId(memberId);
+//                this.memberSubordinateService.save(ms2);
+//            }
+        }
+        this.retailerService.saveOrUpdate(retailer);
+
+        // 会员表插入商家id并改变会员身份为商家
+        this.memberService.update(Wrappers.<Member>update().set("retailer_id", retailer.getId()).set("isretailer", 3).eq("id", memberId));
         return BuildSuccessJson("操作成功");
     }
 
@@ -324,7 +396,7 @@ public class RetailerController extends BaseController {
         String memberId = this.getToken();
         var data = this.memberSubordinateMapper.querySubordinate(new Page<Map>(page != null ? page : 1, limit != null ? limit : 10), memberId);
         data.getRecords().stream().forEach(p->{
-            int dinateCount = this.jdbcTemplate.queryForObject("select count(1) from retailer where parent_member_id in (select member_id from retailer where  parent_member_id=?)",Integer.class,p.get("memberId").toString());
+            int dinateCount = this.jdbcTemplate.queryForObject("select count(1) from retailer where parent_member_id in (select member_id from retailer where  parent_member_id=? and `type`=1)",Integer.class,p.get("memberId").toString());
             p.put("dinateCount",dinateCount);
         });
         return BuildSuccessJson(data.getRecords(), data.getPages(), "查询成功");
@@ -345,7 +417,7 @@ public class RetailerController extends BaseController {
     public JsonResults queryOtherSubordinate(@RequestParam String memberId,Long page, Long limit) {
         var data = this.memberSubordinateMapper.querySubordinate(new Page<Map>(page != null ? page : 1, limit != null ? limit : 10), memberId);
         data.getRecords().stream().forEach(p->{
-            int dinateCount = this.jdbcTemplate.queryForObject("select count(1) from retailer where parent_member_id in (select member_id from retailer where  parent_member_id=?)",Integer.class,p.get("memberId").toString());
+            int dinateCount = this.jdbcTemplate.queryForObject("select count(1) from retailer where parent_member_id in (select member_id from retailer where  parent_member_id=? and `type`=1)",Integer.class,p.get("memberId").toString());
             p.put("dinateCount",dinateCount);
         });
         return BuildSuccessJson(data.getRecords(), data.getPages(), "查询成功");
@@ -429,6 +501,7 @@ public class RetailerController extends BaseController {
     @ApiOperation(value = "我的卡片-详情界面数据", notes = "卡片单价、卡片说明、卡片库存")
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "header", dataType = "String", name = "token", value = "用户token值", required = true),
+            @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "type", value = "卡片类型(1轻奢卡 2贵族卡 3至尊卡)", required = true)
     })
     @ApiResponses({
             @ApiResponse(code = 200, message = "data={cardPrice:'卡片单价格/套',totalCount:'库存(套)',cardNote:'卡片说明'}"),
@@ -436,11 +509,82 @@ public class RetailerController extends BaseController {
     @PostMapping("/cardInfo")
     @LoginRequired
     @Transactional
-    public JsonResults cardInfo() {
-        BigDecimal cardPrice = this.configService.queryForDecimal("card_price");//单价
-        String cardNote = this.configService.queryForString("card_note");//卡片说明
-        Integer count = cardOrderService.queryCount();//剩余库存
-        return BuildSuccessJson(Map.of("cardPrice", cardPrice, "cardNote", cardNote, "totalCount", count), "操作成功，请等待审核");
+    public JsonResults cardInfo(@RequestParam Integer type) {
+        if(type == null || type.equals(0)){
+            return BuildSuccessJson("卡片类型有误");
+        }else{
+            BigDecimal cardPrice = new BigDecimal(0);
+            String cardNote = "";
+            switch (type){
+                case 1:
+                    cardPrice = this.configService.queryForDecimal("card_price");//单价
+                    cardNote = this.configService.queryForString("card_note");//卡片说明
+                    break;
+                case 2:
+                    cardPrice = this.configService.queryForDecimal("card_price_b");//单价
+                    cardNote = this.configService.queryForString("card_note_b");//卡片说明
+                    break;
+                case 3:
+                    cardPrice = this.configService.queryForDecimal("card_price_c");//单价
+                    cardNote = this.configService.queryForString("card_note_c");//卡片说明
+                    break;
+                default: break;
+            }
+            Integer count = cardOrderService.queryCount(type);//剩余库存
+            return BuildSuccessJson(Map.of("cardPrice", cardPrice, "cardNote", cardNote, "totalCount", count), "操作成功，请等待审核");
+
+        }
+
+    }
+
+    @ApiOperation(value = "我的卡片-商家购买卡片获取卡片信息", notes = "卡片单价、卡片说明、卡片库存")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "token", value = "用户token值", required = true),
+            @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "type", value = "卡片类型(1轻奢卡 2贵族卡 3至尊卡)", required = true)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "data={cardPrice:'卡片单价/张',totalCount:'库存(张)',cardNote:'卡片说明'}"),
+    })
+    @PostMapping("/cardInfos")
+    @LoginRequired
+    @Transactional
+    public JsonResults cardInfos(@RequestParam Integer type) {
+        String memberId = this.getToken();
+        // 获取商家信息
+        Retailer retailer = this.retailerService.getOne(Wrappers.<Retailer>query().eq("member_id", memberId));
+        // 获取商家的事业合伙人信息
+        Retailer retailer1 = retailerService.getOne(new QueryWrapper<Retailer>().eq("member_id", retailer.getParentMemberId()));
+
+        if(type == null || type.equals(0)){
+            return BuildSuccessJson("卡片类型有误");
+        }else{
+            BigDecimal cardPrice = new BigDecimal(0);
+            String cardNote = "";
+            switch (type){
+                case 1:
+                    cardPrice = this.configService.queryForDecimal("card_price");//单价
+                    cardNote = this.configService.queryForString("card_note");//卡片说明
+                    break;
+                case 2:
+                    cardPrice = this.configService.queryForDecimal("card_price_b");//单价
+                    cardNote = this.configService.queryForString("card_note_b");//卡片说明
+                    break;
+                case 3:
+                    cardPrice = this.configService.queryForDecimal("card_price_c");//单价
+                    cardNote = this.configService.queryForString("card_note_c");//卡片说明
+                    break;
+                default: break;
+            }
+            // 获取事业合伙人身上的剩余卡片数量
+            Integer count = retailerGiftcardService.count(new QueryWrapper<RetailerGiftcard>()
+                                                                .eq("member_id", retailer1.getMemberId())
+                                                                .eq("`type`", type)
+                                                                .eq("`status`", 0)
+                                                                .eq("`state`", 0));
+            return BuildSuccessJson(Map.of("cardPrice", cardPrice.divide(new BigDecimal("50"), 0, RoundingMode.HALF_DOWN), "cardNote", cardNote, "totalCount", count), "操作成功，请等待审核");
+
+        }
+
     }
 
 
@@ -478,7 +622,64 @@ public class RetailerController extends BaseController {
         return BuildSuccessJson("操作成功，请等待审核");
     }
 
-    @ApiOperation("我的二维码")
+    @ApiOperation("商家购买卡片(下订单)")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "token", value = "用户token值", required = true),
+            @ApiImplicitParam(name = "count", dataType = "Integer", value = "数量（张）", required = true),
+            @ApiImplicitParam(name = "type", dataType = "Integer", value = "卡片类型(1轻奢卡 2贵族卡 3至尊卡)", required = true),
+            @ApiImplicitParam(name = "remark", dataType = "String", value = "备注（非必选）"),
+            @ApiImplicitParam(name = "addressId", dataType = "String", value = "收货地址ID", required = true),
+    })
+    @PostMapping("/buyCards")
+    @LoginRequired
+    @Transactional
+    public JsonResults<?> buyCards(@RequestParam Integer count, @RequestParam Integer type, @RequestParam String addressId, String remark) {
+        String memberId = this.getToken();
+        // 获取商家信息
+        Retailer retailer = this.retailerService.getOne(Wrappers.<Retailer>query().eq("member_id", memberId));
+        // 获取商家的事业合伙人信息
+        Retailer retailer1 = retailerService.getOne(new QueryWrapper<Retailer>().eq("member_id", retailer.getParentMemberId()));
+
+
+        Integer totalCount = 0;
+        if (count == null || count.equals(0)){
+            return BuildFailJson("亲，您输入的数量有误，请重试");
+        }else{
+            // 获取事业合伙人身上的剩余卡片数量
+            totalCount = retailerGiftcardService.count(new QueryWrapper<RetailerGiftcard>()
+                    .eq("member_id", retailer1.getMemberId())
+                    .eq("`type`", type)
+                    .eq("`status`", 0)
+                    .eq("`state`", 0));
+            if (count > totalCount) {
+                return BuildFailJson("亲，卡片库存不足，请联系平台工作人员");
+            }else{
+                // 新增一个商家卡片订单
+                var adddr = memberAddressService.getById(addressId);//收货地址
+
+                CardOrder cos = new CardOrder();
+                cos.setMemberId(memberId);
+                cos.setRetailerId(retailer.getId());
+                cos.setCount(count);
+                cos.setCardType(type);
+                cos.setStatus(1);
+                cos.setCreateTime(new Date());
+                cos.setRemark(remark);
+                String nextSequence = this.jdbcTemplate.queryForObject("select next_sequence_text('delivery') from dual", String.class);
+                cos.setSequence(nextSequence);
+                cos.setOrderType(3);
+
+                cos.setRecipient(adddr.getRecipient());
+                cos.setMobile(adddr.getMobile());
+                cos.setCity(adddr.getProvince() + adddr.getCity() + adddr.getCounty());
+                cos.setAddress(adddr.getAddress());
+                cos.insert();
+                return BuildSuccessJson("购买成功，请联系事业合伙人审核");
+            }
+        }
+    }
+
+    @ApiOperation("我的二维码-邀请事业合伙人")
     @PostMapping("/qr")
     @LoginRequired
     @ApiImplicitParams({
@@ -505,6 +706,84 @@ public class RetailerController extends BaseController {
             }
         }
         return BuildSuccessJson(baill, "查询成功");
+    }
+
+    /**
+     * 事业合伙人审批商家卡片订单
+     *
+     * @param
+     * @return
+     */
+    @ApiOperation("事业合伙人审批商家卡片订单")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "token", value = "用户token值", required = true),
+            @ApiImplicitParam(name = "cardOrderId", dataType = "Integer", value = "商家卡片订单id", required = true),
+            @ApiImplicitParam(name = "status", dataType = "Integer", value = "事业合伙人意见（2 同意， 3拒绝）", required = true),
+            @ApiImplicitParam(name = "lb", dataType = "Integer", value = "0自发 1代发", required = true)
+    })
+    @PostMapping("/checkCardOrders")
+    @LoginRequired
+    @Transactional
+    public JsonResults endCheck(@RequestParam String cardOrderId, @RequestParam String status, @RequestParam Integer lb) {
+        String memberId = this.getToken();
+        // 选择是否代发
+        cardOrderService.update(new UpdateWrapper<CardOrder>().set("`lb`", lb).eq("`id`", cardOrderId));
+        CardOrder cardOrder = cardOrderService.getById(cardOrderId);
+
+        if (status.equals(2)){
+            // 审核通过 分配卡片
+            cardOrderService.finshCardOrders(cardOrder.getId(), cardOrder.getRetailstate());
+        }else if (status.equals(3)){
+            // 拒绝
+            cardOrder.update(new UpdateWrapper<CardOrder>().set("`status`", 3).eq("`id`", cardOrderId));
+        }else{
+            return BuildSuccessJson("异常");
+        }
+
+        //流程处理
+        CardOrderFlow flow = new CardOrderFlow();
+        if (cardOrder.getStatus() == 2) {
+            flow.setState("终审通过");
+            flow.setRemark(cardOrder.getRemark());
+        } else if (cardOrder.getStatus() == 3) {
+            flow.setState("拒绝");
+            flow.setRemark(cardOrder.getReson());
+        } else if (cardOrder.getStatus() == 1) {
+            flow.setState("打回重审");
+            flow.setRemark(cardOrder.getRemark());
+        }
+        flow.setCardOrderId(cardOrder.getId());
+        flow.setCreateBy("123456");
+        flow.insert();
+        return BuildSuccessJson("修改成功");
+    }
+
+    @ApiOperation(value = "事业合伙人-查看商家购卡订单信息", notes = "购买订单列表")
+    @PostMapping("/storeCardOrderList")
+    @LoginRequired
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "token", value = "用户token值", required = true),
+            @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "page", value = " 页码", required = true),
+            @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "limit", value = "每页记录数", required = true)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "data=[{status:'1 待审核，2 已通过，3 已拒绝'}]"),
+    })
+    public JsonResults<List<CardOrder>> storeCardOrderList(@RequestParam Integer page, @RequestParam Integer limit) {
+        String memberId = this.getToken();
+        List<String> memberIds = this.jdbcTemplate.queryForList("select member_id from retailer where parent_member_id=? and `type`=3", String.class, memberId);
+        if(memberIds.size()>0) {
+            // 查询购买记录
+            IPage<CardOrder> data = this.cardOrderService.page(
+                    new Page<CardOrder>(page != null ? page : 1, limit != null ? limit : 10),
+                    new QueryWrapper<CardOrder>()
+                            .in("member_id", memberIds)
+                            .eq("order_type", 3)
+                            .orderByDesc("create_time"));
+            return BuildSuccessJson(data.getRecords(), data.getPages(), "查询成功");
+        }else{
+            return BuildSuccessJson(new ArrayList<CardOrder>(), 0L, "查询成功");
+        }
     }
 
 

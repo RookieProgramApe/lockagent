@@ -46,7 +46,13 @@
                             <%if(member.isretailer==0){ %>
                             普通会员
                             <%}else if(member.isretailer==1){%>
-                            代理商
+                            事业合伙人
+                            <%}else if(member.isretailer==2){%>
+                            合伙人
+                            <%}else if(member.isretailer==3){%>
+                            微股东
+                            <%}else{%>
+                            未知
                             <%}%>
                         </td>
                     </tr>

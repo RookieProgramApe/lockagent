@@ -118,9 +118,23 @@
                         }
                     }},
                 {field: 'saleNum', title: '销量', width: 100,align: 'right',sort: true},
-                {field: 'figure', title: '奖励金额', width: 100,align: 'right',sort: true, templet:function (d) {
+                {field: 'figure', title: '轻奢卡奖励金额', width: 100,align: 'right',sort: true, templet:function (d) {
                         if(d.figure!=null){
                             return d.figure.toFixed(2)+"元";
+                        }else{
+                            return "0.00元";
+                        }
+                    }},
+                {field: 'figureb', title: '贵族卡奖励金额', width: 100,align: 'right',sort: true, templet:function (d) {
+                        if(d.figureb!=null){
+                            return d.figureb.toFixed(2)+"元";
+                        }else{
+                            return "0.00元";
+                        }
+                    }},
+                {field: 'figurec', title: '至尊卡奖励金额', width: 100,align: 'right',sort: true, templet:function (d) {
+                        if(d.figurec!=null){
+                            return d.figurec.toFixed(2)+"元";
                         }else{
                             return "0.00元";
                         }

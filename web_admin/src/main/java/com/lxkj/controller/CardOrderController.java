@@ -132,6 +132,39 @@ public class CardOrderController extends BaseController {
         return model;
     }
 
+    /**
+     * 商家卡片订单首页
+     */
+    @RequestMapping("/list3")
+    public ModelAndView list3(ModelAndView model) {
+//        List<Map<String, Object>> listCount = jdbcTemplate.queryForList("select sum(`count`) as sumCount from card_order where status=2 ");
+//        //设置卡片总数
+//        BigDecimal sumCount = new BigDecimal(0);
+//        if (listCount != null && listCount.size() > 0 && listCount.get(0) != null && listCount.get(0).get("sumCount") != null) {
+//            sumCount = ((BigDecimal) (listCount.get(0).get("sumCount"))).multiply(new BigDecimal(50));
+//        }
+//        model.addObject("cardNum", sumCount);
+//
+//        Integer num = retailerGiftcardService.count(Wrappers.<RetailerGiftcard>query());
+//        Integer num0 = retailerGiftcardService.count(Wrappers.<RetailerGiftcard>query().eq("state", 0).inSql("order_id", "select id from card_order where status=2 "));
+//        Integer num1 = retailerGiftcardService.count(Wrappers.<RetailerGiftcard>query().eq("state", 1).inSql("order_id", "select id from card_order where status=2 "));
+//        List<Map<String, Object>> list = jdbcTemplate.queryForList("select sum(total_price) as sumPrice from card_order where status=2 and retailstate=1");
+//        if (list != null && list.size() > 0 && list.get(0) != null && list.get(0).get("sumPrice") != null) {
+//            model.addObject("sumPrice", (BigDecimal) list.get(0).get("sumPrice"));
+//        } else {
+//            model.addObject("sumPrice", new BigDecimal(0.00));
+//        }
+//        //未分配
+//        model.addObject("cardNum3", sumCount.subtract(new BigDecimal(num)));
+//        //已分配
+//        model.addObject("cardNum4", num);
+//        //已分配未使用
+//        model.addObject("cardNum0", num0);
+//        //已使用
+//        model.addObject("cardNum1", num1);
+        model.setViewName("/admin/CardOrder/storeCardList");
+        return model;
+    }
 
     @RequestMapping("/toCheck")
     public ModelAndView toCheck(String id, ModelAndView model) {
@@ -187,6 +220,7 @@ public class CardOrderController extends BaseController {
         String status = params.getString("status");
         IPage<Map> page = cardOrderMapper.cardOrderPage(new Page<CardOrder>(params.getInteger("page"), params.getInteger("limit")),
                 new QueryWrapper<CardOrder>()
+                        .eq("`order_type`", 1)
                         .nested(StringUtils.isNotBlank(keyword), i -> i.like("r.name", keyword).or().like("r.phone", keyword))
                         .eq(StringUtils.isNotBlank(status), "co.status", params.getInteger("status"))
                         .orderByDesc("co.create_time"));
@@ -200,8 +234,29 @@ public class CardOrderController extends BaseController {
         PageData params = this.getPageData();
         IPage<Map> page = cardOrderMapper.cardOrderPage(new Page<CardOrder>(params.getInteger("page"), params.getInteger("limit")),
                 new QueryWrapper<CardOrder>()
+                        .eq("`order_type`", 1)
                         .nested(StringUtils.isNotBlank(keyword), i -> i.like("r.name", keyword).or().like("r.phone", keyword))
                         .in("co.status", 4, 2)
+                        .orderByAsc("co.status")
+                        .orderByDesc("co.create_time"));
+        DataGridModel<Map> grid = new DataGridModel(page.getRecords(), page.getTotal());
+        return grid;
+    }
+
+    /**
+     * 商家卡片订单列表
+     * @param keyword
+     * @return
+     */
+    @RequestMapping("/storeCardList")
+    @ResponseBody
+    public DataGridModel<Map> storeCardList(String keyword) {
+        PageData params = this.getPageData();
+        IPage<Map> page = cardOrderMapper.cardOrderPage(new Page<CardOrder>(params.getInteger("page"), params.getInteger("limit")),
+                new QueryWrapper<CardOrder>()
+                        .eq("`order_type`", 3)
+                        .nested(StringUtils.isNotBlank(keyword), i -> i.like("r.name", keyword).or().like("r.phone", keyword))
+//                        .in("co.status", 1, 2, 3)
                         .orderByAsc("co.status")
                         .orderByDesc("co.create_time"));
         DataGridModel<Map> grid = new DataGridModel(page.getRecords(), page.getTotal());
@@ -435,7 +490,19 @@ public class CardOrderController extends BaseController {
         }
         co.setMemberId(retailer.getMemberId());
         co.setRetailerId(retailer.getId());
-        BigDecimal unitPrice = this.configService.queryForDecimal("card_price");
+        BigDecimal unitPrice = new BigDecimal(0);
+
+        // 判断购买的卡片类型
+        if (co.getCardType().equals(1)){
+            unitPrice = this.configService.queryForDecimal("card_price");
+        }else if(co.getCardType().equals(2)){
+            unitPrice = this.configService.queryForDecimal("card_price_b");
+        }else if(co.getCardType().equals(3)){
+            unitPrice = this.configService.queryForDecimal("card_price_c");
+        }else{
+
+        }
+        // 将价格不同卡的价格加起来
         co.setTotalPrice(unitPrice.multiply(new BigDecimal(co.getCount())));
         co.setStatus(1);
         String nextSequence = this.jdbcTemplate.queryForObject("select next_sequence_text('delivery') from dual", String.class);

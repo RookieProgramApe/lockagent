@@ -112,6 +112,14 @@
                     // {type: 'checkbox'},
                    {field: 'serial', title: '卡号', width: 100},
                    {field: 'passcode', title: '提货码', width: 150},
+                    {field: 'type', title: '类型', width: 100, templet:function (d) {
+                            switch(d.type){
+                                case 1: return "<span style='color:green;'>轻奢卡</span>";break;
+                                case 2: return "<span style='color:blue;'>贵族卡</span>";break;
+                                case 3: return "<span style='color:red;'>至尊卡</span>";break;
+                                default:return"其他卡";
+                            }
+                        }},
                    {field: 'status', title: '状态', width: 100,templet:function (d) {
                         switch(d.status){
                             case 1: return "<span style='color:red;'>未分配</span>";break;
