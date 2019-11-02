@@ -101,7 +101,9 @@ public class CardOrderService extends ServiceImpl<CardOrderMapper, CardOrder> {
                 rg.setOrderId(o.getId());
                 rg.setGiftcardId(p.getId());
                 rg.setLb(lb);
+                rg.setType(p.getType());
                 rg.insert();
+
                 //更新
                 p.setStatus(2).updateById();
             });
@@ -179,23 +181,40 @@ public class CardOrderService extends ServiceImpl<CardOrderMapper, CardOrder> {
     @Transactional
     public void finshCardOrders1(String cardOrderId) {
         var o = this.getById(cardOrderId);
+
+        // 获取商家信息
+        Retailer retailer = this.retailerService.getOne(Wrappers.<Retailer>query().eq("member_id", o.getMemberId()));
+        // 获取商家的事业合伙人信息
+        Retailer retailer1 = retailerService.getOne(new QueryWrapper<Retailer>().eq("member_id", retailer.getParentMemberId()));
+
         if (o.getStatus() == 2) {//当前环节-完成初审核
-            int sum = o.getCount();//购买量(套)
-            int i = this.count(new QueryWrapper<CardOrder>().eq("`type`", o.getCardType()));//卡片剩余库存
+            int sum = o.getCount();//购买量（张）
+            int i = retailerGiftcardService.count(new QueryWrapper<RetailerGiftcard>()
+                    .eq("member_id", retailer1.getMemberId())
+                    .eq("`type`", o.getCardType())
+                    .eq("`status`", 0)
+                    .eq("`state`", 0));//卡片剩余库存
             if (sum > i) {
                 throw new BusinessException("卡片库存不足");
             }
-            //代理商卡片生成
-            var addList = giftcardService.list(new QueryWrapper<Giftcard>().eq("status", 1).eq("`type`", o.getCardType()).orderByAsc("serial").last("limit " + sum + ""));
+            //获取事业合伙人未分配给商家的卡片
+            var addList = retailerGiftcardService.list(new QueryWrapper<RetailerGiftcard>()
+                    .eq("member_id", retailer1.getMemberId())
+                    .eq("status", 0)
+                    .eq("`state`", 0)
+                    .eq("`type`", o.getCardType())
+                    .orderByAsc("serial")
+                    .last("limit " + sum + ""));
             addList.stream().forEach(p -> {
                 //新增关联
                 RetailerGiftcard rg = new RetailerGiftcard();
                 rg.setMemberId(o.getMemberId());
                 rg.setOrderId(o.getId());
-                rg.setGiftcardId(p.getId());
+                rg.setGiftcardId(p.getGiftcardId());
+                rg.setType(o.getCardType());
+                rg.setStatus(1);
+                // 分配给商家
                 rg.insert();
-                //更新
-                p.setStatus(2).updateById();
             });
             //更新状态
             this.update(new UpdateWrapper<CardOrder>().set("status", 2).eq("id", o.getId()));
@@ -317,6 +336,7 @@ public class CardOrderService extends ServiceImpl<CardOrderMapper, CardOrder> {
     }
 
     /**
+     * 积分商品
      * 完成提货订单-（更改为已支付、提货奖励、库存减少、增加积分、消费积分）  积分兑换
      * @param no_order
      */
@@ -363,52 +383,6 @@ public class CardOrderService extends ServiceImpl<CardOrderMapper, CardOrder> {
             }
 
             Cargo cargo = cargoService.getById(o.getCargoId());
-
-//            //扣除积分
-//            BigDecimal point = cargo.getPoint();
-//            member.setIntegral(member.getIntegral().subtract(point));
-//            mmberService.updateIntegral(member);
-//
-//            //积分表插入一条数据
-//            MemberCredit credit1 = new MemberCredit();
-//            credit1.setAmount(cargo.getSalePrice());
-//            credit1.setMemberId(member.getId());
-//            credit1.setOrderId(o.getId());
-//            credit1.setPoint(point);
-//            credit1.setType(-1);
-//            credit1.setTitle("领取了免费礼品：" + cargo.getName());
-//            credit1.setCreateTime(new Date());
-//            credit1.insert();
-//            //提货奖励
-//            if(StringUtils.isNotBlank(o.getGiftcardId())){
-//                var retailerGiftcard = retailerGiftcardService.getOne(new QueryWrapper<RetailerGiftcard>().eq("giftcard_id", o.getGiftcardId()));//卡的代理商
-//                if (retailerGiftcard != null) {
-//                    var retailerReward = retailerRewardService.getOne(new QueryWrapper<RetailerReward>().eq("member_id", retailerGiftcard.getMemberId()).eq("cargo_id", o.getCargoId()));
-//                    if (retailerReward != null && retailerReward.getFigure().compareTo(BigDecimal.ZERO) > 0) {
-//                        Retailer retailer = this.rtailerService.getById(retailerReward.getRetailerId());
-//                        rtailerService.update(new UpdateWrapper<Retailer>().set("balance", retailer.getBalance().add(retailerReward.getFigure())).eq("id", retailer.getId()));
-//                        Transaction transaction = new Transaction();
-//                        transaction.setMemberId(retailer.getMemberId());
-//                        transaction.setOrderId(o.getId());
-//                        transaction.setType(81);
-//                        transaction.setAmount(retailerReward.getFigure());
-//                        transaction.setStatus(1);
-//                        transactionService.save(transaction);
-//                    }
-//                }
-//            }
-//            //更新库存
-//            if(!o.getSkuId().equals("-1")){
-//                var i = warehousingMapper.sumSku(o.getSkuId());
-//                //砍价订单更新状态
-//                if(o.getType()==2&&StringUtils.isNotBlank(o.getBargainOrderId())){
-//                    bargainOrderService.update(new UpdateWrapper<BargainOrder>()
-//                            .set("status",2)
-//                            .eq("id",o.getBargainOrderId()));
-//                }
-//                new CargoSku().setId(o.getSkuId()).setInventory(i == null ? 0 : i).updateById();
-//            }
-
         }
     }
 
