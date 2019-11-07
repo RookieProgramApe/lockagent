@@ -39,25 +39,33 @@ public class billUtil {
         g.setComposite(ac);
         g.setBackground(Color.WHITE);
         // 头像
-        g.drawImage(billUtil.setClip(headImg, 120), ((imageLocal.getWidth()/2)-(120/2)), 160, 120, 120, null);
+        g.drawImage(billUtil.setClip(headImg, 194), ((imageLocal.getWidth()/2)-(184/2)), 720, 194, 194, null);
         // 二维码
-        g.drawImage(imageCode, (imageLocal.getWidth()/2)-(270/2), imageLocal.getHeight() - (200*2), 270, 270, null);
+        g.drawImage(imageCode, (imageLocal.getWidth()/2)-(246/2), 1170, 242, 242, null);
+//        // 头像
+//        g.drawImage(billUtil.setClip(headImg, 194), ((imageLocal.getWidth()/2)-(184/2)), 540, 194, 194, null);
+//        // 二维码
+//        g.drawImage(imageCode, (imageLocal.getWidth()/2)-(246/2), 870, 242, 242, null);
+//        // 头像
+//        g.drawImage(billUtil.setClip(headImg, 120), ((imageLocal.getWidth()/2)-(120/2)), 160, 120, 120, null);
+//        // 二维码
+//        g.drawImage(imageCode, (imageLocal.getWidth()/2)-(270/2), imageLocal.getHeight() - (200*2), 270, 270, null);
         // 姓名
-        g.setFont(new Font("楷体", Font.PLAIN, 28));
-        g.setColor(Color.WHITE);
-        g.drawString(name, ((imageLocal.getWidth()/2)-(28*name.length()/2)), 320);
-        // 诚邀您一起加入安纹
-        g.setFont(new Font("楷体", Font.BOLD, 40));
-        g.setColor(Color.WHITE);
-        g.drawString("诚邀您一起加入安纹", (imageLocal.getWidth()/2)-(270/2)-55, (imageLocal.getHeight()/2-40));
-        // 合作共赢，共创美好未来
-        g.setFont(new Font("楷体", Font.BOLD, 40));
-        g.setColor(Color.WHITE);
-        g.drawString("合作共赢，共创美好未来", (imageLocal.getWidth()/2)-(270/2)-90, (imageLocal.getHeight()/2+30));
-        // 长按识别二维码
-        g.setFont(new Font("楷体",  Font.PLAIN, 28));
-        g.setColor(Color.WHITE);
-        g.drawString("长按识别二维码", (imageLocal.getWidth()/2)-(270/2)+32, imageLocal.getHeight() - 60);
+        g.setFont(new Font("微软雅黑", Font.BOLD, 36));
+        g.setColor(Color.white);
+        g.drawString(name, ((imageLocal.getWidth()/2)-(28*name.length()/2)), 1000);
+//        // 诚邀您一起加入安纹
+//        g.setFont(new Font("楷体", Font.BOLD, 40));
+//        g.setColor(Color.WHITE);
+//        g.drawString("诚邀您一起加入安纹", (imageLocal.getWidth()/2)-(270/2)-55, (imageLocal.getHeight()/2-40));
+//        // 合作共赢，共创美好未来
+//        g.setFont(new Font("楷体", Font.BOLD, 40));
+//        g.setColor(Color.WHITE);
+//        g.drawString("合作共赢，共创美好未来", (imageLocal.getWidth()/2)-(270/2)-90, (imageLocal.getHeight()/2+30));
+//        // 长按识别二维码
+//        g.setFont(new Font("楷体",  Font.PLAIN, 28));
+//        g.setColor(Color.WHITE);
+//        g.drawString("长按识别二维码", (imageLocal.getWidth()/2)-(270/2)+32, imageLocal.getHeight() - 60);
         InputStream inputStream = billUtil.bufferedImageToInputStream(imageLocal);
 
 
