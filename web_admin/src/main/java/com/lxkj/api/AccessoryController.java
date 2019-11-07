@@ -78,8 +78,12 @@ public class AccessoryController extends BaseController {
 
     @ApiOperation("查询轮播图")
     @PostMapping("/banner")
-    public JsonResults<List<Banner>> queryBanner() {
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "type", dataType = "Integer", value = "类型 1商城首页 2积分商城首页", required = true)
+    })
+    public JsonResults<List<Banner>> queryBanner(@RequestParam Integer type) {
         List<Banner> data = this.bannerService.list(Wrappers.<Banner>query()
+                .eq("`type`", type)
                 .eq("enabled", 1)
                 .orderByAsc("sort"));
         return BuildSuccessJson(data, "查询成功");

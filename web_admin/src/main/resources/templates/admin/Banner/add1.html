@@ -48,6 +48,7 @@
         //表单提交
         form.on('submit(save)', function (data) {
             var param = data.field;
+            param.type = 2;
             //获得复选框
             var arr = new Array();
             $('[name=businessId]:checkbox:checked').each(function () {
@@ -76,7 +77,7 @@
     $('#pasteLink').click(() => {
         let cargoId = localStorage.getItem("cargoId");
         if(cargoId) {
-            $("#link").val('https://aw.wisehuitong.com/detail?id=' + cargoId);
+            $("#link").val('https://aw.wisehuitong.com/creditDetail?id=' + cargoId);
             localStorage.removeItem("cargoId");
         }else{
             alert('没有要粘贴的内容！');

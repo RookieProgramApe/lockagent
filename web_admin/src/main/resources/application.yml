@@ -64,17 +64,17 @@ logging:
 ########################微信配置#######################
 wechat:
   mp:
-#    appid: wxb60e3a8b79f4e69a
-#    secret: 1e02ffabf4aed84e5ab6aad67d713c5e
-#    callback-url: https://aw.wisehuitong.com/lockagent/api/pay/callback
-#    callback-url2: https://aw.wisehuitong.com/lockagent/api/pay/callback2
-#    wxcallback-url: https://aw.wisehuitong.com/lockagent/api/pay/wxcallback
+    appid: wxb60e3a8b79f4e69a
+    secret: 1e02ffabf4aed84e5ab6aad67d713c5e
+    callback-url: https://aw.wisehuitong.com/lockagent/api/pay/callback
+    callback-url2: https://aw.wisehuitong.com/lockagent/api/pay/callback2
+    wxcallback-url: https://aw.wisehuitong.com/lockagent/api/pay/wxcallback
 
-    appid: wxd85f81d36baa5da4
-    secret: e84433ff772e881db8cd909f9656f2fd
-    callback-url: http://192.168.3.74:8088/lockagent/api/pay/callback
-    callback-url2: http://192.168.3.74:8088/lockagent/api/pay/callback2
-    wxcallback-url: http://192.168.3.74:8088/lockagent/api/pay/wxcallback
+#    appid: wxd85f81d36baa5da4
+#    secret: e84433ff772e881db8cd909f9656f2fd
+#    callback-url: http://192.168.3.74:8088/lockagent/api/pay/callback
+#    callback-url2: http://192.168.3.74:8088/lockagent/api/pay/callback2
+#    wxcallback-url: http://192.168.3.74:8088/lockagent/api/pay/wxcallback
 
 
     mchId: 1545294801
@@ -82,6 +82,10 @@ wechat:
 ########################图片配置 二维码海报/加盟海报/授权书#######################
 picture:
   baillUrl: https://aw.wisehuitong.com/lockagentDownFile/big.jpg
+  #  邀请事业合伙人背景图
+  baillUrl1: https://aw.wisehuitong.com/lockagentDownFile/big1.jpg
+  #  邀请商家背景图
+  baillUrl2: https://aw.wisehuitong.com/lockagentDownFile/big2.jpg
   propurl: http://xiyanluo.oss-cn-beijing.aliyuncs.com/bill.jpg
   authurl: https://aw.wisehuitong.com/lockagentDownFile/auth.jpg
   zhanghurl: https://aw.wisehuitong.com/lockagentDownFile/zhang.png

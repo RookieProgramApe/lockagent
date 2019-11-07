@@ -68,11 +68,40 @@ public class RetailerAdminController extends BaseController {
         return model;
     }
 
+    /**
+     * 合伙人管理首页
+     * @param model
+     * @return
+     */
     @RequestMapping("/list2")
     public ModelAndView list2(ModelAndView model) {
         model.setViewName("/admin/Retailer/storeList");
         return model;
     }
+
+    /**
+     * 商家管理首页
+     * @param model
+     * @return
+     */
+    @RequestMapping("/list3")
+    public ModelAndView list3(ModelAndView model) {
+        model.setViewName("/admin/Retailer/partnerList");
+        return model;
+    }
+
+    /**
+     * 合伙人审核首页
+     * @param model
+     * @return
+     */
+    @RequestMapping("/list4")
+    public ModelAndView list4(ModelAndView model) {
+        model.setViewName("/admin/Retailer/partnerCheckList");
+        return model;
+    }
+
+
 
     /**
      * 跳转审核页面
@@ -98,6 +127,33 @@ public class RetailerAdminController extends BaseController {
             model.addObject("cardOrderFlow", cardOrderFlow);
         }
         model.setViewName("/admin/Retailer/check");
+        return model;
+    }
+
+    /**
+     * 合伙人跳转审核页面
+     *
+     * @param id
+     * @param memberId
+     * @param model
+     * @return
+     */
+    @RequestMapping("/toCheck2")
+    public ModelAndView toCheck2(String id, String memberId, ModelAndView model) {
+        model.addObject("id", id);
+        model.addObject("memberId", memberId);
+        var cardOrderFlowlist = cardOrderFlowService.list(new QueryWrapper<CardOrderFlow>().eq("card_order_id", id).eq("lb",2).eq("state", "初审通过").orderByDesc("create_time"));
+        if (cardOrderFlowlist.isEmpty()) {
+            model.addObject("cardOrderFlow", null);
+        } else {
+            var cardOrderFlow = cardOrderFlowlist.get(0);
+            var user = new SysUser().selectById(cardOrderFlow.getCreateBy());
+            cardOrderFlow.setRealName(user.getRealName() + "(" + user.getUserName() + ")");
+            cardOrderFlow.setMobile(user.getMobile());
+            cardOrderFlow.setFileList(cardOrderFlowFileService.list(new QueryWrapper<CardOrderFlowFile>().eq("card_order_flow_id", cardOrderFlow.getId())));
+            model.addObject("cardOrderFlow", cardOrderFlow);
+        }
+        model.setViewName("/admin/Retailer/check2");
         return model;
     }
 
@@ -137,6 +193,54 @@ public class RetailerAdminController extends BaseController {
                         .eq("`type`", 3)
                         .nested(StringUtils.isNotBlank(keyword), i -> i.like("name", keyword).or().like("identity", keyword).or().like("phone", keyword))
                         .in("status", 1, 2)
+                        .orderByDesc("create_time"));
+        page.getRecords().stream().forEach(p -> {
+            int i = jdbcTemplate.queryForObject("select count(1) from retailer where parent_member_id=?", Integer.class, p.getMemberId());
+            p.setSubordinateCount(i);
+        });
+        DataGridModel<Retailer> grid = new DataGridModel(page.getRecords(), page.getTotal());
+        return grid;
+    }
+
+    /**
+     * 合伙人分页列表
+     *
+     * @return
+     */
+    @RequestMapping("/partnerList")
+    @ResponseBody
+    public DataGridModel<Retailer> partnerList(String keyword) {
+        PageData params = this.getPageData();
+        String status = params.getString("status");
+        IPage<Retailer> page = retailerService.page(new Page<Retailer>(params.getInteger("page"), params.getInteger("limit")),
+                new QueryWrapper<Retailer>()
+                        .eq("`type`", 2)
+                        .eq("status", 1)
+                        .nested(StringUtils.isNotBlank(keyword), i -> i.like("name", keyword).or().like("identity", keyword).or().like("phone", keyword))
+                        .orderByDesc("create_time"));
+        page.getRecords().stream().forEach(p -> {
+            int i = jdbcTemplate.queryForObject("select count(1) from retailer where parent_member_id=?", Integer.class, p.getMemberId());
+            p.setSubordinateCount(i);
+        });
+        DataGridModel<Retailer> grid = new DataGridModel(page.getRecords(), page.getTotal());
+        return grid;
+    }
+
+    /**
+     * 合伙人审核列表
+     *
+     * @return
+     */
+    @RequestMapping("/partnerCheckList")
+    @ResponseBody
+    public DataGridModel<Retailer> partnerCheckList(String keyword) {
+        PageData params = this.getPageData();
+        String status = params.getString("status");
+        IPage<Retailer> page = retailerService.page(new Page<Retailer>(params.getInteger("page"), params.getInteger("limit")),
+                new QueryWrapper<Retailer>()
+                        .eq("`type`", 2)
+                        .nested(StringUtils.isNotBlank(keyword), i -> i.like("name", keyword).or().like("identity", keyword).or().like("phone", keyword))
+                        .in("status", 0, 1, 2, 99)
                         .orderByDesc("create_time"));
         page.getRecords().stream().forEach(p -> {
             int i = jdbcTemplate.queryForObject("select count(1) from retailer where parent_member_id=?", Integer.class, p.getMemberId());
@@ -208,6 +312,19 @@ public class RetailerAdminController extends BaseController {
     }
 
     /**
+     * 代理商下级列表
+     *
+     * @return
+     */
+    @RequestMapping("/subordinateList1")
+    @ResponseBody
+    public DataGridModel<Retailer> subordinateList1(String memberId, Integer isretailer) {
+        List<Map<String, Object>> list = memberSubordinateService.querySubordinateByLevel1(memberId, isretailer);
+        DataGridModel<Retailer> grid = new DataGridModel(list, Long.valueOf(list.size()));
+        return grid;
+    }
+
+    /**
      * 跳转添加/编辑界面
      *
      * @param id
@@ -264,6 +381,16 @@ public class RetailerAdminController extends BaseController {
         model.addObject("cardNum0", retailerGiftcardService.count(Wrappers.<RetailerGiftcard>query().eq("member_id", r.getMemberId()).eq("state", 0)));
         //代理商卡已使用片总数
         model.addObject("cardNum1", retailerGiftcardService.count(Wrappers.<RetailerGiftcard>query().eq("member_id", r.getMemberId()).eq("state", 1)));
+        //代理商轻奢卡数量
+        model.addObject("cardNum2", retailerGiftcardService.count(Wrappers.<RetailerGiftcard>query().eq("member_id", r.getMemberId()).eq("`type`", 1)));
+        //代理商贵族卡数量
+        model.addObject("cardNum3", retailerGiftcardService.count(Wrappers.<RetailerGiftcard>query().eq("member_id", r.getMemberId()).eq("`type`", 2)));
+        //代理商至尊卡数量
+        model.addObject("cardNum4", retailerGiftcardService.count(Wrappers.<RetailerGiftcard>query().eq("member_id", r.getMemberId()).eq("`type`", 3)));
+        //代理商已分配数量
+        model.addObject("cardNum5", retailerGiftcardService.count(Wrappers.<RetailerGiftcard>query().eq("member_id", r.getMemberId()).eq("`status`", 1)));
+        //代理商未分配数量
+        model.addObject("cardNum6", retailerGiftcardService.count(Wrappers.<RetailerGiftcard>query().eq("member_id", r.getMemberId()).eq("`status`", 0)));
         //代理商card_order购买总金额
         List<Map<String, Object>> list = jdbcTemplate.queryForList("select ifnull(sum(total_price),0) as sumPrice from card_order where member_id=? and status=2", r.getMemberId());
         if (list != null && list.size() > 0 && list.get(0) != null && list.get(0).get("sumPrice") != null) {
@@ -286,6 +413,70 @@ public class RetailerAdminController extends BaseController {
             model.addObject("sum99", new BigDecimal(0.00));
         }
         model.setViewName("/admin/Retailer/detail");
+        return model;
+    }
+
+    /**
+     * 详情
+     *
+     * @param id
+     * @param model
+     * @return
+     */
+    @RequestMapping("/storeDetail")
+    public ModelAndView storeDetail(String id, ModelAndView model) {
+        Retailer r = retailerService.getById(id);
+        r.setPhone(ShiroUtils.getPhone(r.getPhone()));
+        r.setIdentity(ShiroUtils.getIdCard(r.getIdentity()));
+        model.addObject("Retailer", r);
+        if (StringUtils.isNotBlank(r.getMemberId())) {
+            var m = memberService.getById(r.getMemberId());
+            model.addObject("member", m);
+            model.addObject("memberId", r.getMemberId());
+        } else {
+            model.addObject("member", null);
+            model.addObject("memberId", "");
+        }
+        if (StringUtils.isNotBlank(r.getParentMemberId())) {
+            var m = memberService.getById(r.getParentMemberId());
+            var rmember = retailerService.getById(m.getRetailerId());
+            model.addObject("Parent", m);
+
+            rmember.setPhone(ShiroUtils.getPhone(rmember.getPhone()));
+            rmember.setIdentity(ShiroUtils.getIdCard(rmember.getIdentity()));
+            model.addObject("rmember", rmember);
+        } else {
+            model.addObject("Parent", null);
+            model.addObject("rmember", null);
+        }
+        //代理商卡片总数
+        model.addObject("cardNum", retailerGiftcardService.count(Wrappers.<RetailerGiftcard>query().eq("member_id", r.getMemberId())));
+        //代理商未使用卡片总数
+        model.addObject("cardNum0", retailerGiftcardService.count(Wrappers.<RetailerGiftcard>query().eq("member_id", r.getMemberId()).eq("state", 0)));
+        //代理商卡已使用片总数
+        model.addObject("cardNum1", retailerGiftcardService.count(Wrappers.<RetailerGiftcard>query().eq("member_id", r.getMemberId()).eq("state", 1)));
+        //代理商card_order购买总金额
+        List<Map<String, Object>> list = jdbcTemplate.queryForList("select ifnull(sum(total_price),0) as sumPrice from card_order where member_id=? and status=2", r.getMemberId());
+        if (list != null && list.size() > 0 && list.get(0) != null && list.get(0).get("sumPrice") != null) {
+            model.addObject("sumPrice", list.get(0).get("sumPrice"));
+        } else {
+            model.addObject("sumPrice", new BigDecimal(0.00));
+        }
+        //支付transaction收益总金额
+        List<Map<String, Object>> list1 = jdbcTemplate.queryForList("select ifnull(sum(amount),0) as sum80 from transaction where status=1 and type in (80,81) and member_id=?", r.getMemberId());
+        if (list1 != null && list1.size() > 0 && list1.get(0) != null && list1.get(0).get("sum80") != null) {
+            model.addObject("sum80", list1.get(0).get("sum80"));
+        } else {
+            model.addObject("sum80", new BigDecimal(0.00));
+        }
+        //支付transaction收益总金额
+        List<Map<String, Object>> list2 = jdbcTemplate.queryForList("select sum(amount) as sum99 from transaction where status=1 and type=99 and member_id=?", r.getMemberId());
+        if (list2 != null && list2.size() > 0 && list2.get(0) != null && list2.get(0).get("sum99") != null) {
+            model.addObject("sum99", list2.get(0).get("sum99"));
+        } else {
+            model.addObject("sum99", new BigDecimal(0.00));
+        }
+        model.setViewName("/admin/Retailer/storeDetail");
         return model;
     }
 
@@ -375,6 +566,50 @@ public class RetailerAdminController extends BaseController {
             new Bulletin().setSort(new Bulletin().selectCount(null) + 1).setContent(cnts).insert();
             //审核通过
             memberService.updateById(memberService.getById(retailer.getMemberId()).setIsretailer(1).setRetailerId(bean.getId()));
+        }
+        retailerService.update(new UpdateWrapper<Retailer>()
+                .set(StringUtils.isNotBlank(bean.getApprovalComment()), "approval_comment", bean.getApprovalComment())
+                .set("status", bean.getStatus())
+                .eq("id", retailer.getId()));
+
+        //流程处理
+        CardOrderFlow flow = new CardOrderFlow();
+        if (bean.getStatus() == 1) {
+            flow.setState("终审通过");
+            flow.setRemark(bean.getRemark());
+        } else if (bean.getStatus() == 99) {
+            flow.setState("拒绝");
+            flow.setRemark(bean.getApprovalComment());
+        } else if (bean.getStatus() == 0) {
+            flow.setState("打回重审");
+            flow.setRemark(bean.getRemark());
+        }
+        flow.setCardOrderId(retailer.getId());
+        flow.setLb(2);
+        flow.setCreateBy(ShiroUtils.getUserId());
+        flow.insert();
+        return BuildSuccessJson("修改成功");
+    }
+
+    /**
+     * 终审
+     *
+     * @param bean
+     * @return
+     */
+    @RequestMapping("/endCheck2")
+    @ResponseBody
+    @Transactional
+    public JsonResults endCheck2(Retailer bean) {
+        if (StringUtils.isBlank(bean.getId())) return BuildFailJson("主键不能为空");
+        var retailer = retailerService.getById(bean.getId());
+        if (bean.getStatus() == 1) {//通过
+            //添加公告
+            String gender = retailer.getGender().equals("男") ? "先生" : "女士";
+            String cnts = "恭喜来自" + retailer.getCity().split(" ")[0] + retailer.getCity().split(" ")[1] + "的" + retailer.getName().substring(0, 1) + gender + "成功加入代理";
+            new Bulletin().setSort(new Bulletin().selectCount(null) + 1).setContent(cnts).insert();
+            //审核通过 会员身份设为合伙人
+            memberService.update(new UpdateWrapper<Member>().set("isretailer", 2).eq("id", retailer.getMemberId()));
         }
         retailerService.update(new UpdateWrapper<Retailer>()
                 .set(StringUtils.isNotBlank(bean.getApprovalComment()), "approval_comment", bean.getApprovalComment())

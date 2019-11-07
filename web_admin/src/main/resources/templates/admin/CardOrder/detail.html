@@ -42,7 +42,13 @@
                             <%if(Member.isretailer==0){ %>
                             普通会员
                             <%}else if(Member.isretailer==1){%>
-                            代理商
+                            事业合伙人
+                            <%}else if(Member.isretailer==2){%>
+                            合伙人
+                            <%}else if(Member.isretailer==3){%>
+                            微股东
+                            <%}else{%>
+                            未知
                             <%}%>
                         </td>
                     </tr>
@@ -54,7 +60,19 @@
                     <% } %>
                     <% if(isNotEmpty(Retailer)){ %>
                     <tr>
-                        <th style="background-color: #BFEFFF;text-align: center;" colspan="4">合伙人信息</th>
+                        <th style="background-color: #BFEFFF;text-align: center;" colspan="4">
+                            <%if(Member.isretailer==0){ %>
+                            普通会员信息
+                            <%}else if(Member.isretailer==1){%>
+                            事业合伙人信息
+                            <%}else if(Member.isretailer==2){%>
+                            合伙人信息
+                            <%}else if(Member.isretailer==3){%>
+                            商家信息
+                            <%}else{%>
+                            会员信息
+                            <%}%>
+                        </th>
                     </tr>
                     <tr>
                         <th width="10" style="background-color: #f2f2f2;text-align: right;">姓名：</th>
@@ -112,7 +130,18 @@
                     </tr>
                     <tr>
                         <th width="10" style="background-color: #f2f2f2;text-align: right;">卡片数量：</th>
-                        <td width="40" align="left">${CardOrder.count}套</td>
+                        <td width="40" align="left">${CardOrder.count}
+                            <%if(Member.isretailer==0){ %>
+                            套
+                            <%}else if(Member.isretailer==1){%>
+                            套
+                            <%}else if(Member.isretailer==2){%>
+                            套
+                            <%}else if(Member.isretailer==3){%>
+                            张
+                            <%}else{%>
+                            套
+                            <%}%></td>
                         <th width="10" style="background-color: #f2f2f2;text-align: right;">卡片类型：</th>
                         <td width="40" align="left">${CardOrder.cardType==1?'轻奢卡':CardOrder.cardType==2?'贵族卡':CardOrder.cardType==3?'至尊卡':'其他卡'}</td>
                     </tr>

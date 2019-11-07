@@ -68,7 +68,7 @@ public class CardOrderController extends BaseController {
      */
     @RequestMapping("/list")
     public ModelAndView list(ModelAndView model) {
-        List<Map<String, Object>> listCount = jdbcTemplate.queryForList("select sum(`count`) as sumCount from card_order where status=2 ");
+        List<Map<String, Object>> listCount = jdbcTemplate.queryForList("select sum(`count`) as sumCount from card_order where status=2 and order_type=1");
         //设置卡片总数
         BigDecimal sumCount = new BigDecimal(0);
         if (listCount != null && listCount.size() > 0 && listCount.get(0) != null && listCount.get(0).get("sumCount") != null) {
@@ -77,8 +77,8 @@ public class CardOrderController extends BaseController {
         model.addObject("cardNum", sumCount);
 
         Integer num = retailerGiftcardService.count(Wrappers.<RetailerGiftcard>query());
-        Integer num0 = retailerGiftcardService.count(Wrappers.<RetailerGiftcard>query().eq("state", 0).inSql("order_id", "select id from card_order where status=2 "));
-        Integer num1 = retailerGiftcardService.count(Wrappers.<RetailerGiftcard>query().eq("state", 1).inSql("order_id", "select id from card_order where status=2 "));
+        Integer num0 = retailerGiftcardService.count(Wrappers.<RetailerGiftcard>query().eq("state", 0).inSql("order_id", "select id from card_order where status=2 and order_type=1"));
+        Integer num1 = retailerGiftcardService.count(Wrappers.<RetailerGiftcard>query().eq("state", 1).inSql("order_id", "select id from card_order where status=2 and order_type=1"));
         List<Map<String, Object>> list = jdbcTemplate.queryForList("select sum(total_price) as sumPrice from card_order where status=2 and retailstate=1");
         if (list != null && list.size() > 0 && list.get(0) != null && list.get(0).get("sumPrice") != null) {
             model.addObject("sumPrice", (BigDecimal) list.get(0).get("sumPrice"));
@@ -103,7 +103,7 @@ public class CardOrderController extends BaseController {
      */
     @RequestMapping("/list2")
     public ModelAndView list2(ModelAndView model) {
-        List<Map<String, Object>> listCount = jdbcTemplate.queryForList("select sum(`count`) as sumCount from card_order where status=2 ");
+        List<Map<String, Object>> listCount = jdbcTemplate.queryForList("select sum(`count`) as sumCount from card_order where status=2  and order_type=1");
         //设置卡片总数
         BigDecimal sumCount = new BigDecimal(0);
         if (listCount != null && listCount.size() > 0 && listCount.get(0) != null && listCount.get(0).get("sumCount") != null) {
@@ -112,8 +112,8 @@ public class CardOrderController extends BaseController {
         model.addObject("cardNum", sumCount);
 
         Integer num = retailerGiftcardService.count(Wrappers.<RetailerGiftcard>query());
-        Integer num0 = retailerGiftcardService.count(Wrappers.<RetailerGiftcard>query().eq("state", 0).inSql("order_id", "select id from card_order where status=2 "));
-        Integer num1 = retailerGiftcardService.count(Wrappers.<RetailerGiftcard>query().eq("state", 1).inSql("order_id", "select id from card_order where status=2 "));
+        Integer num0 = retailerGiftcardService.count(Wrappers.<RetailerGiftcard>query().eq("state", 0).inSql("order_id", "select id from card_order where status=2 and order_type=1"));
+        Integer num1 = retailerGiftcardService.count(Wrappers.<RetailerGiftcard>query().eq("state", 1).inSql("order_id", "select id from card_order where status=2 and order_type=1"));
         List<Map<String, Object>> list = jdbcTemplate.queryForList("select sum(total_price) as sumPrice from card_order where status=2 and retailstate=1");
         if (list != null && list.size() > 0 && list.get(0) != null && list.get(0).get("sumPrice") != null) {
             model.addObject("sumPrice", (BigDecimal) list.get(0).get("sumPrice"));
@@ -163,6 +163,54 @@ public class CardOrderController extends BaseController {
 //        //已使用
 //        model.addObject("cardNum1", num1);
         model.setViewName("/admin/CardOrder/storeCardList");
+        return model;
+    }
+
+    /**
+     * 合伙人卡片订单首页
+     */
+    @RequestMapping("/list4")
+    public ModelAndView list4(ModelAndView model) {
+        List<Map<String, Object>> listCount = jdbcTemplate.queryForList("select sum(`count`) as sumCount from card_order where status=2  and order_type=2");
+        //设置卡片总数
+        BigDecimal sumCount = new BigDecimal(0);
+        if (listCount != null && listCount.size() > 0 && listCount.get(0) != null && listCount.get(0).get("sumCount") != null) {
+            sumCount = ((BigDecimal) (listCount.get(0).get("sumCount"))).multiply(new BigDecimal(50));
+        }
+        model.addObject("cardNum", sumCount);
+
+        Integer num = retailerGiftcardService.count(Wrappers.<RetailerGiftcard>query().eq("status", 0));
+        // 未使用
+        Integer num0 = retailerGiftcardService.count(Wrappers.<RetailerGiftcard>query().eq("state", 0).inSql("order_id", "select id from card_order where status=2 and order_type=2"));
+        // 已使用
+        Integer num1 = retailerGiftcardService.count(Wrappers.<RetailerGiftcard>query().eq("state", 1).inSql("order_id", "select id from card_order where status=2 and order_type=2"));
+        // 轻奢卡
+        Integer num2 = retailerGiftcardService.count(Wrappers.<RetailerGiftcard>query().inSql("order_id", "select id from card_order where status=2 and order_type=2 and card_type=1"));
+        // 贵族卡
+        Integer num3 = retailerGiftcardService.count(Wrappers.<RetailerGiftcard>query().inSql("order_id", "select id from card_order where status=2 and order_type=2 and card_type=2"));
+        // 至尊卡
+        Integer num4 = retailerGiftcardService.count(Wrappers.<RetailerGiftcard>query().inSql("order_id", "select id from card_order where status=2 and order_type=2 and card_type=3"));
+        List<Map<String, Object>> list = jdbcTemplate.queryForList("select sum(total_price) as sumPrice from card_order where status=2 and retailstate=1 and order_type=2");
+        if (list != null && list.size() > 0 && list.get(0) != null && list.get(0).get("sumPrice") != null) {
+            model.addObject("sumPrice", (BigDecimal) list.get(0).get("sumPrice"));
+        } else {
+            model.addObject("sumPrice", new BigDecimal(0.00));
+        }
+        //未分配
+        model.addObject("cardNum3", sumCount.subtract(new BigDecimal(num)));
+        //已分配
+        model.addObject("cardNum4", num);
+        //已分配未使用
+        model.addObject("cardNum0", num0);
+        //已使用
+        model.addObject("cardNum1", num1);
+        //轻奢卡
+        model.addObject("cardNum2", num2);
+        //贵族卡
+        model.addObject("cardNum3", num3);
+        //至尊卡
+        model.addObject("cardNum4", num4);
+        model.setViewName("/admin/CardOrder/partnerCardList");
         return model;
     }
 
@@ -255,6 +303,26 @@ public class CardOrderController extends BaseController {
         IPage<Map> page = cardOrderMapper.cardOrderPage(new Page<CardOrder>(params.getInteger("page"), params.getInteger("limit")),
                 new QueryWrapper<CardOrder>()
                         .eq("`order_type`", 3)
+                        .nested(StringUtils.isNotBlank(keyword), i -> i.like("r.name", keyword).or().like("r.phone", keyword))
+//                        .in("co.status", 1, 2, 3)
+                        .orderByAsc("co.status")
+                        .orderByDesc("co.create_time"));
+        DataGridModel<Map> grid = new DataGridModel(page.getRecords(), page.getTotal());
+        return grid;
+    }
+
+    /**
+     * 合伙人卡片订单列表
+     * @param keyword
+     * @return
+     */
+    @RequestMapping("/partnerCardList")
+    @ResponseBody
+    public DataGridModel<Map> partnerCardList(String keyword) {
+        PageData params = this.getPageData();
+        IPage<Map> page = cardOrderMapper.cardOrderPage(new Page<CardOrder>(params.getInteger("page"), params.getInteger("limit")),
+                new QueryWrapper<CardOrder>()
+                        .eq("`order_type`", 2)
                         .nested(StringUtils.isNotBlank(keyword), i -> i.like("r.name", keyword).or().like("r.phone", keyword))
 //                        .in("co.status", 1, 2, 3)
                         .orderByAsc("co.status")

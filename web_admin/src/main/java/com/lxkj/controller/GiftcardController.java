@@ -85,7 +85,8 @@ public class GiftcardController extends BaseController {
         IPage<Giftcard> page=giftcardService.page(new Page<Giftcard>(params.getInteger("page"),params.getInteger("limit")),
                 new QueryWrapper<Giftcard>()
                         .select("giftcard.*"
-                                ,"(select rg.state from retailer_giftcard  rg where rg.giftcard_id=giftcard.id and rg.member_id='"+member_id+"') as state"
+                                ,"(select rg.state from retailer_giftcard  rg where rg.giftcard_id=giftcard.id and rg.member_id='"+member_id+"') as state",
+                                "(select rg.`status` from retailer_giftcard rg where rg.giftcard_id=giftcard.id and rg.member_id='" + member_id + "') as occupant"
                         )
                         .inSql("id","select rg.giftcard_id from retailer_giftcard  rg where rg.member_id='"+member_id+"'")
                         .orderByAsc("serial")

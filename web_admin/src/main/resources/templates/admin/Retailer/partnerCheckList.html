@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <title>微股东信息首页</title>
+    <title>合伙人审核</title>
     <%include("/includes/common.html"){}%>
     <%include("/includes/toolbar.html"){}%>
 </head>
@@ -19,6 +19,18 @@
                     <label class="layui-form-label">关键字</label>
                     <div class="layui-input-block">
                         <input type="text" name="keyword" value="" placeholder="请输入姓名|身份证号|联系电话" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">状态</label>
+                    <div class="layui-input-block">
+                        <select name="status" lay-search="" class="layui-select">
+                            <option value="">-全部-</option>
+                            <option value="0">待审核</option>
+                            <option value="1">终审通过</option>
+                            <option value="2">初审通过</option>
+                            <option value="99">审核不通过</option>
+                        </select>
                     </div>
                 </div>
             </div>
@@ -58,6 +70,29 @@
     <span class="layui-badge layui-bg-cyan">{{item}}</span>&nbsp;
     {{#  }); }}
 </script>
+
+<!-- 开关 -->
+<script type="text/html" id="stateTpl">
+    <input type="checkbox" name="state" data-id="{{d.id}}" lay-skin="switch"
+           lay-filter="stateFilter" style="width:52px;" lay-text="上架|下架" {{d.state==2 ? 'checked' : '' }} />
+</script>
+
+<!-- 头像 -->
+<script id="headUrl" type="text/html">
+    <img class="layui-circle" src="{{d.avatarUrl}}" style="width: 50px;height: 100%;"/>
+</script>
+
+<!-- 封面 -->
+<script type="text/html" id="picture">
+    <img src="{{ d.advertUrl}}" style="width:100%;height: 100%;" lay-event="lookPhoto"/>
+</script>
+
+<!-- 排序-->
+<script type="text/html" id="ordersTpl">
+    <input name="orders" value="{{d.orders}}" style="height: 28px;" data-oval="{{d.orders}}" data-id="{{d.id}}"
+           class="layui-input sort" onkeyup="value=value.replace(/[^\d]/g,'')"
+           keydown="value=value.replace(/[^\d]/g,'')">
+</script>
 <script type="text/html" id="phone">
     {{#
     var phone=d.phone;
@@ -84,40 +119,14 @@
     }
     }}
 </script>
-<!-- 开关 -->
-<script type="text/html" id="stateTpl">
-    <input type="checkbox" name="state" data-id="{{d.id}}" lay-skin="switch"
-           lay-filter="stateFilter" style="width:52px;" lay-text="上架|下架" {{d.state==2 ? 'checked' : '' }} />
-</script>
-
-<!-- 头像 -->
-<script id="headUrl" type="text/html">
-    <img class="layui-circle" src="{{d.avatarUrl}}" style="width: 50px;height: 100%;"/>
-</script>
-
-<!-- 封面 -->
-<script type="text/html" id="picture">
-    <img src="{{ d.advertUrl}}" style="width:100%;height: 100%;" lay-event="lookPhoto"/>
-</script>
-
-<!-- 排序-->
-<script type="text/html" id="ordersTpl">
-    <input name="orders" value="{{d.orders}}" style="height: 28px;" data-oval="{{d.orders}}" data-id="{{d.id}}"
-           class="layui-input sort" onkeyup="value=value.replace(/[^\d]/g,'')"
-           keydown="value=value.replace(/[^\d]/g,'')">
-</script>
 <!-- 增删改-工具模板栏-->
 <script type="text/html" id="toolbar1">
     <button class="layui-btn layui-btn-xs layui-bg-green" lay-event="detail" title="详情">详情</button>
+    {{# if(d.status==0){ }}
+    <button class="layui-btn layui-btn-xs layui-bg-red" lay-event="check" title="初审">去初审</button>
+    {{# } }}
     {{# if(d.status==2){ }}
-<!--    <button class="layui-btn layui-btn-xs layui-bg-red" lay-event="check" title="终审">去终审</button>-->
-    {{# } }}
-    {{# if(d.status==1){ }}
-<!--    <button class="layui-btn layui-btn-xs layui-bg-blue" lay-event="setGiftcard" title="设置卡片奖励">卡片奖励</button>-->
-    <button class="layui-btn layui-btn-xs layui-bg-blue" lay-event="cargoList" title="设置商品奖励">商品奖励</button>
-    {{# } }}
-    {{# if(d.status==1||d.status==0||d.status==2){ }}
-    <button class="layui-btn layui-btn-xs layui-bg-blue" lay-event="edit" title="编辑资料">修改资料</button>
+    <button class="layui-btn layui-btn-xs layui-bg-red" lay-event="endCheck" title="终审">去终审</button>
     {{# } }}
 </script>
 <script type="text/javascript">
@@ -129,13 +138,13 @@
         /**创建表格*/
         table.render({
             elem: '#dataList',
-            url: $ctx + '/Retailer/storeList',
+            url: $ctx + '/Retailer/partnerCheckList',
             method: "POST",
             page: true,
             loading: true,
             cols: [[
                 // {type: 'checkbox'},
-                {field: 'tool', title: '操作', width: 280, toolbar: '#toolbar1'},
+                {field: 'tool', title: '操作', width: 180, toolbar: '#toolbar1'},
                 {
                     field: 'status', title: '状态', width: 100, templet: function (d) {
                         switch (d.status) {
@@ -143,7 +152,13 @@
                                 return "待审核";
                                 break;
                             case 1:
-                                return "<span style='color:green;'><b>审核通过</b></span>";
+                                return "<span style='color:green;'><b>终审通过</b></span>";
+                                break;
+                            case 2:
+                                return "<span style='color:green;'>初审通过</span>";
+                                break;
+                            case 99:
+                                return "<span style='color:red;'>审核不通过</span>";
                                 break;
                             default:
                         }
@@ -154,7 +169,7 @@
                 {field: 'identity', title: '身份证号', width: 180,templet:'#idcard'},
                 {field: 'phone', title: '联系号码', width: 120,templet:'#phone'},
                 {field: 'balance', title: '余额(元)', width: 110},
-                // {field: 'subordinateCount', title: '团队人数', width: 100},
+                {field: 'subordinateCount', title: '团队人数', width: 100},
                 {field: 'createTime', title: '创建时间', width: 200}
 
             ]]
@@ -205,9 +220,9 @@
         };
 
         //添加
-        // admin.events.add = function () {
-        //     LayOpen('添加', '/Retailer/toAdd', 'add');
-        // };
+        admin.events.add = function () {
+            LayOpen('添加', '/Retailer/toAdd', 'add');
+        };
         //批量删除
         admin.events.delete = function () {
             var array = table.checkStatus("dataList").data;
@@ -238,11 +253,13 @@
             var data = obj.data; //获得当前行数据
             var layEvent = obj.event;
             if (layEvent == 'detail') {//详情
-                LayOpen('详情', '/Retailer/storeDetail?id=' + data.id, 'find');
+                LayOpen('详情', '/Retailer/detail?id=' + data.id, 'find');
             } else if (layEvent == 'edit') { //编辑
                 LayOpen('编辑', '/Retailer/toAdd?id=' + data.id, 'update');
             } else if (layEvent == 'check') { //审核
-                LayOpen('终审', '/Retailer/toCheck?id=' + data.id + '&memberId=' + data.memberId, 'update');
+                LayOpen('初审[下一环节：终审]', '/Retailer/toCheck1?id=' + data.id + '&memberId=' + data.memberId, 'update');
+            } else if (layEvent == 'endCheck') { //终审
+                LayOpen('终审', '/Retailer/toCheck2?id=' + data.id + '&memberId=' + data.memberId, 'update');
             } else if (layEvent == 'setGiftcard') { //giftcard
                 LayOpen('卡片奖励', '/Retailer/toSetGiftcard?id=' + data.id, 'update');
             } else if (layEvent == 'cargoList') {//查看图片

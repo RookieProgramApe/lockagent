@@ -134,6 +134,13 @@
                             default:return "其他卡";
                         }
                     }},
+                {field: 'lb', title: '发货方式', width: 100, templet:function(d){
+                        switch(d.lb){
+                            case 0:return "<span>自发</span>";break;
+                            case 1:return "<span>代发</span>";break;
+                            default:return "其他";
+                        }
+                    }},
                 // {
                 //     field: 'total_price', title: '金额(元)', width: 100, templet: function (d) {
                 //         if (d.total_price != null) {

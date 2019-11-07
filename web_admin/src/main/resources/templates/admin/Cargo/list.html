@@ -125,6 +125,7 @@
         <button class="layui-btn layui-btn-xs layui-bg-blue" lay-event="edit" title="修改">修改</button>
         <button class="layui-btn layui-btn-xs layui-bg-green" lay-event="detail" title="详情">详情</button>
         <button class="layui-btn layui-btn-xs layui-btn-danger" lay-event="del" title="删除">删除</button>
+        <button class="layui-btn layui-btn-xs layui-btn-warm" lay-event="copyUrl" title="复制链接">复制链接</button>
 </script>
 <script type="text/javascript">
     layui.use(['index','layer', 'table', 'element', 'form', 'laytpl'], function () {
@@ -139,7 +140,7 @@
             loading: true,
             cols: [[
                 {field: '', title: '封面',templet:'#picture',width:100, align: 'center'},
-                {field: 'name', title: '商品名称', width: 150},
+                {field: 'name', title: '商品名称', width: 250},
                 {field: 'tellphone', title: '客服电话', width: 150, align: 'center'},
                 {field: 'originalPrice', title: '原价',width:100,align: 'right',sort: true, templet:function (d) {
                     if(d.originalPrice!=null){
@@ -159,7 +160,7 @@
                 {field: 'status', title: '是否上架', templet: '#stateTpl', align: 'center', width: 120},
                 {field: 'sort', title: '排序', width: 90, templet: '#ordersTpl', align: 'center'},
                 // {field: 'isMeal', title: '是否选择套餐', templet: '#stateTp2', width: 150, align: 'center'},
-                {field: 'tool', title: '操作', width: 200,align:'center', toolbar: '#toolbar1'}
+                {field: 'tool', title: '操作', width: 300,align:'center', toolbar: '#toolbar1'}
             ]]
             , limit: 10
             , text: {
@@ -251,6 +252,12 @@
                     $.ajaxPost( '/Cargo/delete', param,function (data) {
                         table.reload("dataList");
                     });
+                });
+            }else if(layEvent == 'copyUrl') { //复制链接
+                localStorage.setItem("cargoId", data.id);
+                layer.confirm('复制成功，是否立即前往添加商城轮播图?', function (index) {
+                    LayOpen('添加商城首页轮播图','/Banner/list','add');
+                    return true;
                 });
             }
         });

@@ -104,7 +104,7 @@
             /**创建表格*/
           table.render({
                 elem: '#dataList',
-                url: $ctx + '/Banner/pageList',
+                url: $ctx + '/Banner/pageList1',
                 method: "POST",
                 page: true,
                 loading: true,
@@ -159,7 +159,7 @@
 
             //添加
             admin.events.add = function () {
-                LayOpen('添加','/Banner/toAdd','add');
+                LayOpen('添加','/Banner/toAdd1','add');
             };
             //批量删除
             admin.events.delete = function () {
@@ -191,7 +191,7 @@
                  if (layEvent == 'detail') {//详情
                      LayOpen('详情', '/Banner/detail?id=' + data.id, 'find');
                  }else if(layEvent == 'edit') { //编辑
-                     LayOpen('编辑', '/Banner/toAdd?id=' + data.id,'update');
+                     LayOpen('编辑', '/Banner/toAdd1?id=' + data.id,'update');
                  }else if(layEvent=='lookPhoto'){//查看图片
                      LookPhoto(data.image);
                  }else if(layEvent == 'del') { //删除

@@ -67,12 +67,12 @@ public class CardOrderFlowController extends BaseController {
                         .eq(StringUtils.isNotBlank(lb), "lb", lb)
                         .eq("card_order_id", cardOrderId)
                         .orderByAsc("create_time"));
-        page.getRecords().stream().forEach(cardOrderFlow -> {
-            var user = new SysUser().selectById(cardOrderFlow.getCreateBy());
-            cardOrderFlow.setRealName(user.getRealName() + "(" + user.getUserName() + ")");
-            cardOrderFlow.setMobile(user.getMobile());
-            //cardOrderFlow.setFileList(cardOrderFlowFileService.list(new QueryWrapper<CardOrderFlowFile>().eq("card_order_flow_id",cardOrderFlow.getId())));
-        });
+//        page.getRecords().stream().forEach(cardOrderFlow -> {
+//            var user = new SysUser().selectById(cardOrderFlow.getCreateBy());
+//            cardOrderFlow.setRealName(user.getRealName() + "(" + user.getUserName() + ")");
+//            cardOrderFlow.setMobile(user.getMobile());
+//            //cardOrderFlow.setFileList(cardOrderFlowFileService.list(new QueryWrapper<CardOrderFlowFile>().eq("card_order_flow_id",cardOrderFlow.getId())));
+//        });
         DataGridModel<CardOrderFlow> grid = new DataGridModel(page.getRecords(), page.getTotal());
         return grid;
     }

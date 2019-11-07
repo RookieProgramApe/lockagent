@@ -48,7 +48,16 @@ public class BannerController extends BaseController {
     }
 
     /**
-     * 分页列表
+     * 积分商城轮播图首页
+     */
+    @RequestMapping("/list1")
+    public ModelAndView list2(ModelAndView model) {
+        model.setViewName("/admin/Banner/list1");
+        return model;
+    }
+
+    /**
+     * 商城首页轮播图分页列表
      * @return
      */
     @RequestMapping("/pageList")
@@ -57,11 +66,31 @@ public class BannerController extends BaseController {
             PageData params=this.getPageData();
             IPage<Banner> page=bannerService.page(new Page<Banner>(params.getInteger("page"),params.getInteger("limit")),
                 new QueryWrapper<Banner>()
+                    .eq("`type`", 1)
                     .orderByAsc("sort")
-                    .orderByDesc("created_date"));
+                    .orderByDesc("created_date")
+            );
             DataGridModel<Banner> grid=new DataGridModel(page.getRecords(),page.getTotal());
             return  grid;
      }
+
+    /**
+     * 积分商城首页轮播图分页列表
+     * @return
+     */
+    @RequestMapping("/pageList1")
+    @ResponseBody
+    public DataGridModel<Banner> pageList1() {
+        PageData params=this.getPageData();
+        IPage<Banner> page=bannerService.page(new Page<Banner>(params.getInteger("page"),params.getInteger("limit")),
+                new QueryWrapper<Banner>()
+                        .eq("`type`", 2)
+                        .orderByAsc("sort")
+                        .orderByDesc("created_date")
+        );
+        DataGridModel<Banner> grid=new DataGridModel(page.getRecords(),page.getTotal());
+        return  grid;
+    }
 
     /**
     * 跳转添加/编辑界面
@@ -77,6 +106,23 @@ public class BannerController extends BaseController {
             model.addObject("Banner",new Banner());
         }
         model.setViewName("/admin/Banner/add");
+        return model;
+    }
+
+    /**
+     * 跳转添加/编辑界面
+     * @param id
+     * @param model
+     * @return
+     */
+    @RequestMapping("/toAdd1")
+    public ModelAndView toAdd1(String id,ModelAndView model) {
+        if (StringUtils.isNotBlank(id)) {
+            model.addObject("Banner",bannerService.getById(id));
+        }else{
+            model.addObject("Banner",new Banner());
+        }
+        model.setViewName("/admin/Banner/add1");
         return model;
     }
 
