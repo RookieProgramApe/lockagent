@@ -70,6 +70,10 @@ private static final long serialVersionUID = 1L;
     @TableField("`type`")
     private Integer type;
 
+    @ApiModelProperty(value = "当前卡片拥有者")
+    @TableField(exist=false)
+    private String occupant;
+
 
     @Override
 protected Serializable pkVal() {

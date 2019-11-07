@@ -26,6 +26,13 @@ public interface MemberSubordinateMapper extends BaseMapper<MemberSubordinate> {
           + "   where ms.parent_member_id = #{memberId,jdbcType=VARCHAR}")
   IPage<Map> querySubordinate(IPage<Map> page, @Param("memberId") String memberId);
 
+  @Select("select ms.name, ms.phone,ms.member_id as memberId,"+
+          "         (select count(1) from retailer b where b.parent_member_id = ms.member_id) as teamcount,"
+          + "        (select count(1) from retailer_giftcard rg where rg.member_id = ms.member_id) as bought, ms.create_time\n"
+          + "    from retailer ms\n"
+          + "   where ms.parent_member_id = #{memberId,jdbcType=VARCHAR} and ms.type=#{type,jdbcType=INTEGER}")
+  IPage<Map> querySubordinate1(IPage<Map> page, @Param("memberId") String memberId,  @Param("type") Integer type);
+
     @Select(" select m.avatar, m.nickname, ms.name,ms.phone," +
             "   (select count(1) from retailer b where b.parent_member_id = ms.member_id) as teamcount,"
             + "  (select count(1) from `card_order` co where co.status=2 and co.member_id = ms.member_id) as bought "
@@ -34,6 +41,18 @@ public interface MemberSubordinateMapper extends BaseMapper<MemberSubordinate> {
             + " , ms.create_time\n"
             + "  from retailer ms\n"
             + "  inner join member m on m.id = ms.member_id\n"
-            + "  where ms.parent_member_id = #{memberId,jdbcType=VARCHAR} order by ms.create_time desc ")
+            + "  where ms.parent_member_id = #{memberId,jdbcType=VARCHAR} and m.isretailer = 1 order by ms.create_time desc ")
     List<Map<String, Object>> querySubordinateByLevel(@Param("memberId") String memberId);
+
+    /*查询事业合伙人下面的列表*/
+  @Select(" select m.avatar, m.nickname, ms.name,ms.phone," +
+          "   (select count(1) from retailer b where b.parent_member_id = ms.member_id) as teamcount,"
+          + "  (select count(1) from `card_order` co where co.status=2 and co.member_id = ms.member_id) as bought "
+          + " ,(select ifnull(sum(count),0) from `card_order` co where co.status=2 and co.member_id = ms.member_id) as sumCount "
+          + " ,(select ifnull(sum(total_price),0) from `card_order` co where co.status=2 and co.member_id = ms.member_id) as sumTotal "
+          + " , ms.create_time\n"
+          + "  from retailer ms\n"
+          + "  inner join member m on m.id = ms.member_id and m.isretailer = #{isretailer,jdbcType=INTEGER}\n"
+          + "  where ms.parent_member_id = #{memberId,jdbcType=VARCHAR} order by ms.create_time desc ")
+  List<Map<String, Object>> querySubordinateByLevel1(@Param("memberId") String memberId, @Param("isretailer") Integer isretailer);
 }

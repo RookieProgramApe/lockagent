@@ -4,12 +4,15 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.lxkj.common.bean.JsonResults;
 import com.lxkj.common.exception.BusinessException;
 import com.lxkj.entity.*;
 import com.lxkj.mapper.CardOrderMapper;
 import com.lxkj.mapper.WarehousingMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +20,7 @@ import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Date;
+import java.util.List;
 
 /**
  * <p>
@@ -52,6 +56,8 @@ public class CardOrderService extends ServiceImpl<CardOrderMapper, CardOrder> {
     private WarehousingMapper warehousingMapper;
     @Autowired
     private BargainOrderService bargainOrderService;
+    @Autowired
+    protected JdbcTemplate jdbcTemplate;
     /**
      * 卡片剩余库存
      *
@@ -113,61 +119,65 @@ public class CardOrderService extends ServiceImpl<CardOrderMapper, CardOrder> {
             if(retailstate==1){
                 //卡片一级分销奖励金额
                 var retailer = rtailerService.getById(o.getRetailerId());//该代理商信息
-                if (StringUtils.isNotBlank(retailer.getParentMemberId())) {
-                    /*************************************************************一级卡片奖励****************************************************************************/
-                    Retailer retailer_p = this.rtailerService.getOne(Wrappers.<Retailer>query().eq("member_id", retailer.getParentMemberId()));//直接领导人
-                    if (retailer_p != null) {
-                        // 根据不同卡片类型分配不同卡片奖励
-                        var frstAward = new BigDecimal(0);
-                        if(o.getCardType().equals(1)){
-                            frstAward = retailer_p.getFirstAward();
-                        }else if(o.getCardType().equals(2)) {
-                            frstAward = retailer_p.getFirstAwardb();
-                        }else if(o.getCardType().equals(3)) {
-                            frstAward = retailer_p.getFirstAwardc();
-                        }else{
-                            frstAward = new BigDecimal(0);
-                        }
+                // 事业合伙人分销
+                if(retailer.getType().equals(1)){
+                    if (StringUtils.isNotBlank(retailer.getParentMemberId())) {
+                        /*************************************************************一级卡片奖励****************************************************************************/
+                        Retailer retailer_p = this.rtailerService.getOne(Wrappers.<Retailer>query().eq("member_id", retailer.getParentMemberId()));//直接领导人
+                        if (retailer_p != null) {
+                            // 根据不同卡片类型分配不同卡片奖励
+                            var frstAward = new BigDecimal(0);
+                            if(o.getCardType().equals(1)){
+                                frstAward = retailer_p.getFirstAward();
+                            }else if(o.getCardType().equals(2)) {
+                                frstAward = retailer_p.getFirstAwardb();
+                            }else if(o.getCardType().equals(3)) {
+                                frstAward = retailer_p.getFirstAwardc();
+                            }else{
+                                frstAward = new BigDecimal(0);
+                            }
 
-                        if (frstAward.compareTo(BigDecimal.ZERO) > 0) {
-                            var sacount = frstAward.multiply(new BigDecimal(sum));//一级卡片奖励金额
-                            rtailerService.update(new UpdateWrapper<Retailer>().set("balance", retailer_p.getBalance().add(sacount)).eq("id", retailer_p.getId()));
-                            Transaction transaction = new Transaction();
-                            transaction.setMemberId(retailer_p.getMemberId());
-                            transaction.setOrderId(o.getId());
-                            transaction.setType(80);
-                            transaction.setAmount(sacount);
-                            transaction.setStatus(1);
-                            transactionService.save(transaction);
+                            if (frstAward.compareTo(BigDecimal.ZERO) > 0) {
+                                var sacount = frstAward.multiply(new BigDecimal(sum));//一级卡片奖励金额
+                                rtailerService.update(new UpdateWrapper<Retailer>().set("balance", retailer_p.getBalance().add(sacount)).eq("id", retailer_p.getId()));
+                                Transaction transaction = new Transaction();
+                                transaction.setMemberId(retailer_p.getMemberId());
+                                transaction.setOrderId(o.getId());
+                                transaction.setType(80);
+                                transaction.setAmount(sacount);
+                                transaction.setStatus(1);
+                                transactionService.save(transaction);
+                            }
                         }
-                    }
-                    /*************************************************************二级卡片奖励****************************************************************************/
-                    if (retailer_p != null && StringUtils.isNotBlank(retailer_p.getParentMemberId())) {
-                        Retailer retailer_p_p = this.rtailerService.getOne(Wrappers.<Retailer>query().eq("member_id", retailer_p.getParentMemberId()));//上上级领导人
-                        // 根据不同卡片类型分配不同卡片奖励
-                        var secondAward = new BigDecimal(0);
-                        if(o.getCardType().equals(1)){
-                            secondAward = retailer_p_p.getSecondAward();
-                        }else if(o.getCardType().equals(2)) {
-                            secondAward = retailer_p_p.getSecondAwardb();
-                        }else if(o.getCardType().equals(3)) {
-                            secondAward = retailer_p_p.getSecondAwardc();
-                        }else{
-                            secondAward = new BigDecimal(0);
-                        }
-                        if (secondAward.compareTo(BigDecimal.ZERO) > 0) {
-                            var dacount = secondAward.multiply(new BigDecimal(sum));//一级卡片奖励金额
-                            rtailerService.update(new UpdateWrapper<Retailer>().set("balance", retailer_p_p.getBalance().add(dacount)).eq("id", retailer_p_p.getId()));
-                            Transaction transaction = new Transaction();
-                            transaction.setMemberId(retailer_p_p.getMemberId());
-                            transaction.setOrderId(o.getId());
-                            transaction.setType(80);
-                            transaction.setAmount(dacount);
-                            transaction.setStatus(1);
-                            transactionService.save(transaction);
+                        /*************************************************************二级卡片奖励****************************************************************************/
+                        if (retailer_p != null && StringUtils.isNotBlank(retailer_p.getParentMemberId())) {
+                            Retailer retailer_p_p = this.rtailerService.getOne(Wrappers.<Retailer>query().eq("member_id", retailer_p.getParentMemberId()));//上上级领导人
+                            // 根据不同卡片类型分配不同卡片奖励
+                            var secondAward = new BigDecimal(0);
+                            if(o.getCardType().equals(1)){
+                                secondAward = retailer_p_p.getSecondAward();
+                            }else if(o.getCardType().equals(2)) {
+                                secondAward = retailer_p_p.getSecondAwardb();
+                            }else if(o.getCardType().equals(3)) {
+                                secondAward = retailer_p_p.getSecondAwardc();
+                            }else{
+                                secondAward = new BigDecimal(0);
+                            }
+                            if (secondAward.compareTo(BigDecimal.ZERO) > 0) {
+                                var dacount = secondAward.multiply(new BigDecimal(sum));//一级卡片奖励金额
+                                rtailerService.update(new UpdateWrapper<Retailer>().set("balance", retailer_p_p.getBalance().add(dacount)).eq("id", retailer_p_p.getId()));
+                                Transaction transaction = new Transaction();
+                                transaction.setMemberId(retailer_p_p.getMemberId());
+                                transaction.setOrderId(o.getId());
+                                transaction.setType(80);
+                                transaction.setAmount(dacount);
+                                transaction.setStatus(1);
+                                transactionService.save(transaction);
+                            }
                         }
                     }
                 }
+
             }
 
         }
@@ -179,7 +189,7 @@ public class CardOrderService extends ServiceImpl<CardOrderMapper, CardOrder> {
      * @return
      */
     @Transactional
-    public void finshCardOrders1(String cardOrderId) {
+    public JsonResults finshCardOrders1(String cardOrderId) {
         var o = this.getById(cardOrderId);
 
         // 获取商家信息
@@ -187,7 +197,7 @@ public class CardOrderService extends ServiceImpl<CardOrderMapper, CardOrder> {
         // 获取商家的事业合伙人信息
         Retailer retailer1 = retailerService.getOne(new QueryWrapper<Retailer>().eq("member_id", retailer.getParentMemberId()));
 
-        if (o.getStatus() == 2) {//当前环节-完成初审核
+        if (o.getStatus() == 1) {//当前环节-完成初审核
             int sum = o.getCount();//购买量（张）
             int i = retailerGiftcardService.count(new QueryWrapper<RetailerGiftcard>()
                     .eq("member_id", retailer1.getMemberId())
@@ -195,16 +205,18 @@ public class CardOrderService extends ServiceImpl<CardOrderMapper, CardOrder> {
                     .eq("`status`", 0)
                     .eq("`state`", 0));//卡片剩余库存
             if (sum > i) {
-                throw new BusinessException("卡片库存不足");
+                // throw new BusinessException("卡片库存不足");
+                return new JsonResults(200, "卡片库存不足");
             }
+            List<RetailerGiftcard> addList = jdbcTemplate.query("select rg.*,(select g.serial from giftcard g where g.id=rg.giftcard_id) as serial from retailer_giftcard rg where rg.member_id=? and rg.`status`=0 and rg.`state`=0 and rg.`type`=? ORDER BY serial limit ?",
+                    new BeanPropertyRowMapper<>(RetailerGiftcard.class), retailer1.getMemberId(), o.getCardType(), sum);
             //获取事业合伙人未分配给商家的卡片
-            var addList = retailerGiftcardService.list(new QueryWrapper<RetailerGiftcard>()
-                    .eq("member_id", retailer1.getMemberId())
-                    .eq("status", 0)
-                    .eq("`state`", 0)
-                    .eq("`type`", o.getCardType())
-                    .orderByAsc("serial")
-                    .last("limit " + sum + ""));
+//            var addList = retailerGiftcardService.list(new QueryWrapper<RetailerGiftcard>()
+//                    .eq("member_id", retailer1.getMemberId())
+//                    .eq("status", 0)
+//                    .eq("`state`", 0)
+//                    .eq("`type`", o.getCardType())
+//                    .last("limit " + sum + ""));
             addList.stream().forEach(p -> {
                 //新增关联
                 RetailerGiftcard rg = new RetailerGiftcard();
@@ -212,15 +224,17 @@ public class CardOrderService extends ServiceImpl<CardOrderMapper, CardOrder> {
                 rg.setOrderId(o.getId());
                 rg.setGiftcardId(p.getGiftcardId());
                 rg.setType(o.getCardType());
-                rg.setStatus(1);
+                // rg.setStatus(1);
                 // 分配给商家
                 rg.insert();
+                // 更新代理商手中卡片状态
+                p.update(new UpdateWrapper<RetailerGiftcard>().set("`status`", 1).eq("`id`", p.getId()));
             });
+
             //更新状态
             this.update(new UpdateWrapper<CardOrder>().set("status", 2).eq("id", o.getId()));
-
-
         }
+        return new JsonResults(200, "操作成功");
     }
 
 
@@ -257,27 +271,26 @@ public class CardOrderService extends ServiceImpl<CardOrderMapper, CardOrder> {
                         .setPoint(addCredit)
                         .insert();
             }
-            // 积分兑换 更新积分表
             Cargo cargo = cargoService.getById(o.getCargoId());
-            if(o.getType().equals(3)){
-
-
-                //扣除积分
-                BigDecimal point = cargo.getPoint();
-                member.setIntegral(member.getIntegral().subtract(point));
-                mmberService.updateIntegral(member);
-
-                //积分表插入一条数据
-                MemberCredit credit1 = new MemberCredit();
-                credit1.setAmount(cargo.getSalePrice());
-                credit1.setMemberId(member.getId());
-                credit1.setOrderId(o.getId());
-                credit1.setPoint(point);
-                credit1.setType(-1);
-                credit1.setTitle("兑换了礼品：" + cargo.getName());
-                credit1.setCreateTime(new Date());
-                credit1.insert();
-            }
+//            if(o.getType().equals(3)){
+//
+//
+//                //扣除积分
+//                BigDecimal point = cargo.getPoint();
+//                member.setIntegral(member.getIntegral().subtract(point));
+//                mmberService.updateIntegral(member);
+//
+//                //积分表插入一条数据
+//                MemberCredit credit1 = new MemberCredit();
+//                credit1.setAmount(cargo.getSalePrice());
+//                credit1.setMemberId(member.getId());
+//                credit1.setOrderId(o.getId());
+//                credit1.setPoint(point);
+//                credit1.setType(-1);
+//                credit1.setTitle("兑换了礼品：" + cargo.getName());
+//                credit1.setCreateTime(new Date());
+//                credit1.insert();
+//            }
             //增加消费积分流水
             if (o.getCredit().compareTo(BigDecimal.ZERO) > 0) {
                 integral = integral.subtract(o.getCredit());
@@ -291,34 +304,67 @@ public class CardOrderService extends ServiceImpl<CardOrderMapper, CardOrder> {
                         .setPoint(o.getCredit())
                         .insert();
             }
+            /*******************************提货奖励********************************/
             //提货奖励
             if(StringUtils.isNotBlank(o.getGiftcardId())){
-                var retailerGiftcard = retailerGiftcardService.getOne(new QueryWrapper<RetailerGiftcard>().eq("giftcard_id", o.getGiftcardId()));//卡的代理商
-                if (retailerGiftcard != null) {
-                    var retailerReward = retailerRewardService.getOne(new QueryWrapper<RetailerReward>().eq("member_id", retailerGiftcard.getMemberId()).eq("cargo_id", o.getCargoId()));
-                    if (retailerReward != null && retailerReward.getFigure().compareTo(BigDecimal.ZERO) > 0) {
-                        Retailer retailer = this.rtailerService.getById(retailerReward.getRetailerId());
-                        rtailerService.update(new UpdateWrapper<Retailer>().set("balance", retailer.getBalance().add(retailerReward.getFigure())).eq("id", retailer.getId()));
-                        Transaction transaction = new Transaction();
-                        transaction.setMemberId(retailer.getMemberId());
-                        transaction.setOrderId(o.getId());
-                        transaction.setType(81);
-                        // 根据不同卡片类型分配不同提货奖励
-                        var figure = new BigDecimal(0);
-                        if(cargo.getCardType().equals(1)){
-                            figure = retailerReward.getFigure();
-                        }else if(cargo.getCardType().equals(2)) {
-                            figure = retailerReward.getFigureb();
-                        }else if(cargo.getCardType().equals(3)) {
-                            figure = retailerReward.getFigurec();
-                        }else{
-                            figure = new BigDecimal(0);
+//                // 获取当前卡的代理商
+//                var retailerGiftcard1 = retailerGiftcardService.getOne(new QueryWrapper<RetailerGiftcard>().eq("giftcard_id", o.getGiftcardId()).eq("`status`", 1));
+//                // 获取上级卡片代理商
+//                var retailerGiftcard = retailerGiftcardService.getOne(new QueryWrapper<RetailerGiftcard>().eq("giftcard_id", o.getGiftcardId()).eq("`status`", 0));
+                List<RetailerGiftcard> rgList = retailerGiftcardService.list(new QueryWrapper<RetailerGiftcard>().eq("giftcard_id", o.getGiftcardId()));
+                rgList.forEach(rg -> {
+                    if (rg != null) {
+                        var retailerReward = retailerRewardService.getOne(new QueryWrapper<RetailerReward>().eq("member_id", rg.getMemberId()).eq("cargo_id", o.getCargoId()));
+                        if (retailerReward != null) {
+//                         && retailerReward.getFigure().compareTo(BigDecimal.ZERO) > 0
+                            Retailer retailer = this.rtailerService.getById(retailerReward.getRetailerId());
+                            /*************************区分卡片类型分配提货奖励***********************/
+                            // 根据不同卡片类型分配不同提货奖励
+                            /************************后续可能要加**************************/
+//                            var figure = new BigDecimal(0);
+//
+//                            if(cargo.getCardType().equals(1)){
+//                                figure = retailerReward.getFigure();
+//                            }else if(cargo.getCardType().equals(2)) {
+//                                figure = retailerReward.getFigureb();
+//                            }else if(cargo.getCardType().equals(3)) {
+//                                figure = retailerReward.getFigurec();
+//                            }else{
+//                                figure = new BigDecimal(0);
+//                            }
+                            // 目前是根据使用的卡的类型区分提货奖励
+                            var figure = new BigDecimal(0);
+                            Giftcard giftcard = giftcardService.getById(o.getGiftcardId());
+                            if(giftcard.getType().equals(1)){
+                                figure = retailerReward.getFigure();
+                            }else if(giftcard.getType().equals(2)) {
+                                figure = retailerReward.getFigureb();
+                            }else if(giftcard.getType().equals(3)) {
+                                figure = retailerReward.getFigurec();
+                            }else{
+                                figure = new BigDecimal(0);
+                            }
+                            // 获取提货佣金
+                            rtailerService.update(new UpdateWrapper<Retailer>().set("balance", retailer.getBalance().add(figure)).eq("id", retailer.getId()));
+                            Transaction transaction = new Transaction();
+                            transaction.setMemberId(retailer.getMemberId());
+                            transaction.setOrderId(o.getId());
+                            transaction.setType(81);
+                            transaction.setAmount(figure);
+                            transaction.setStatus(1);
+                            transactionService.save(transaction);
                         }
-                        transaction.setAmount(figure);
-                        transaction.setStatus(1);
-                        transactionService.save(transaction);
                     }
-                }
+                });
+//                if(retailerGiftcard1 == null){
+//                    // 未分配给商家
+//
+//                }else{
+//                    // 已分配给商家
+//
+//                }
+
+
             }
             //更新库存
             if(!o.getSkuId().equals("-1")){
@@ -382,7 +428,7 @@ public class CardOrderService extends ServiceImpl<CardOrderMapper, CardOrder> {
                         .insert();
             }
 
-            Cargo cargo = cargoService.getById(o.getCargoId());
+            // Cargo cargo = cargoService.getById(o.getCargoId());
         }
     }
 

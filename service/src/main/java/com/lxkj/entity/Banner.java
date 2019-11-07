@@ -58,6 +58,14 @@ private static final long serialVersionUID = 1L;
     @TableField("enabled")
                     private Integer enabled;
 
+    @ApiModelProperty(value = "轮播图类型 1普通商品 2积分商品")
+    @TableField("`type`")
+    private Integer type;
+
+    @ApiModelProperty(value = "轮播图跳转链接")
+    @TableField("`link`")
+    private String link;
+
 
 
 @Override

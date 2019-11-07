@@ -46,4 +46,7 @@ public interface RetailerMapper extends BaseMapper<Retailer> {
           + "     and t.member_id = #{memberId,jdbcType=VARCHAR}\n"
           + "   order by t.create_time desc")
   IPage<Map> queryCardAward(IPage<Map> page, @Param("memberId") String memberId);
+
+  @Select("select t.*,(select o.cargo_name from `order` o where o.id=t.order_id) as cargoName, (select g.serial from giftcard g where g.id=(select o.giftcard_id from `order` o where o.id=t.order_id)) as serial from `transaction` t where member_id=#{memberId,jdbcType=VARCHAR} and type=81 and status=1")
+  IPage<Map> queryTransaction(IPage<Map> page, @Param("memberId") String memberId);
 }

@@ -23,6 +23,10 @@ public class MemberSubordinateService extends ServiceImpl<MemberSubordinateMappe
     return this.baseMapper.querySubordinateByLevel(memberId);
   }
 
+  public List<Map<String, Object>> querySubordinateByLevel1(String memberId, Integer isretailer) {
+    return this.baseMapper.querySubordinateByLevel1(memberId, isretailer);
+  }
+
 
 
 }

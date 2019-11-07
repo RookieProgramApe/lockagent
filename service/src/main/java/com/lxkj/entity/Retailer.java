@@ -126,6 +126,10 @@ public class Retailer extends Model<Retailer> {
     @TableField("qr")
     private String qr;
 
+    @ApiModelProperty(value = "邀请商家二维码")
+    @TableField("qr3")
+    private String qr3;
+
     @ApiModelProperty(value = "授权书")
     @TableField("authurl")
     private String authurl;
@@ -154,6 +158,10 @@ public class Retailer extends Model<Retailer> {
     @ApiModelProperty(value = "次属团队数量")
     @TableField(exist = false)
     private Integer dinateCount;
+
+    @ApiModelProperty(value = "商家数量")
+    @TableField(exist = false)
+    private Integer storeCount;
 
     @ApiModelProperty(value = "类型")
     @TableField("`type`")
