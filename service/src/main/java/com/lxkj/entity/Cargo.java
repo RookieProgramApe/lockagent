@@ -146,9 +146,17 @@ public class Cargo extends Model<Cargo> {
   @TableField("is_adv")
   private Integer isAdv;
 
-  @ApiModelProperty(value = "卡片类型 （0全部 1白银 2黄金 3钻石）")
+  @ApiModelProperty(value = "卡片类型 （0全部 1轻奢 2贵族 3至尊）")
   @TableField("card_type")
   private Integer cardType;
+
+  @ApiModelProperty(value = "商品分类")
+  @TableField("classify_id")
+  private String classifyId;
+
+  @ApiModelProperty(value = "商品分类名称")
+  @TableField(exist = false)
+  private String classifyName;
 
   @Override
   protected Serializable pkVal() {
