@@ -136,11 +136,11 @@ public class billUtil {
         g.setComposite(ac);
         g.setBackground(Color.WHITE);
         // 姓名
-        g.setFont(new Font("楷体", Font.BOLD, 45));
+        g.setFont(new Font("微软雅黑", Font.BOLD, 45));
         g.setColor(Color.black);
         g.drawString(name, ((imageLocal.getWidth()/2)-(80*name.length()/2)), imageLocal.getHeight()/2-95);
         // 日期
-        g.setFont(new Font("楷体", Font.PLAIN, 24));
+        g.setFont(new Font("微软雅黑", Font.PLAIN, 24));
         g.setColor(Color.black);
         g.drawString(time, (imageLocal.getWidth()/2)+70, (imageLocal.getHeight()/2+378));
         //章
