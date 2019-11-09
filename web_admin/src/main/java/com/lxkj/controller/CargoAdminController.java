@@ -46,7 +46,7 @@ public class CargoAdminController extends BaseController {
     @Autowired
     private CargoSkuService cargoSkuService;
     @Autowired
-    private OrderService orderService;
+    private ClassifyService classifyService;
     @Autowired
     private RetailerRewardService retailerRewardService;
     @Autowired
@@ -80,7 +80,9 @@ public class CargoAdminController extends BaseController {
             if(list!=null&&list.size()>0){
                 p.setAttachment(list);
             }
-
+            if(p.getClassifyId()!=null){
+                p.setClassifyName(classifyService.getById(p.getClassifyId()).getName());
+            }
             p.setSaleNum(cargoService.getSaleNum(p.getId()));
         });
         DataGridModel<Cargo> grid=new DataGridModel(page.getRecords(),page.getTotal());
@@ -180,7 +182,11 @@ public class CargoAdminController extends BaseController {
      */
     @RequestMapping("/detail")
     public ModelAndView detail(String id,ModelAndView model) {
-        model.addObject("Cargo",cargoService.getById(id));
+        Cargo cargo = cargoService.getById(id);
+        if(cargo.getClassifyId()!=null){
+            cargo.setClassifyName(classifyService.getById(cargo.getClassifyId()).getName());
+        }
+        model.addObject("Cargo", cargo);
         CargoAttachment image = cargoAttachmentService.getOne(Wrappers.<CargoAttachment>query().eq("cargo_id",id).eq("type",1));
         CargoAttachment video = cargoAttachmentService.getOne(Wrappers.<CargoAttachment>query().eq("cargo_id",id).eq("type",2));
         model.addObject("image",(image!=null&&StringUtils.isNotBlank(image.getUrl()))?image.getUrl():"");

@@ -85,6 +85,28 @@ public class CargoController extends BaseController {
         return BuildSuccessJson(data.getRecords(), data.getPages(), "查询成功");
     }
 
+    @ApiOperation("根据分类获取商品分页列表")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "keyword", value = "模糊搜索[关键字]"),
+            @ApiImplicitParam(paramType = "query", dataType = "Long", name = "page", value = " 页码", required = true),
+            @ApiImplicitParam(paramType = "query", dataType = "Long", name = "limit", value = "每页记录数", required = true),
+            @ApiImplicitParam(paramType = "query", dataType = "String", name = "classifyId", value = "分类id", required = true)
+    })
+    @PostMapping("/allByClassify")
+    public JsonResults<List<Cargo>> queryCargoListByClassifyId(Long page, Long limit, String keyword, String classifyId) {
+        IPage<Cargo> data = this.cargoService.page(
+                new Page<Cargo>(page != null ? page : 1, limit != null ? limit : 10),
+                new QueryWrapper<Cargo>()
+                        .eq("classify_id", classifyId)
+                        .eq("status", 1)
+                        .eq("type", 1)
+                        .eq("isdel", 0)
+                        .like(StringUtils.isNotBlank(keyword), "name", keyword)
+                        .orderByAsc("sort"));
+        data.getRecords().forEach(p -> cargoService.getData(p));
+        return BuildSuccessJson(data.getRecords(), data.getPages(), "查询成功");
+    }
+
     @ApiOperation("商品详情")
     @PostMapping("/detail")
     @ApiImplicitParams({
