@@ -16,9 +16,90 @@
                     <result column="create_time" property="createTime" />
         </resultMap>
 
+        <!-- 通用查询映射结果 -->
+        <resultMap id="GiftcardResultMap" type="com.lxkj.entity.Giftcard">
+            <id column="id" property="id" />
+            <result column="serial" property="serial" />
+            <result column="passcode" property="passcode" />
+            <result column="status" property="status" />
+            <result column="create_time" property="createTime" />
+            <result column="update_time" property="updateTime" />
+            <result column="state" property="state" />
+            <result column="use" property="use" />
+            <result column="type" property="type" />
+            <result column="occupant" property="occupant" />
+        </resultMap>
+
         <!-- 通用查询结果列 -->
         <sql id="Base_Column_List">
         id, name, gender, identity, province, city, county, status, approval_comment, create_time
     </sql>
+
+
+        <!--  根据卡片类型、卡片使用情况分页查询  -->
+        <select id="queryCardPage" parameterType="java.util.Map" resultMap="GiftcardResultMap">
+            select * FROM
+                (select g.`id`, g.serial, g.passcode, g.type, g.`status`, rg.`status` `share`
+                    from giftcard g INNER JOIN (select giftcard_id, `status` from retailer_giftcard where member_id=#{memberId, jdbcType=VARCHAR}) rg on g.id=rg.giftcard_id
+                    <where>
+                        1=1
+                        <if test="type != null and type != 0">
+                            and g.`type` = #{type, jdbcType=INTEGER}
+                        </if>
+                        <if test="status != null and status != 0">
+                            and g.status = #{status, jdbcType=INTEGER}
+                        </if>
+                    </where>) t
+                <where>
+                    <if test="share != null">
+                        and t.`share` = #{share, jdbcType=INTEGER}
+                    </if>
+                </where>
+                limit #{page, jdbcType=INTEGER},#{limit, jdbcType=INTEGER}
+        </select>
+
+        <select id="countCardPage" parameterType="java.util.Map" resultType="Long">
+            select count(1) FROM
+            (select g.`id`, g.serial, g.passcode, g.type, g.`status`, rg.`status` `share`
+                from giftcard g INNER JOIN (select giftcard_id, `status` from retailer_giftcard where member_id=#{memberId, jdbcType=VARCHAR}) rg on g.id=rg.giftcard_id
+                <where>
+                    1=1
+                    <if test="type != null and type != 0">
+                        and g.`type` = #{type, jdbcType=INTEGER}
+                    </if>
+                    <if test="status != null and status != 0">
+                        and g.status = #{status, jdbcType=INTEGER}
+                    </if>
+                </where>) t
+            <where>
+                <if test="share != null">
+                    and t.`share` = #{share, jdbcType=INTEGER}
+                </if>
+            </where>
+        </select>
+
+        <!--  查询代理商卡片使用情况及分配情况信息信息  -->
+        <select id="queryRetailerCardDetail" parameterType="String" resultType="java.util.Map">
+            SELECT (select count(1) from retailer_giftcard where member_id=#{memberId, jdbcType=VARCHAR}) totalCount,
+            (select count(1) from retailer_giftcard where member_id=#{memberId, jdbcType=VARCHAR} and state=1) usedCount,
+            (select count(1) from retailer_giftcard where member_id=#{memberId, jdbcType=VARCHAR} and state=0) leftCount,
+            (select count(1) from retailer_giftcard where member_id=#{memberId, jdbcType=VARCHAR} and `status`=1) shareCount,
+            (select count(1) from retailer_giftcard where member_id=#{memberId, jdbcType=VARCHAR} and `status`=0) unShareCount,
+            (select count(1) from retailer_giftcard where member_id=#{memberId, jdbcType=VARCHAR} and `type`=1) qsCount,
+            (select count(1) from retailer_giftcard where member_id=#{memberId, jdbcType=VARCHAR} and `type`=2) gzCount,
+            (select count(1) from retailer_giftcard where member_id=#{memberId, jdbcType=VARCHAR} and `type`=3) zzCount,
+            (select count(1) from retailer_giftcard where member_id=#{memberId, jdbcType=VARCHAR} and `type`=1 and `status`=1) qsShareCount,
+            (select count(1) from retailer_giftcard where member_id=#{memberId, jdbcType=VARCHAR} and `type`=2 and `status`=1) gzShareCount,
+            (select count(1) from retailer_giftcard where member_id=#{memberId, jdbcType=VARCHAR} and `type`=3 and `status`=1) zzShareCount,
+            (select count(1) from retailer_giftcard where member_id=#{memberId, jdbcType=VARCHAR} and `type`=1 and `status`=0) qsUnShareCount,
+            (select count(1) from retailer_giftcard where member_id=#{memberId, jdbcType=VARCHAR} and `type`=2 and `status`=0) gzUnShareCount,
+            (select count(1) from retailer_giftcard where member_id=#{memberId, jdbcType=VARCHAR} and `type`=3 and `status`=0) zzUnShareCount,
+            (select count(1) from retailer_giftcard where member_id=#{memberId, jdbcType=VARCHAR} and `type`=1 and `state`=1) qsUsedCount,
+            (select count(1) from retailer_giftcard where member_id=#{memberId, jdbcType=VARCHAR} and `type`=2 and `state`=1) gzUsedCount,
+            (select count(1) from retailer_giftcard where member_id=#{memberId, jdbcType=VARCHAR} and `type`=3 and `state`=1) zzUsedCount,
+            (select count(1) from retailer_giftcard where member_id=#{memberId, jdbcType=VARCHAR} and `type`=1 and `state`=0) qsLeftCount,
+            (select count(1) from retailer_giftcard where member_id=#{memberId, jdbcType=VARCHAR} and `type`=2 and `state`=0) gzLeftCount,
+            (select count(1) from retailer_giftcard where member_id=#{memberId, jdbcType=VARCHAR} and `type`=3 and `state`=0) zzLeftCount
+        </select>
 
 </mapper>

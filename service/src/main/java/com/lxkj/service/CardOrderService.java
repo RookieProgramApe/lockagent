@@ -237,6 +237,52 @@ public class CardOrderService extends ServiceImpl<CardOrderMapper, CardOrder> {
         return new JsonResults(200, "操作成功");
     }
 
+    /**
+     * 完成抽奖商家卡片分配
+     *
+     * @return
+     * @param retailerId 商家代理商表的id
+     * @param sum 分配卡片数量
+     */
+    @Transactional
+    public JsonResults finshCardOrders2(String retailerId, Integer sum) {
+
+        // 获取商家信息
+        Retailer retailer = this.retailerService.getOne(Wrappers.<Retailer>query().eq("`id`", retailerId));
+        // 获取商家的事业合伙人信息
+        Retailer retailer1 = retailerService.getOne(new QueryWrapper<Retailer>().eq("member_id", retailer.getParentMemberId()));
+        // 默认为轻奢卡
+        int cardType = 1;
+        int i = retailerGiftcardService.count(new QueryWrapper<RetailerGiftcard>()
+                    .eq("member_id", retailer1.getMemberId())
+                    .eq("`type`", cardType)
+                    .eq("`status`", 0)
+                    .eq("`state`", 0));//卡片剩余库存
+            if (sum > i) {
+                // throw new BusinessException("卡片库存不足");
+                return new JsonResults(200, "卡片库存不足");
+            }
+            List<RetailerGiftcard> addList = jdbcTemplate.query("select rg.*,(select g.serial from giftcard g where g.id=rg.giftcard_id) as serial from retailer_giftcard rg where rg.member_id=? and rg.`status`=0 and rg.`state`=0 and rg.`type`=? ORDER BY serial limit ?",
+                    new BeanPropertyRowMapper<>(RetailerGiftcard.class), retailer1.getMemberId(), cardType, sum);
+
+            addList.stream().forEach(p -> {
+                //新增关联
+                RetailerGiftcard rg = new RetailerGiftcard();
+                rg.setMemberId(retailer.getMemberId());
+                rg.setOrderId("===" + retailer.getId());
+                rg.setGiftcardId(p.getGiftcardId());
+                rg.setType(cardType);
+                // 分配给商家
+                rg.insert();
+                // 更新代理商手中卡片状态
+                p.update(new UpdateWrapper<RetailerGiftcard>().set("`status`", 1).eq("`id`", p.getId()));
+            });
+
+            //更新状态
+            // this.update(new UpdateWrapper<CardOrder>().set("status", 2).eq("id", o.getId()));
+        return new JsonResults(200, "操作成功");
+    }
+
 
     /**
      * 完成提货订单-（更改为已支付、提货奖励、库存减少、增加积分、消费积分）

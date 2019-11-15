@@ -2,6 +2,7 @@ package com.lxkj.mapper;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
+import com.lxkj.entity.Giftcard;
 import com.lxkj.entity.Retailer;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import java.util.List;
@@ -35,8 +36,6 @@ public interface RetailerMapper extends BaseMapper<Retailer> {
       + "   group by o.cargo_id")
   List<Map<String, Object>> queryCommission(@Param("memberId") String memberId);
 
-
-
   @Select("select u.phone,u.name, co.count as orderNum, co.total_price as orderPrice, co.create_time as orderCreateTime, t.amount\n"
           + "    from `transaction` t  "
           + "    inner join  card_order co on t.order_id = co.id\n"
@@ -49,4 +48,11 @@ public interface RetailerMapper extends BaseMapper<Retailer> {
 
   @Select("select t.*,(select o.cargo_name from `order` o where o.id=t.order_id) as cargoName, (select g.serial from giftcard g where g.id=(select o.giftcard_id from `order` o where o.id=t.order_id)) as serial from `transaction` t where member_id=#{memberId,jdbcType=VARCHAR} and type=81 and status=1")
   IPage<Map> queryTransaction(IPage<Map> page, @Param("memberId") String memberId);
+
+  // 根据卡片类型、卡片使用情况分页查询
+  List<Giftcard> queryCardPage(Map<String, Object> map);
+  Long countCardPage(Map<String, Object> map);
+
+  // 查询代理商卡片使用情况及分配情况信息信息
+  Map<String, Object> queryRetailerCardDetail(@Param("memberId") String memberId);
 }

@@ -66,13 +66,17 @@ private static final long serialVersionUID = 1L;
     @TableField("`use`")
     private Integer use;
 
-    @ApiModelProperty(value = "卡片类型 1白银来福卡 2黄金来福卡 3钻石来福卡")
+    @ApiModelProperty(value = "卡片类型 1轻奢来福卡 2贵族来福卡 3至尊来福卡")
     @TableField("`type`")
     private Integer type;
 
     @ApiModelProperty(value = "当前卡片拥有者")
     @TableField(exist=false)
     private String occupant;
+
+    @ApiModelProperty(value = "分配商家情况 0未分配 1已分配")
+    @TableField(exist=false)
+    private Integer share;
 
 
     @Override

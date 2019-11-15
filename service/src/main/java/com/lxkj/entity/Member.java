@@ -42,7 +42,7 @@ public class Member extends Model<Member> {
     @TableField("mobile")
     private String mobile;
 
-    @ApiModelProperty(value = "0:普通会员 1代理商")
+    @ApiModelProperty(value = "0:普通会员 1事业合伙人 2合伙人 3商家 ")
     @TableField("isretailer")
     private Integer isretailer;
 

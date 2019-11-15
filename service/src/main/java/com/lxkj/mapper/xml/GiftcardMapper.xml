@@ -4,17 +4,45 @@
 
         <!-- 通用查询映射结果 -->
         <resultMap id="BaseResultMap" type="com.lxkj.entity.Giftcard">
-                    <id column="id" property="id" />
-                    <result column="serial" property="serial" />
-                    <result column="passcode" property="passcode" />
-                    <result column="status" property="status" />
-                    <result column="create_time" property="createTime" />
-                    <result column="update_time" property="updateTime" />
+            <id column="id" property="id" />
+            <result column="serial" property="serial" />
+            <result column="passcode" property="passcode" />
+            <result column="status" property="status" />
+            <result column="create_time" property="createTime" />
+            <result column="update_time" property="updateTime" />
+            <result column="state" property="state" />
+            <result column="use" property="use" />
+            <result column="type" property="type" />
+            <result column="occupant" property="occupant" />
         </resultMap>
 
         <!-- 通用查询结果列 -->
         <sql id="Base_Column_List">
-        id, serial, passcode, status, create_time, update_time
-    </sql>
+            id, serial, passcode, status, create_time, update_time
+        </sql>
+
+        <select id="queryGiftcardPageByOrderId" resultMap="BaseResultMap" parameterType="java.util.Map">
+            SELECT a.*,rg.state as state
+            FROM giftcard a INNER JOIN (select rg.giftcard_id, rg.state from retailer_giftcard rg where rg.order_id=#{orderId, jdbcType=VARCHAR}) rg on a.id=rg.giftcard_id
+            ORDER BY serial asc LIMIT #{page, jdbcType=INTEGER}, #{limit, jdbcType=INTEGER}
+        </select>
+
+        <select id="countGiftcardPageByOrderId" resultType="Long" parameterType="java.util.Map">
+            SELECT count(1)
+            FROM giftcard a INNER JOIN (select rg.giftcard_id, rg.state from retailer_giftcard rg where rg.order_id=#{orderId, jdbcType=VARCHAR}) rg on a.id=rg.giftcard_id
+        </select>
+
+        <select id="queryGiftcardPageByMemberId" resultMap="BaseResultMap" parameterType="java.util.Map">
+            SELECT g.*, rg.state occupant, rg.`status` state
+            FROM giftcard g INNER JOIN (select rg.giftcard_id, rg.state, rg.`status` from retailer_giftcard rg where rg.member_id=#{memberId, jdbcType=VARCHAR}) rg
+            on g.id=rg.giftcard_id
+            ORDER BY serial ASC LIMIT #{page, jdbcType=INTEGER}, #{limit, jdbcType=INTEGER}
+        </select>
+
+        <select id="countGiftcardPageByMemberId" resultType="Long" parameterType="java.util.Map">
+            SELECT count(1)
+            FROM giftcard g INNER JOIN (select rg.giftcard_id, rg.state, rg.`status` from retailer_giftcard rg where rg.member_id=#{memberId, jdbcType=VARCHAR}) rg
+            on g.id=rg.giftcard_id
+        </select>
 
 </mapper>
