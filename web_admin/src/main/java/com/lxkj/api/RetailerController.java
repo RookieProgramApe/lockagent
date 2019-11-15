@@ -25,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.mp.api.WxMpQrcodeService;
 import me.chanjar.weixin.mp.bean.result.WxMpQrCodeTicket;
+import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -614,20 +615,90 @@ public class RetailerController extends BaseController {
             @ApiImplicitParam(paramType = "header", dataType = "String", name = "token", value = "用户token值", required = true)
     })
     @ApiResponses({
-            @ApiResponse(code = 200, message = "data={leftCount:'剩余可用',totalCount:'总量',usedCount:'已用'}"),
+            @ApiResponse(code = 200, message = "data={" +
+                        "totalCount:'总量', leftCount:'未提货', usedCount:'已提货', shareCount:'已分配', unShareCount:'未分配'" +
+                        "totalCount:'轻奢卡总量', leftCount:'轻奢卡未提货', usedCount:'轻奢卡已提货', shareCount:'轻奢卡已分配', unShareCount:'轻奢卡未分配'" +
+                        "totalCount:'贵族卡总量', leftCount:'贵族卡未提货', usedCount:'贵族卡已提货', shareCount:'贵族卡已分配', unShareCount:'贵族卡未分配'" +
+                        "totalCount:'至尊卡总量', leftCount:'至尊卡未提货', usedCount:'至尊卡已提货', shareCount:'至尊卡已分配', unShareCount:'至尊卡未分配'" +
+                    "}"),
     })
     public JsonResults<Map<String, Object>> queryGiftcard() {
         String memberId = this.getToken();
-        // 查询总量
-        Integer totalCount = this.jdbcTemplate.queryForObject("select count(1) from retailer_giftcard where member_id = ?", Integer.class, memberId);
-        // 查询已用
-        Integer usedCount = this.jdbcTemplate.queryForObject("select count(1) from retailer_giftcard where member_id = ? and state=1", Integer.class, memberId);
-        Map<String, Object> data = Maps.<String, Object>builder()
-                .put("leftCount", totalCount - usedCount) // 剩余可用
-                .put("totalCount", totalCount) // 总量
-                .put("usedCount", usedCount) // 已用
-                .build();
-        return BuildSuccessJson(data, "查询成功");
+
+//        // 查询总量
+//        Integer totalCount = this.jdbcTemplate.queryForObject("select count(1) from retailer_giftcard where member_id = ?", Integer.class, memberId);
+//        // 查询已用
+//        Integer usedCount = this.jdbcTemplate.queryForObject("select count(1) from retailer_giftcard where member_id = ? and state=1", Integer.class, memberId);
+//
+//        // 卡片已分配数量
+//        Integer shareCount = retailerGiftcardService.count(new QueryWrapper<RetailerGiftcard>()
+//                .eq("member_id", memberId)
+//                .eq("`status`", 1)
+//        );
+//
+//        // 卡片未分配数量
+//        Integer unShareCount = retailerGiftcardService.count(new QueryWrapper<RetailerGiftcard>()
+//                .eq("member_id", memberId)
+//                .eq("`status`", 0)
+//        );
+//
+//        // 轻奢卡数量
+//        Integer qsCount = retailerGiftcardService.count(new QueryWrapper<RetailerGiftcard>()
+//                .eq("member_id", memberId)
+//                .eq("`type`", 1)
+//        );
+//        // 贵族卡数量
+//        Integer gzCount = retailerGiftcardService.count(new QueryWrapper<RetailerGiftcard>()
+//                .eq("member_id", memberId)
+//                .eq("`type`", 2)
+//        );
+//        // 至尊卡数量
+//        Integer zzCount = retailerGiftcardService.count(new QueryWrapper<RetailerGiftcard>()
+//                .eq("member_id", memberId)
+//                .eq("`type`", 3)
+//        );
+//        // 轻奢卡数量（已分配）
+//        Integer qsShareCount = retailerGiftcardService.count(new QueryWrapper<RetailerGiftcard>()
+//                .eq("member_id", memberId)
+//                .eq("")
+//                .eq("`type`", 1)
+//        );
+//        // 贵族卡数量（已分配）
+//        Integer gzShareCount = retailerGiftcardService.count(new QueryWrapper<RetailerGiftcard>()
+//                .eq("member_id", memberId)
+//                .eq("`type`", 2)
+//        );
+//        // 至尊卡数量（已分配）
+//        Integer zzShareCount = retailerGiftcardService.count(new QueryWrapper<RetailerGiftcard>()
+//                .eq("member_id", memberId)
+//                .eq("`type`", 3)
+//        );
+//        // 轻奢卡数量（未分配）
+//        Integer qsUnShareCount = retailerGiftcardService.count(new QueryWrapper<RetailerGiftcard>()
+//                .eq("member_id", memberId)
+//                .eq("`type`", 1)
+//        );
+//        // 贵族卡数量（未分配）
+//        Integer gzUnShareCount = retailerGiftcardService.count(new QueryWrapper<RetailerGiftcard>()
+//                .eq("member_id", memberId)
+//                .eq("`type`", 2)
+//        );
+//        // 至尊卡数量（未分配）
+//        Integer zzUnShareCount = retailerGiftcardService.count(new QueryWrapper<RetailerGiftcard>()
+//                .eq("member_id", memberId)
+//                .eq("`type`", 3)
+//        );
+//        Map<String, Object> data = Maps.<String, Object>builder()
+//                .put("leftCount", totalCount - usedCount) // 剩余可用
+//                .put("totalCount", totalCount) // 总量
+//                .put("usedCount", usedCount) // 已用
+//                .put("shareCount", shareCount)
+//                .put("unShareCount", unShareCount)
+//                .put("qsCount", qsCount)
+//                .put("gzCount", gzCount)
+//                .put("zzCount", zzCount)
+//                .build();
+        return BuildSuccessJson(retailerService.queryRetailerCardDetail(memberId), "查询成功");
     }
 
     @ApiOperation(value = "我的卡片-购买记录", notes = "购买订单列表")
@@ -664,25 +735,50 @@ public class RetailerController extends BaseController {
     @LoginRequired
     @Transactional
     public JsonResults cardInfo(@RequestParam Integer type) {
+        String memberId = this.getToken();
+
+        Member member = memberService.getById(memberId);
         if(type == null || type.equals(0)){
             return BuildSuccessJson("卡片类型有误");
         }else{
             BigDecimal cardPrice = new BigDecimal(0);
             String cardNote = "";
-            switch (type){
-                case 1:
-                    cardPrice = this.configService.queryForDecimal("card_price");//单价
-                    cardNote = this.configService.queryForString("card_note");//卡片说明
-                    break;
-                case 2:
-                    cardPrice = this.configService.queryForDecimal("card_price_b");//单价
-                    cardNote = this.configService.queryForString("card_note_b");//卡片说明
-                    break;
-                case 3:
-                    cardPrice = this.configService.queryForDecimal("card_price_c");//单价
-                    cardNote = this.configService.queryForString("card_note_c");//卡片说明
-                    break;
-                default: break;
+            // 事业合伙人
+            if(member.getIsretailer().equals(1)) {
+                switch (type) {
+                    case 1:
+                        cardPrice = this.configService.queryForDecimal("card_price");//单价
+                        cardNote = this.configService.queryForString("card_note");//卡片说明
+                        break;
+                    case 2:
+                        cardPrice = this.configService.queryForDecimal("card_price_b");//单价
+                        cardNote = this.configService.queryForString("card_note_b");//卡片说明
+                        break;
+                    case 3:
+                        cardPrice = this.configService.queryForDecimal("card_price_c");//单价
+                        cardNote = this.configService.queryForString("card_note_c");//卡片说明
+                        break;
+                    default:
+                        break;
+                }
+                // 合伙人
+            }else if(member.getIsretailer().equals(2)) {
+                switch (type) {
+                    case 1:
+                        cardPrice = this.configService.queryForDecimal("card_price_d");//单价
+                        cardNote = this.configService.queryForString("card_note_d");//卡片说明
+                        break;
+                    case 2:
+                        cardPrice = this.configService.queryForDecimal("card_price_e");//单价
+                        cardNote = this.configService.queryForString("card_note_e");//卡片说明
+                        break;
+                    case 3:
+                        cardPrice = this.configService.queryForDecimal("card_price_f");//单价
+                        cardNote = this.configService.queryForString("card_note_f");//卡片说明
+                        break;
+                    default:
+                        break;
+                }
             }
             Integer count = cardOrderService.queryCount(type);//剩余库存
             return BuildSuccessJson(Map.of("cardPrice", cardPrice, "cardNote", cardNote, "totalCount", count), "操作成功，请等待审核");
@@ -813,11 +909,11 @@ public class RetailerController extends BaseController {
         // 判断购买的卡片类型
         BigDecimal unitPrice = new BigDecimal(0);
         if (type.equals(1)){
-            unitPrice = this.configService.queryForDecimal("card_price");
+            unitPrice = this.configService.queryForDecimal("card_price_d");
         }else if(type.equals(2)){
-            unitPrice = this.configService.queryForDecimal("card_price_b");
+            unitPrice = this.configService.queryForDecimal("card_price_e");
         }else if(type.equals(3)){
-            unitPrice = this.configService.queryForDecimal("card_price_c");
+            unitPrice = this.configService.queryForDecimal("card_price_f");
         }else{
 
         }
@@ -1027,27 +1123,102 @@ public class RetailerController extends BaseController {
             @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "limit", value = "每页记录数", required = true),
             @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "type", value = "卡片类型（0全部 1轻奢卡 2贵族卡 3至尊卡）", required = true),
             @ApiImplicitParam(paramType = "query", dataType = "String", name = "memberId", value = "微股东的memberId", required = true),
-            @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "status", value = "是否使用 （0全部 2未使用 3已使用）")
+            @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "status", value = "是否使用 （0全部 2未使用 3已使用）"),
+            @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "share", value = "是否分配 （null全部 0未分配 1已分配）")
     })
 //    @ApiResponses({
 //            @ApiResponse(code = 200, message = "data=[{status:'1 待审核，2 已通过，3 已拒绝'}]"),
 //    })
-    public JsonResults<List<Giftcard>> storeCardPage(@RequestParam Integer page, @RequestParam Integer limit, @RequestParam Integer type, @RequestParam String memberId, Integer status) {
+    public JsonResults<List<Giftcard>> storeCardPage(@RequestParam Integer page, @RequestParam Integer limit, @RequestParam Integer type, @RequestParam String memberId, Integer status, Integer share) {
         // String memberId = this.getToken();
             // 查询购买记录
-        Integer count = this.jdbcTemplate.queryForObject("select count(1) from retailer_giftcard where member_id=?", Integer.class, memberId);
-        if(count > 0) {
-            IPage<Giftcard> data = this.giftcardService.page(
-                    new Page<Giftcard>(page != null ? page : 1, limit != null ? limit : 10),
-                    new QueryWrapper<Giftcard>()
-                            .in("id", this.jdbcTemplate.queryForList("select giftcard_id from retailer_giftcard where member_id=?", String.class, memberId))
-                            .eq(!type.equals(0), "`type`", type)
-                            .eq(!status.equals(0), "`status`", status)
-                            .orderByAsc("serial"));
-            return BuildSuccessJson(data.getRecords(), data.getPages(), "查询成功");
-        }else{
-            return BuildSuccessJson(new ArrayList<Giftcard>(), 0L, "查询成功");
+//        Integer count = this.jdbcTemplate.queryForObject("select count(1) from retailer_giftcard where member_id=?", Integer.class, memberId);
+//        if(count > 0) {
+//            IPage<Giftcard> data = this.giftcardService.page(
+//                    new Page<Giftcard>(page != null ? page : 1, limit != null ? limit : 10),
+//                    new QueryWrapper<Giftcard>()
+//                            .in("id", this.jdbcTemplate.queryForList("select giftcard_id from retailer_giftcard where member_id=?", String.class, memberId))
+//                            .eq(!type.equals(0), "`type`", type)
+//                            .eq(!status.equals(0), "`status`", status)
+//                            .orderByAsc("serial"));
+//            return BuildSuccessJson(data.getRecords(), data.getPages(), "查询成功");
+//        }else{
+//            return BuildSuccessJson(new ArrayList<Giftcard>(), 0L, "查询成功");
+//        }
+        Map<String, Object> map = new HashedMap();
+        map.put("page", page==0||page==null?0:(page-1)*limit);
+        map.put("limit", limit);
+        map.put("type", type);
+        map.put("memberId", memberId);
+        map.put("status", status);
+        map.put("share", share);
+        return BuildSuccessJson(retailerService.queryCardPage(map), retailerService.countCardPage(map), "查询成功");
+
+    }
+
+    @ApiOperation(value = "查看卡片信息", notes = "购买订单列表")
+    @PostMapping("/cardDetail")
+    @LoginRequired
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "token", value = "用户token值", required = true),
+            @ApiImplicitParam(paramType = "query", dataType = "String", name = "memberId", value = "memberId", required = true)
+    })
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "data=[{count:总数量, countUse:已提货数量, countUnUse:未提货数量, countShare:已分配数量, countUnShare:未分配数量}]"),
+    })
+    public JsonResults<List<Map<String, Object>>> cardDetail(@RequestParam String memberId) {
+        // 查询购买记录
+        List<Map<String, Object>> maps = new ArrayList<>();
+        for (int i = 1; i <= 3; i++){
+            Map<String, Object> map = new HashedMap();
+
+            // 查询不同卡片类型的卡片情况
+
+            // 卡片总数量
+            Integer count = retailerGiftcardService.count(new QueryWrapper<RetailerGiftcard>()
+                    .eq("member_id", memberId)
+                    .eq("`type`", i)
+            );
+            map.put("count", count);
+
+            // 卡片已提货数量
+            Integer countUse = retailerGiftcardService.count(new QueryWrapper<RetailerGiftcard>()
+                    .eq("member_id", memberId)
+                    .eq("`type`", i)
+                    .eq("`state`", 1)
+            );
+            map.put("countUse", countUse);
+
+            // 卡片未提货数量
+            Integer countUnUse = retailerGiftcardService.count(new QueryWrapper<RetailerGiftcard>()
+                    .eq("member_id", memberId)
+                    .eq("`type`", i)
+                    .eq("`state`", 0)
+            );
+            map.put("countUnUse", countUnUse);
+
+            // 卡片已分配数量
+            Integer countShare = retailerGiftcardService.count(new QueryWrapper<RetailerGiftcard>()
+                    .eq("member_id", memberId)
+                    .eq("`type`", i)
+                    .eq("`status`", 1)
+            );
+            map.put("countShare", countShare);
+
+            // 卡片未分配数量
+            Integer countUnShare = retailerGiftcardService.count(new QueryWrapper<RetailerGiftcard>()
+                    .eq("member_id", memberId)
+                    .eq("`type`", i)
+                    .eq("`status`", 0)
+            );
+            map.put("countUnShare", countUnShare);
+
+            maps.add(map);
         }
+
+
+
+        return BuildSuccessJson(maps, "查询成功");
 
     }
 

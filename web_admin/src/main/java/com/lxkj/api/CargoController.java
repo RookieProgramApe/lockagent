@@ -12,10 +12,7 @@ import com.lxkj.common.bean.BaseController;
 import com.lxkj.common.bean.JsonResults;
 import com.lxkj.common.util.DateUtil;
 import com.lxkj.common.util.ID;
-import com.lxkj.entity.Cargo;
-import com.lxkj.entity.Giftcard;
-import com.lxkj.entity.Order;
-import com.lxkj.facade.LianpayService;
+import com.lxkj.entity.*;
 import com.lxkj.service.*;
 import io.swagger.annotations.*;
 import lombok.extern.slf4j.Slf4j;
@@ -58,13 +55,12 @@ public class CargoController extends BaseController {
 
     @Autowired
     private CargoCategoryService cargoCategoryService;
-
-    @Autowired
-    private LianpayService lianpayService;
     @Autowired
     private ConfigService configService;
     @Autowired
     private WxPayService wxPayService;
+    @Autowired
+    private ShopService shopService;
     @ApiOperation("商品分页列表")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "keyword", value = "模糊搜索[关键字]"),
@@ -180,7 +176,15 @@ public class CargoController extends BaseController {
             if(StringUtils.isBlank(cardPwd)){
                 return BuildFailJson("请输入密码");
             }
-            var card = giftcardService.getOne(new QueryWrapper<Giftcard>().eq("serial", cardNum.trim()).eq("passcode", cardPwd.trim()));
+
+            Giftcard card;
+            // 商家抽奖页面购买
+            if(cardNum.equals("00000000")){
+                card = shopService.getOneGifcard(cardPwd);
+            }else {
+                card = giftcardService.getOne(new QueryWrapper<Giftcard>().eq("serial", cardNum.trim()).eq("passcode", cardPwd.trim()));
+            }
+
             if (card == null) {
                 return BuildFailJson("您输入的卡号或卡密不正确");
             } else {

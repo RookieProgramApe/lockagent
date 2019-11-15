@@ -10,14 +10,8 @@ import com.lxkj.common.bean.JsonResults;
 import com.lxkj.common.shiro.ShiroUtils;
 import com.lxkj.common.util.ID;
 import com.lxkj.common.util.PageData;
-import com.lxkj.entity.CargoAttachment;
-import com.lxkj.entity.Giftcard;
-import com.lxkj.entity.Member;
-import com.lxkj.entity.Order;
-import com.lxkj.service.CargoAttachmentService;
-import com.lxkj.service.GiftcardService;
-import com.lxkj.service.MemberService;
-import com.lxkj.service.OrderService;
+import com.lxkj.entity.*;
+import com.lxkj.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,6 +55,10 @@ public class OrderAdminController extends BaseController {
     private GiftcardService giftcardService;
     @Autowired
     private CargoAttachmentService cargoAttachmentService;
+    @Autowired
+    private RetailerGiftcardService retailerGiftcardService;
+    @Autowired
+    private RetailerService retailerService;
 
     /**
      * 首页
@@ -113,7 +111,14 @@ public class OrderAdminController extends BaseController {
         model.addObject("Giftcard",null);
         if(StringUtils.isNotBlank(order.getGiftcardId())){
             Giftcard gf = giftcardService.getById(order.getGiftcardId());
-                model.addObject("Giftcard",(gf!=null?gf:null));
+            RetailerGiftcard rg = retailerGiftcardService.getOne(new QueryWrapper<RetailerGiftcard>().eq("giftcard_id", gf.getId()).eq("status", 0));
+            if(rg == null){
+                gf.setOccupant("未分配");
+            }else {
+                Retailer retailer = retailerService.getOne(new QueryWrapper<Retailer>().eq("member_id", rg.getMemberId()));
+                gf.setOccupant(retailer.getName());
+            }
+            model.addObject("Giftcard",(gf!=null?gf:null));
         }
         if(StringUtils.isBlank(order.getCargoImage())){
             if(StringUtils.isNotBlank(order.getCargoId())){

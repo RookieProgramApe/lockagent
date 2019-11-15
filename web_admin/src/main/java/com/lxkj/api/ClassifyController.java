@@ -68,7 +68,7 @@ public class ClassifyController extends BaseController {
     public JsonResults<Classify> queryCargoList(Long page, Long limit, String keyword, String classifyId) {
 
         Classify classify = classifyService.getById(classifyId);
-        List<Cargo> cargoList = cargoService.list(new QueryWrapper<Cargo>().eq("classify_id", classifyId));
+        List<Cargo> cargoList = cargoService.list(new QueryWrapper<Cargo>().eq("classify_id", classifyId).orderByAsc("sort"));
         // 获取商品的封面和附件
         cargoList.stream().forEach(cargo -> cargoService.getData(cargo));
         classify.setCargoList(cargoList);

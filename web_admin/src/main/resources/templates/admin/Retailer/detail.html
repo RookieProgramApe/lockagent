@@ -286,6 +286,14 @@
            cols: [[
                {field: 'serial', title: '卡号', width: 300},
                {field: 'passcode', title: '提货码', width: 350},
+               {field: 'type', title: '卡片类型', width: 100, templet:function(d){
+                       switch(d.type){
+                           case 1: return "<span style='color:rgb(81,186,212);'><b>轻奢卡</b></span>";break;
+                           case 2: return "<span style='color:rgb(184,42,49);'><b>贵族卡</b></span>";break;
+                           case 3: return "<span style='color:rgb(35,61,98);'><b>至尊卡</b></span>";break;
+                           default:return "其他卡";
+                       }
+                   }},
                {field: 'state', title: '状态', width: 100,templet:function (d) {
                        switch(d.state){
                            case 0: return "<span style='color:red;'>未使用</span>";break;

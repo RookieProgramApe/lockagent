@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <title>商品首页</title>
+    <title>商品分类首页</title>
     <%include("/includes/common.html"){}%>
     <%include("/includes/toolbar.html"){}%>
 </head>
@@ -18,24 +18,9 @@
                 <div class="layui-inline">
                     <label class="layui-form-label">关键字</label>
                     <div class="layui-input-block">
-                        <input type="text" name="keyword" value="" placeholder="请输入商品名称" class="layui-input">
+                        <input type="text" name="keyword" value="" placeholder="请输入分类名称" class="layui-input">
                     </div>
                 </div>
-                <!--<div class="layui-inline">-->
-                <!--<label class="layui-form-label">动态选择器</label>-->
-                <!--<div class="layui-input-block">-->
-                <!--<select name="selectId" lay-search="" id="selectId" ></select>-->
-                <!--</div>-->
-                <!--</div>-->
-                <!--<div class="layui-inline">-->
-                <!--<label class="layui-form-label">静态选择器</label>-->
-                <!--<div class="layui-input-block">-->
-                <!--<select name="selectId2" lay-search="" class="layui-select">-->
-                <!--<option value="">-全部-</option>-->
-                <!--<option value="1">选择1</option>-->
-                <!--</select>-->
-                <!--</div>-->
-                <!--</div>-->
             </div>
         </div>
         <!--按钮组-->
@@ -55,63 +40,17 @@
     </div>
 </div>
 
-<!-- 条件筛选 -->
-<script  type="text/html" id="gender">
-    {{# if(d.gender==1){ }}
-    <span>男</span>
-    {{# }else if(d.gender==2){ }}
-    <span>女</span>
-    {{# } }}
-</script>
-
-<!-- 循环遍历 -->
-<script  type="text/html" id="gz">
-    {{#  layui.each(d.ptlist, function(index, item){ }}
-    <span class="layui-badge layui-bg-cyan">{{item}}</span>&nbsp;
-    {{#  }); }}
-</script>
-
 <!-- 开关 -->
 <script type="text/html" id="stateTpl">
     <input type="checkbox" name="status" data-id="{{d.id}}" lay-skin="switch"
            lay-filter="stateFilter" style="width:52px;" lay-text="上架|下架" {{d.status== 1 ? 'checked' : '' }} />
 </script>
 
-<!-- 开关2 -->
-<!--<script type="text/html" id="stateTp2">-->
-<!--    <input type="checkbox" name="isMeal" data-id="{{d.id}}" lay-skin="switch"-->
-<!--           lay-filter="stateFilter2" style="width:52px;" lay-text="是|否" {{d.isMeal== 1 ? 'checked' : '' }} />-->
-<!--</script>-->
-
-<!-- 头像 -->
-<script id="headUrl" type="text/html">
-    <img class="layui-circle" src="{{d.avatarUrl}}" style="width: 50px;height: 100%;"/>
-</script>
-
 <!-- 封面 -->
 <script type="text/html" id="picture">
-    {{#  layui.each(d.attachment, function(index, item){ }}
-    {{# if(item!=null&&item.url!=null&&item.url!=""&&item.type==1){ }}
-    <img src="{{item.url}}"  style="width:100%;height: 100%;" onclick="LookPhoto(this.src)"/>
-    {{# }else{ }}
+    {{# if(d.img!=null&&d.img!=""){ }}
+    <img src="{{ d.img}}"  style="width:200px;height: 50px;" lay-event="lookPhoto"/>
     {{# } }}
-    {{#  }); }}
-</script>
-<script type="text/html" id="imageUrlTpl">
-    {{#  layui.each(d.attachment, function(index, item){ }}
-    {{# if(item!=null&&item.url!=null&&item.url!=""&&item.type==2){ }}
-    <div class="tableOutImage" onclick="LookVideo('{{item.url}}','{{item.id}}')">
-        <img src="{{ item.url}}" height="50" width="100"/>
-        <p><i class="layui-icon" style="font-size: 24px;">&#xe652;</i></p>
-    </div>
-    {{# } }}
-    {{#  }); }}
-    <!--{{#  if(d.attachment !=null&&d.attachment !=''){ }}-->
-    <!--<div class="tableOutImage" lay-event="showPicture">-->
-        <!--<img src="{{ d.attachment}}" height="50" width="100"/>-->
-        <!--<p><i class="layui-icon" style="font-size: 24px;">&#xe652;</i></p>-->
-    <!--</div>-->
-    <!--{{#  } }}-->
 </script>
 
 <!-- 排序-->
@@ -122,10 +61,9 @@
 </script>
 <!-- 增删改-工具模板栏-->
 <script type="text/html" id="toolbar1">
-        <button class="layui-btn layui-btn-xs layui-bg-blue" lay-event="edit" title="修改">修改</button>
-        <button class="layui-btn layui-btn-xs layui-bg-green" lay-event="detail" title="详情">详情</button>
-        <button class="layui-btn layui-btn-xs layui-btn-danger" lay-event="del" title="删除">删除</button>
-        <button class="layui-btn layui-btn-xs layui-btn-warm" lay-event="copyUrl" title="复制链接">复制链接</button>
+    <button class="layui-btn layui-btn-xs layui-bg-blue" lay-event="edit" title="修改">修改</button>
+    <button class="layui-btn layui-btn-xs layui-bg-green" lay-event="detail" title="详情">详情</button>
+    <button class="layui-btn layui-btn-xs layui-btn-danger" lay-event="del" title="删除">删除</button>
 </script>
 <script type="text/javascript">
     layui.use(['index','layer', 'table', 'element', 'form', 'laytpl'], function () {
@@ -134,33 +72,16 @@
         /**创建表格*/
         table.render({
             elem: '#dataList',
-            url: $ctx + '/Cargo/pageList',
+            url: $ctx + '/Classify/pageList',
             method: "POST",
             page: true,
             loading: true,
             cols: [[
-                {field: '', title: '封面',templet:'#picture',width:100, align: 'center'},
-                {field: 'name', title: '商品名称', width: 250},
-                {field: 'classifyName', title: '分类名称', width: 150},
-                {field: 'tellphone', title: '客服电话', width: 150, align: 'center'},
-                {field: 'originalPrice', title: '原价',width:100,align: 'right',sort: true, templet:function (d) {
-                    if(d.originalPrice!=null){
-                        return d.originalPrice.toFixed(2)+"元";
-                    }else{
-                        return "";
-                    }
-                    }},
-                {field: 'salePrice', title: '现价',width:100,align: 'right',sort: true, templet:function (d) {
-                        if(d.salePrice!=null){
-                            return d.salePrice.toFixed(2)+"元";
-                        }else{
-                            return "";
-                        }
-                    }},
-                {field: 'saleNum', title: '销量', width: 100,align: 'right',sort: true},
+                {field: 'img', title: '封面',templet:'#picture',width:200, align: 'center'},
+                {field: 'name', title: '分类名称', width: 250},
+                {field: 'createTime', title: '创建时间', width: 200,sort: true},
                 {field: 'status', title: '是否上架', templet: '#stateTpl', align: 'center', width: 120},
                 {field: 'sort', title: '排序', width: 90, templet: '#ordersTpl', align: 'center'},
-                // {field: 'isMeal', title: '是否选择套餐', templet: '#stateTp2', width: 150, align: 'center'},
                 {field: 'tool', title: '操作', width: 300,align:'center', toolbar: '#toolbar1'}
             ]]
             , limit: 10
@@ -181,7 +102,7 @@
                     if (oldVal != orders) {
                         var id = $(this).attr("data-id");
                         if (orders && id) {
-                            $.ajaxPost('/Cargo/update',{id: id, sort: orders},
+                            $.ajaxPost('/Classify/update',{id: id, sort: orders},
                                 function (data) {
                                     table.reload("dataList");
                                 });
@@ -204,7 +125,7 @@
         };
         //添加
         admin.events.add = function () {
-            LayOpen('添加','/Cargo/toAdd','add');
+            LayOpen('添加','/Classify/toAdd','add');
         };
         //批量删除
         admin.events.delete = function () {
@@ -213,7 +134,7 @@
                 var idsArr=new Array();
                 array.forEach(function(res) {idsArr.push(res.id);});
                 layer.confirm('是否删除选中的数据?', function (index) {
-                    $.ajaxPost( '/Cargo/deleteForList',{ids:idsArr},function (d) {
+                    $.ajaxPost( '/Class/deleteForList',{ids:idsArr},function (d) {
                         table.reload("dataList");
                     });
                 });
@@ -226,7 +147,7 @@
             var name = $(data.elem).attr("name"), id = $(data.elem).attr("data-id"),
                 obj = data.elem, isChecked = data.elem.checked, val = 0;
             if (isChecked) val = 1;
-            $.ajaxPost("/Cargo/update", {id: id, status: val});
+            $.ajaxPost("/Classify/update", {id: id, status: val});
         });
 
         //监听开/关/更新 是否套餐
@@ -242,23 +163,17 @@
             var data = obj.data; //获得当前行数据
             var layEvent = obj.event;
             if (layEvent == 'detail') {//详情
-                LayOpen('详情', '/Cargo/detail?id=' + data.id, 'find');
+                LayOpen('详情', '/Classify/detail?id=' + data.id, 'find');
             }else if(layEvent == 'edit') { //编辑
-                LayOpen('编辑', '/Cargo/toAdd?id=' + data.id,'update');
+                LayOpen('编辑', '/Classify/toAdd?id=' + data.id,'update');
             }else if(layEvent=='lookPhoto'){//查看图片
-                LookPhoto(data.attachment.url);
+                LookPhoto(data.img);
             }else if(layEvent == 'del') { //删除
                 layer.confirm('是否删除该数据?', function (index) {
                     var param = {id: data.id};
-                    $.ajaxPost( '/Cargo/delete', param,function (data) {
+                    $.ajaxPost( '/Classify/delete', param,function (data) {
                         table.reload("dataList");
                     });
-                });
-            }else if(layEvent == 'copyUrl') { //复制链接
-                sessionStorage.setItem("cargoId", {time:3000}, data.id);
-                layer.confirm('复制成功，是否立即前往添加商城轮播图?', function (index) {
-                    LayOpen('添加商城首页轮播图','/Banner/list','add');
-                    return true;
                 });
             }
         });

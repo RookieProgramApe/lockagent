@@ -32,6 +32,17 @@
                         </select>
                     </div>
                 </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">卡片类型</label>
+                    <div class="layui-input-block">
+                        <select name="selectId3" lay-search="" class="layui-select">
+                            <option value="">-全部-</option>
+                            <option value="1">轻奢卡</option>
+                            <option value="2">贵族卡</option>
+                            <option value="3">至尊卡</option>
+                        </select>
+                    </div>
+                </div>
             </div>
         </div>
         <!--按钮组-->
@@ -42,6 +53,24 @@
                     <label class="layui-form-label" style="width:200px;">未分配：${cardNum1}&nbsp;张</label>
                     <label class="layui-form-label" style="width:200px;">已分配：${cardNum2}&nbsp;张</label>
                     <label class="layui-form-label" style="width:200px;">已使用：${cardNum3}&nbsp;张</label>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label" style="width:200px;">轻奢卡: ${cardNum1_0}&nbsp;张</label>
+                    <label class="layui-form-label" style="width:200px;">未分配：${cardNum1_1}&nbsp;张</label>
+                    <label class="layui-form-label" style="width:200px;">已分配：${cardNum1_2}&nbsp;张</label>
+                    <label class="layui-form-label" style="width:200px;">已使用：${cardNum1_3}&nbsp;张</label>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label" style="width:200px;">贵族卡: ${cardNum2_0}&nbsp;张</label>
+                    <label class="layui-form-label" style="width:200px;">未分配：${cardNum2_1}&nbsp;张</label>
+                    <label class="layui-form-label" style="width:200px;">已分配：${cardNum2_2}&nbsp;张</label>
+                    <label class="layui-form-label" style="width:200px;">已使用：${cardNum2_3}&nbsp;张</label>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label" style="width:200px;">至尊卡: ${cardNum3_0}&nbsp;张</label>
+                    <label class="layui-form-label" style="width:200px;">未分配：${cardNum3_1}&nbsp;张</label>
+                    <label class="layui-form-label" style="width:200px;">已分配：${cardNum3_2}&nbsp;张</label>
+                    <label class="layui-form-label" style="width:200px;">已使用：${cardNum3_3}&nbsp;张</label>
                 </div>
                 <!--<button class="layui-btn layui-btn-sm" layadmin-event="add">添加</button>-->
                 <!--<button class="layui-btn layui-btn-sm layui-btn-danger" layadmin-event="delete">删除</button>-->
@@ -114,9 +143,9 @@
                    {field: 'passcode', title: '提货码', width: 150},
                     {field: 'type', title: '类型', width: 100, templet:function (d) {
                             switch(d.type){
-                                case 1: return "<span style='color:green;'>轻奢卡</span>";break;
-                                case 2: return "<span style='color:blue;'>贵族卡</span>";break;
-                                case 3: return "<span style='color:red;'>至尊卡</span>";break;
+                                case 1: return "<span style='color:rgb(81,186,212);'><b>轻奢卡</b></span>";break;
+                                case 2: return "<span style='color:rgb(184,42,49);'><b>贵族卡</b></span>";break;
+                                case 3: return "<span style='color:rgb(35,61,98);'><b>至尊卡</b></span>";break;
                                 default:return"其他卡";
                             }
                         }},

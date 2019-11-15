@@ -41,6 +41,12 @@
             <input type="text" name="name"  value="${Cargo.name}" lay-verify="required" autocomplete="off" id="name" class="layui-input" >
         </div>
     </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">选择分类<font color="red">*</font></label>
+        <div class="layui-input-block">
+            <select name="classifyId" lay-search="" id="classifyId" lay-verify="required" lay-filter="classifyId"></select>
+        </div>
+    </div>
     <div class="layui-form-item optitem">
         <label class="layui-form-label">添加规格<font color="red">*</font></label>
         <div class="layui-input-block">
@@ -171,6 +177,13 @@
                     return "请输入非负整数";
                 }
             }
+        });
+        $("#classifyId").Select({
+            url: $ctx + '/Classify/selectClassifys',
+            data:{},
+            valueName:'id',
+            labelName:'name',
+            def:'${Cargo.classifyId}'
         });
         //富文本
         var um = UE.getEditor('container', {

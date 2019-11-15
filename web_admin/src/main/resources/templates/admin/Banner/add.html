@@ -17,7 +17,7 @@
                 <div id="picker"><i class="layui-icon">&#xe67c;</i>选择文件</div>
             </div>
         </div>
-        <!--附件上传 -->
+
         <div class="layui-form-item">
             <label class="layui-form-label">图片链接到</label>
             <div class="layui-input-block">
@@ -74,10 +74,10 @@
      }
 
     $('#pasteLink').click(() => {
-        let cargoId = localStorage.getItem("cargoId");
+        let cargoId = sessionStorage.getItem("cargoId");
         if(cargoId) {
             $("#link").val('https://aw.wisehuitong.com/detail?id=' + cargoId);
-            localStorage.removeItem("cargoId");
+            // sessionStorage.removeItem("cargoId");
         }else{
             alert('没有要粘贴的内容！');
         }

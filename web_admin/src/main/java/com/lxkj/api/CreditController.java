@@ -163,11 +163,11 @@ public class CreditController extends BaseController {
                 }else{
                     // 不同则返回
                     if(type.equals(1)) {
-                        return BuildFailJson("亲，需要白银会员才可以兑换哦！");
+                        return BuildFailJson("亲，需要轻奢卡才可以兑换哦！");
                     } else if(type.equals(2)) {
-                        return BuildFailJson("亲，需要黄金会员才可以兑换哦！");
+                        return BuildFailJson("亲，需要贵族卡才可以兑换哦！");
                     } else if(type.equals(3)) {
-                        return BuildFailJson("亲，需要钻石会员才可以兑换哦！");
+                        return BuildFailJson("亲，需要至尊卡才可以兑换哦！");
                     } else {
                         return BuildFailJson("亲，现在还无法兑换哦！");
                     }

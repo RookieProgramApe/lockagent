@@ -15,7 +15,7 @@
         <div class="layui-card-header layuiadmin-card-header-auto layui-row">
             <form class="layui-form" id="addForm">
                 <div class="layui-form-item">
-                    <label class="layui-form-label">轻奢来福卡单价<font color="red">*</font></label>
+                    <label class="layui-form-label">轻奢来福卡单价（事业合伙人）<font color="red">*</font></label>
                     <div class="layui-input-inline">
                         <input type="text" name="card_price@${card_price.id}" id="card_price"
                                value="${card_price.value}" lay-verify="required|number" placeholder="元"
@@ -24,13 +24,13 @@
                     <div class="layui-form-mid layui-word-aux">元/套,1套=50张</div>
                 </div>
                 <div class="layui-form-item">
-                    <label class="layui-form-label">轻奢来福卡说明<font color="red">*</font></label>
+                    <label class="layui-form-label">轻奢来福卡说明（事业合伙人）<font color="red">*</font></label>
                     <div class="layui-input-block">
                         <textarea name="card_note@${card_note.id}"  id="card_note" placeholder="将展示在代理商中心界面上" class="layui-textarea">${card_note.value}</textarea>
                     </div>
                 </div>
                 <div class="layui-form-item">
-                    <label class="layui-form-label">贵族来福卡单价<font color="red">*</font></label>
+                    <label class="layui-form-label">贵族来福卡单价（事业合伙人）<font color="red">*</font></label>
                     <div class="layui-input-inline">
                         <input type="text" name="card_price_b@${card_price_b.id}" id="card_price_b"
                                value="${card_price_b.value}" lay-verify="required|number" placeholder="元"
@@ -39,13 +39,13 @@
                     <div class="layui-form-mid layui-word-aux">元/套,1套=50张</div>
                 </div>
                 <div class="layui-form-item">
-                    <label class="layui-form-label">贵族来福卡说明<font color="red">*</font></label>
+                    <label class="layui-form-label">贵族来福卡说明（事业合伙人）<font color="red">*</font></label>
                     <div class="layui-input-block">
                         <textarea name="card_note_b@${card_note_b.id}"  id="card_note_b" placeholder="将展示在代理商中心界面上" class="layui-textarea">${card_note_b.value}</textarea>
                     </div>
                 </div>
                 <div class="layui-form-item">
-                    <label class="layui-form-label">至尊来福卡单价<font color="red">*</font></label>
+                    <label class="layui-form-label">至尊来福卡单价（事业合伙人）<font color="red">*</font></label>
                     <div class="layui-input-inline">
                         <input type="text" name="card_price_c@${card_price_c.id}" id="card_price_c"
                                value="${card_price_c.value}" lay-verify="required|number" placeholder="元"
@@ -54,9 +54,54 @@
                     <div class="layui-form-mid layui-word-aux">元/套,1套=50张</div>
                 </div>
                 <div class="layui-form-item">
-                    <label class="layui-form-label">至尊来福卡说明<font color="red">*</font></label>
+                    <label class="layui-form-label">至尊来福卡说明（事业合伙人）<font color="red">*</font></label>
                     <div class="layui-input-block">
                         <textarea name="card_note_c@${card_note_c.id}"  id="card_note_c" placeholder="将展示在代理商中心界面上" class="layui-textarea">${card_note_c.value}</textarea>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">轻奢来福卡单价（合伙人）<font color="red">*</font></label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="card_price_d@${card_price_d.id}" id="card_price_d"
+                               value="${card_price_d.value}" lay-verify="required|number" placeholder="元"
+                               autocomplete="off" class="layui-input">
+                    </div>
+                    <div class="layui-form-mid layui-word-aux">元/套,1套=50张</div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">轻奢来福卡说明（合伙人）<font color="red">*</font></label>
+                    <div class="layui-input-block">
+                        <textarea name="card_note_d@${card_note_d.id}"  id="card_note_d" placeholder="将展示在代理商中心界面上" class="layui-textarea">${card_note_d.value}</textarea>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">贵族来福卡单价（合伙人）<font color="red">*</font></label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="card_price_e@${card_price_e.id}" id="card_price_e"
+                               value="${card_price_e.value}" lay-verify="required|number" placeholder="元"
+                               autocomplete="off" class="layui-input">
+                    </div>
+                    <div class="layui-form-mid layui-word-aux">元/套,1套=50张</div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">贵族来福卡说明（合伙人）<font color="red">*</font></label>
+                    <div class="layui-input-block">
+                        <textarea name="card_note_e@${card_note_e.id}"  id="card_note_e" placeholder="将展示在代理商中心界面上" class="layui-textarea">${card_note_e.value}</textarea>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">至尊来福卡单价（合伙人）<font color="red">*</font></label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="card_price_f@${card_price_f.id}" id="card_price_f"
+                               value="${card_price_f.value}" lay-verify="required|number" placeholder="元"
+                               autocomplete="off" class="layui-input">
+                    </div>
+                    <div class="layui-form-mid layui-word-aux">元/套,1套=50张</div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">至尊来福卡说明（合伙人）<font color="red">*</font></label>
+                    <div class="layui-input-block">
+                        <textarea name="card_note_f@${card_note_f.id}"  id="card_note_f" placeholder="将展示在代理商中心界面上" class="layui-textarea">${card_note_f.value}</textarea>
                     </div>
                 </div>
                 <!--隐藏域-不用乱动 -->

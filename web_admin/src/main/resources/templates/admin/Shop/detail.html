@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html style="background-color: #fff;">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>详情</title>
+    <%include("/includes/common.html"){}%>
+</head>
+<body class="childrenBody">
+<div class="layui-tab ">
+    <ul class="layui-tab-title">
+        <li class="layui-this">基础信息</li>
+        <li >抽奖列表</li>
+<!--        <li >收益列表</li>-->
+<!--        <li >提现列表</li>-->
+<!--        <li>处理流程记录</li>-->
+    </ul>
+    <div class="layui-tab-content">
+        <div class="layui-tab-item layui-show">
+            <div class="layui-form">
+                <table class="layui-table" lay-skin="" width="100%">
+                    <% if(isNotEmpty(Retailer)){ %>
+                    <tr>
+                        <th  style="background-color: #BFEFFF;text-align: center;" colspan="4">微股东信息</th>
+                    </tr>
+                    <tr>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">姓名：</th>
+                        <td width="40" align="left">${Retailer.name} </td>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">身份证号：</th>
+                        <td width="40" align="left">${Retailer.identity}</td>
+                    </tr>
+                    <tr>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">性别：</th>
+                        <td width="40" align="left">${Retailer.gender}</td>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">安装电话：</th>
+                        <td width="40" align="left">${Retailer.installerMobile}</td>
+                    </tr>
+                    <tr>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">地址：</th>
+                        <td width="40" align="left">${Retailer.city}</td>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">手机号：</th>
+                        <td width="40" align="left">${Retailer.phone}</td>
+                    </tr>
+                    <tr>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">开户人：</th>
+                        <td width="40" align="left">${Retailer.bankHolder}</td>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">开户行：</th>
+                        <td width="40" align="left">${Retailer.bank}</td>
+                    </tr>
+                    <tr>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">银行卡号：</th>
+                        <td width="40" align="left">${Retailer.bankAccountNumber}</td>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">审核状态：</th>
+                        <td width="40" align="left">
+                            <% if(Retailer.status==0){%>
+                            待审核
+                            <% }else if(Retailer.status==1){%>
+                            审核通过
+                            <% }else if(Retailer.status==99){%>
+                            审核不通过
+                            <% }%>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">审核意见：</th>
+                        <td width="40" align="left" >${Retailer.approvalComment}</td>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">钱包余额：</th>
+                        <td width="40" align="left" >${Retailer.balance}</td>
+                    </tr>
+                    <tr>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">创建时间：</th>
+                        <td width="40" align="left" colspan="3">${Retailer.createTime,dateFormat="yyyy-MM-dd HH:mm:ss"}</td>
+                    </tr>
+                    <% } %>
+                    <% if(isNotEmpty(Shop)){ %>
+                    <tr>
+                        <th  style="background-color: #BFEFFF;text-align: center;" colspan="4">商家信息</th>
+                    </tr>
+                    <tr>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">商家名称：</th>
+                        <td width="40" align="left">${Shop.name}</td>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">商家电话：</th>
+                        <td width="40" align="left">${Shop.phone}</td>
+                    </tr>
+                    <tr>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">创建时间：</th>
+                        <td width="40" align="left">${Shop.createTime,dateFormat="yyyy-MM-dd HH:mm:ss"}</td>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">最后一次抽奖：</th>
+                        <td width="40" align="left">${Shop.lastTime,dateFormat="yyyy-MM-dd HH:mm:ss"}</td>
+                    </tr>
+                    <tr>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">抽奖次数：</th>
+                        <td width="40" align="left">${Shop.lotteryCount}</td>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">参与人数：</th>
+                        <td width="40" align="left">${Shop.partakeCount}</td>
+                    </tr>
+                    <% } %>
+                </table>
+            </div>
+        </div>
+        <div class="layui-tab-item">
+            <table id="dataList1" lay-filter="dataList1"></table>
+        </div>
+    </div>
+</div>
+<script type="text/html" id="phone">
+    {{#
+    var phone=d.phone;
+    var a=${so.isAuth()};
+    if(phone&&phone.length>7){
+    if(a){
+    return d.phone;
+    }else{
+    return phone.substr(0,3)+'****'+phone.substr(-4);
+    }
+    }
+    }}
+</script>
+<script type="text/javascript">
+    layui.use(['index','layer', 'table', 'element', 'laytpl'], function () {
+        var table = layui.table, form = layui.form;
+        var admin = layui.admin;
+        /**创建表格*/
+        // 抽奖记录
+        table.render({
+            elem: '#dataList1',
+            url: $ctx + '/Shop/shopLotterys',
+            method: "POST",
+            page: true,
+            loading: true,
+            where:{
+                shopId:'${Shop.id}'
+            },
+            cols: [[
+                {field: 'name', title: '抽奖名称', width: 200},
+                {field: 'partakeCount', title: '参与人数', width: 100},
+                {field: 'winCount', title: '中奖人数', width: 100},
+                {field: 'startTime', title: '开始时间', width: 200},
+                {field: 'endTime', title: '结束时间', width: 200},
+                {field: 'createTime', title: '创建时间', width: 200}
+            ]]
+            , limit: 10
+            , text: {
+                none: '暂无相关数据' //默认：无数据。注：该属性为 layui 2.2.5 开始新增
+            }
+        });
+        //刷新
+        admin.events.refresh = function () {
+            table.reload('dataList');
+        };
+        //监听工具条(编辑|删除)
+        table.on('tool(dataList)', function (obj) { //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
+            var data = obj.data; //获得当前行数据
+            var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+        });
+    })
+</script>
+</body>
+</html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html style="background-color: #fff;">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>详情</title>
+    <%include("/includes/common.html"){}%>
+</head>
+<body class="childrenBody">
+<div class="layui-tab ">
+    <ul class="layui-tab-title">
+        <li class="layui-this">基础信息</li>
+        <li >抽奖列表</li>
+<!--        <li >收益列表</li>-->
+<!--        <li >提现列表</li>-->
+<!--        <li>处理流程记录</li>-->
+    </ul>
+    <div class="layui-tab-content">
+        <div class="layui-tab-item layui-show">
+            <div class="layui-form">
+                <table class="layui-table" lay-skin="" width="100%">
+                    <% if(isNotEmpty(Shop)){ %>
+                    <tr>
+                        <th  style="background-color: #BFEFFF;text-align: center;" colspan="4">商家信息</th>
+                    </tr>
+                    <tr>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">商家名称：</th>
+                        <td width="40" align="left">${Shop.name}</td>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">商家电话：</th>
+                        <td width="40" align="left">${Shop.phone}</td>
+                    </tr>
+                    <tr>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">创建时间：</th>
+                        <td width="40" align="left">${Shop.createTime,dateFormat="yyyy-MM-dd HH:mm:ss"}</td>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">最后一次抽奖：</th>
+                        <td width="40" align="left">${Shop.lastTime,dateFormat="yyyy-MM-dd HH:mm:ss"}</td>
+                    </tr>
+                    <tr>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">抽奖次数：</th>
+                        <td width="40" align="left">${Shop.lotteryCount}</td>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">参与人数：</th>
+                        <td width="40" align="left">${Shop.partakeCount}</td>
+                    </tr>
+                    <% } %><% if(isNotEmpty(Lottery)){ %>
+                    <tr>
+                        <th  style="background-color: #BFEFFF;text-align: center;" colspan="4">抽奖信息</th>
+                    </tr>
+                    <tr>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">抽奖名称：</th>
+                        <td width="40" align="left">${Lottery.name} </td>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">中奖概率：</th>
+                        <td width="40" align="left">${Lottery.chance} </td>
+                    </tr>
+                    <tr>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">起止时间：</th>
+                        <td width="40" align="left">${Lottery.startTime} - ${Lottery.endTime}</td>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">创建时间：</th>
+                        <td width="40" align="left">${Lottery.createTime,dateFormat="yyyy-MM-dd HH:mm:ss"}</td>
+                    </tr>
+                    <tr>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">参与人数：</th>
+                        <td width="40" align="left">${Lottery.partakeCount}</td>
+                        <th width="10" style="background-color: #f2f2f2;text-align: right;">中奖人数：</th>
+                        <td width="40" align="left">${Lottery.winCount}</td>
+                    </tr>
+                    <% } %>
+                </table>
+            </div>
+        </div>
+        <!--        <div class="layui-tab-item">-->
+        <!--            &lt;!&ndash; 头像 &ndash;&gt;-->
+        <!--            <script id="headUrl" type="text/html">-->
+        <!--                <img class="layui-circle" src="{{d.avatar}}" style="width: 50px;height: 100%;" onclick="LookPhoto(this.src)" />-->
+        <!--            </script>-->
+        <!--            <table id="dataList1" lay-filter="dataList1"></table>-->
+        <!--        </div>-->
+        <div class="layui-tab-item">
+            <table id="dataList1" lay-filter="dataList1"></table>
+        </div>
+<!--        <div class="layui-tab-item">-->
+<!--            <table id="dataList2" lay-filter="dataList2"></table>-->
+<!--        </div>-->
+<!--        <div class="layui-tab-item">-->
+<!--            <div class="layui-block">-->
+<!--            </div>-->
+<!--            <br><br>-->
+<!--            <table id="dataList3" lay-filter="dataList3"></table>-->
+<!--        </div>-->
+<!--        <div class="layui-tab-item">-->
+<!--            <table id="dataList4" lay-filter="dataList4"></table>-->
+<!--        </div>-->
+    </div>
+</div>
+<script type="text/html" id="phone">
+    {{#
+    var phone=d.phone;
+    var a=${so.isAuth()};
+    if(phone&&phone.length>7){
+    if(a){
+    return d.phone;
+    }else{
+    return phone.substr(0,3)+'****'+phone.substr(-4);
+    }
+    }
+    }}
+</script>
+<script type="text/javascript">
+    layui.use(['index','layer', 'table', 'element', 'laytpl'], function () {
+        var table = layui.table, form = layui.form;
+        var admin = layui.admin;
+        /**创建表格*/
+        // 抽奖记录
+        table.render({
+            elem: '#dataList1',
+            url: $ctx + '/ShopLottery/lotteryRecords',
+            method: "POST",
+            page: true,
+            loading: true,
+            where:{
+                lotteryId:'${Lottery.id}'
+            },
+            cols: [[
+                {field: 'memberName', title: '抽奖人', width: 200},
+                {field: 'prizeName', title: '奖品', width: 350},
+                {field: 'createTime', title: '抽奖时间', width: 200},
+            ]]
+            , limit: 10
+            , text: {
+                none: '暂无相关数据' //默认：无数据。注：该属性为 layui 2.2.5 开始新增
+            }
+        });
+        //刷新
+        admin.events.refresh = function () {
+            table.reload('dataList');
+        };
+        //监听工具条(编辑|删除)
+        table.on('tool(dataList)', function (obj) { //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
+            var data = obj.data; //获得当前行数据
+            var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+        });
+    })
+</script>
+</body>
+</html>

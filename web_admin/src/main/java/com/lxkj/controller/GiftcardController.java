@@ -9,9 +9,11 @@ import com.lxkj.common.bean.DataGridModel;
 import com.lxkj.common.bean.JsonResults;
 import com.lxkj.common.util.PageData;
 import com.lxkj.entity.Giftcard;
+import com.lxkj.entity.RetailerGiftcard;
 import com.lxkj.service.GiftcardService;
 import com.lxkj.service.RetailerGiftcardService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -21,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.util.Arrays;
+import java.util.*;
 
 /**
  * <p>
@@ -47,8 +49,26 @@ public class GiftcardController extends BaseController {
     public ModelAndView list(ModelAndView model) {
         model.addObject("cardNum",giftcardService.count());
         model.addObject("cardNum1",giftcardService.count(Wrappers.<Giftcard>query().eq("status",1)));
-        model.addObject("cardNum2",retailerGiftcardService.count(null));
+        model.addObject("cardNum2",retailerGiftcardService.count(new QueryWrapper<RetailerGiftcard>().eq("status",0).eq("status", 0)));
         model.addObject("cardNum3",giftcardService.count(Wrappers.<Giftcard>query().eq("status",3)));
+
+        // 轻奢卡
+        model.addObject("cardNum1_0",giftcardService.count(new QueryWrapper<Giftcard>().eq("`type`", 1)));
+        model.addObject("cardNum1_1",giftcardService.count(Wrappers.<Giftcard>query().eq("status",1).eq("`type`", 1)));
+        model.addObject("cardNum1_2",retailerGiftcardService.count(new QueryWrapper<RetailerGiftcard>().eq("status",0).eq("`type`", 1)));
+        model.addObject("cardNum1_3",giftcardService.count(Wrappers.<Giftcard>query().eq("status",3).eq("`type`", 1)));
+
+        // 贵族卡
+        model.addObject("cardNum2_0",giftcardService.count(new QueryWrapper<Giftcard>().eq("`type`", 2)));
+        model.addObject("cardNum2_1",giftcardService.count(Wrappers.<Giftcard>query().eq("status",1).eq("`type`", 2)));
+        model.addObject("cardNum2_2",retailerGiftcardService.count(new QueryWrapper<RetailerGiftcard>().eq("status",0).eq("`type`", 2)));
+        model.addObject("cardNum2_3",giftcardService.count(Wrappers.<Giftcard>query().eq("status",3).eq("`type`", 2)));
+
+        // 至尊卡
+        model.addObject("cardNum3_0",giftcardService.count(new QueryWrapper<Giftcard>().eq("`type`", 3)));
+        model.addObject("cardNum3_1",giftcardService.count(Wrappers.<Giftcard>query().eq("status",1).eq("`type`", 3)));
+        model.addObject("cardNum3_2",retailerGiftcardService.count(new QueryWrapper<RetailerGiftcard>().eq("status",0).eq("`type`", 3)));
+        model.addObject("cardNum3_3",giftcardService.count(Wrappers.<Giftcard>query().eq("status",3).eq("`type`", 3)));
         model.setViewName("/admin/Giftcard/list");
         return model;
     }
@@ -63,11 +83,13 @@ public class GiftcardController extends BaseController {
             PageData params=this.getPageData();
             String keyword = params.getString("keyword");
             String selectId2 = params.getString("selectId2");
+            String selectId3 = params.getString("selectId3");
             IPage<Giftcard> page=giftcardService.page(new Page<Giftcard>(params.getInteger("page"),params.getInteger("limit")),
                 new QueryWrapper<Giftcard>()
                     .eq("1",1)
                     .and(StringUtils.isNotBlank(keyword),i->i.like("serial",keyword).or().like("passcode",keyword))
                     .eq(StringUtils.isNotBlank(selectId2),"status",params.getInteger("selectId2"))
+                    .eq(StringUtils.isNotBlank(selectId3),"`type`", selectId3)
                     .orderByAsc("serial")
               );
             DataGridModel<Giftcard> grid=new DataGridModel(page.getRecords(),page.getTotal());
@@ -82,17 +104,25 @@ public class GiftcardController extends BaseController {
     @ResponseBody
     public DataGridModel<Giftcard> pageListRetailer(String member_id) {
         PageData params=this.getPageData();
-        IPage<Giftcard> page=giftcardService.page(new Page<Giftcard>(params.getInteger("page"),params.getInteger("limit")),
-                new QueryWrapper<Giftcard>()
-                        .select("giftcard.*"
-                                ,"(select rg.state from retailer_giftcard  rg where rg.giftcard_id=giftcard.id and rg.member_id='"+member_id+"') as state",
-                                "(select rg.`status` from retailer_giftcard rg where rg.giftcard_id=giftcard.id and rg.member_id='" + member_id + "') as occupant"
-                        )
-                        .inSql("id","select rg.giftcard_id from retailer_giftcard  rg where rg.member_id='"+member_id+"'")
-                        .orderByAsc("serial")
-                        //.orderByDesc("(select rg.create_time from retailer_giftcard  rg where rg.giftcard_id=giftcard.id and rg.member_id='"+member_id+"')")
-        );
-        DataGridModel<Giftcard> grid=new DataGridModel(page.getRecords(),page.getTotal());
+//        IPage<Giftcard> page=giftcardService.page(new Page<Giftcard>(params.getInteger("page"),params.getInteger("limit")),
+//                new QueryWrapper<Giftcard>()
+//                        .select("giftcard.*"
+//                                ,"(select rg.state from retailer_giftcard  rg where rg.giftcard_id=giftcard.id and rg.member_id='"+member_id+"') as state",
+//                                "(select rg.`status` from retailer_giftcard rg where rg.giftcard_id=giftcard.id and rg.member_id='" + member_id + "') as occupant"
+//                        )
+//                        .inSql("id","select rg.giftcard_id from retailer_giftcard  rg where rg.member_id='"+member_id+"'")
+//                        .orderByAsc("serial")
+//                        //.orderByDesc("(select rg.create_time from retailer_giftcard  rg where rg.giftcard_id=giftcard.id and rg.member_id='"+member_id+"')")
+//        );
+
+        Integer limit = (Integer) params.getInteger("limit") == null?10:params.getInteger("limit");
+        Integer page = (Integer) params.getInteger("page") == null?0:(params.getInteger("page")-1) * limit;
+        Map<String, Object> map = new HashedMap();
+        map.put("page", page);
+        map.put("limit", limit);
+        map.put("memberId", member_id);
+        // 待优化
+        DataGridModel<Giftcard> grid=new DataGridModel(giftcardService.queryGiftcardPageByMemberId(map), giftcardService.countGiftcardPageByMemberId(map));
         return  grid;
     }
 
@@ -100,16 +130,23 @@ public class GiftcardController extends BaseController {
     @ResponseBody
     public DataGridModel<Giftcard> pageListOrder(String order_id) {
         PageData params=this.getPageData();
-        IPage<Giftcard> page=giftcardService.page(new Page<Giftcard>(params.getInteger("page"),params.getInteger("limit")),
-                new QueryWrapper<Giftcard>()
-                        .select("giftcard.*"
-                                ,"(select rg.state from retailer_giftcard  rg where rg.giftcard_id=giftcard.id and rg.order_id='"+order_id+"') as state"
-                        )
-                        .inSql("id","select rg.giftcard_id from retailer_giftcard  rg where rg.order_id='"+order_id+"'")
-                        .orderByAsc("serial")
-                        //.orderByDesc("(select rg.create_time from retailer_giftcard  rg where rg.giftcard_id=giftcard.id and rg.member_id='"+order_id+"')")
-        );
-        DataGridModel<Giftcard> grid=new DataGridModel(page.getRecords(),page.getTotal());
+//        IPage<Giftcard> page=giftcardService.page(new Page<Giftcard>(params.getInteger("page"),params.getInteger("limit")),
+//                new QueryWrapper<Giftcard>()
+//                        .select("giftcard.*"
+//                                ,"(select rg.state from retailer_giftcard  rg where rg.giftcard_id=giftcard.id and rg.order_id='"+order_id+"') as state"
+//                        )
+//                        .inSql("id","select rg.giftcard_id from retailer_giftcard  rg where rg.order_id='"+order_id+"'")
+//                        .orderByAsc("serial")
+//                        //.orderByDesc("(select rg.create_time from retailer_giftcard  rg where rg.giftcard_id=giftcard.id and rg.member_id='"+order_id+"')")
+//        );
+        Integer limit = (Integer) params.getInteger("limit") == null?10:params.getInteger("limit");
+        Integer page = (Integer) params.getInteger("page") == null?0:(params.getInteger("page")-1) * limit;
+
+        Map<String, Object> map = new HashedMap();
+        map.put("page", page);
+        map.put("limit", limit);
+        map.put("orderId", order_id);
+        DataGridModel<Giftcard> grid=new DataGridModel(giftcardService.queryGiftcardPageByOrderId(map), giftcardService.countGiftcardPageByOrderId(map));
         return  grid;
     }
 

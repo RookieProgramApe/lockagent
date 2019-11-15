@@ -266,11 +266,13 @@ public class CardOrderController extends BaseController {
     public DataGridModel<Map> pageList1(String keyword) {
         PageData params = this.getPageData();
         String status = params.getString("status");
+        String cardType = params.getString("cardType");
         IPage<Map> page = cardOrderMapper.cardOrderPage(new Page<CardOrder>(params.getInteger("page"), params.getInteger("limit")),
                 new QueryWrapper<CardOrder>()
                         .eq("`order_type`", 1)
                         .nested(StringUtils.isNotBlank(keyword), i -> i.like("r.name", keyword).or().like("r.phone", keyword))
                         .eq(StringUtils.isNotBlank(status), "co.status", params.getInteger("status"))
+                        .eq(StringUtils.isNotBlank(cardType), "co.card_type", cardType)
                         .orderByDesc("co.create_time"));
         DataGridModel<Map> grid = new DataGridModel(page.getRecords(), page.getTotal());
         return grid;
@@ -300,10 +302,12 @@ public class CardOrderController extends BaseController {
     @ResponseBody
     public DataGridModel<Map> storeCardList(String keyword) {
         PageData params = this.getPageData();
+        String cardType = params.getString("cardType");
         IPage<Map> page = cardOrderMapper.cardOrderPage(new Page<CardOrder>(params.getInteger("page"), params.getInteger("limit")),
                 new QueryWrapper<CardOrder>()
                         .eq("`order_type`", 3)
                         .nested(StringUtils.isNotBlank(keyword), i -> i.like("r.name", keyword).or().like("r.phone", keyword))
+                        .eq(StringUtils.isNotBlank(cardType), "co.card_type", cardType)
 //                        .in("co.status", 1, 2, 3)
                         .orderByAsc("co.status")
                         .orderByDesc("co.create_time"));
@@ -320,10 +324,12 @@ public class CardOrderController extends BaseController {
     @ResponseBody
     public DataGridModel<Map> partnerCardList(String keyword) {
         PageData params = this.getPageData();
+        String cardType = params.getString("cardType");
         IPage<Map> page = cardOrderMapper.cardOrderPage(new Page<CardOrder>(params.getInteger("page"), params.getInteger("limit")),
                 new QueryWrapper<CardOrder>()
                         .eq("`order_type`", 2)
                         .nested(StringUtils.isNotBlank(keyword), i -> i.like("r.name", keyword).or().like("r.phone", keyword))
+                        .eq(StringUtils.isNotBlank(cardType), "co.card_type", cardType)
 //                        .in("co.status", 1, 2, 3)
                         .orderByAsc("co.status")
                         .orderByDesc("co.create_time"));

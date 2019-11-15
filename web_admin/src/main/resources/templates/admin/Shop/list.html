@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <title>卡片订单首页</title>
+    <title>抽奖商家列表</title>
     <%include("/includes/common.html"){}%>
     <%include("/includes/toolbar.html"){}%>
 </head>
@@ -18,18 +18,7 @@
                 <div class="layui-inline">
                     <label class="layui-form-label">关键字</label>
                     <div class="layui-input-block">
-                        <input type="text" name="keyword" value="" placeholder="请输入姓名|手机号" class="layui-input">
-                    </div>
-                </div>
-                <div class="layui-inline">
-                    <label class="layui-form-label">卡片类型</label>
-                    <div class="layui-input-block">
-                        <select name="cardType" lay-search="" class="layui-select">
-                            <option value="">-全部-</option>
-                            <option value="1">轻奢卡</option>
-                            <option value="2">贵族卡</option>
-                            <option value="3">至尊卡</option>
-                        </select>
+                        <input type="text" name="keyword" value="" placeholder="请输入姓名|联系电话" class="layui-input">
                     </div>
                 </div>
             </div>
@@ -37,7 +26,7 @@
         <!--按钮组-->
         <div class="layui-row list_btnGroup">
             <div style="float: left;">
-                <!--<button class="layui-btn layui-btn-sm" layadmin-event="add">添加</button>-->
+                <button class="layui-btn layui-btn-sm" layadmin-event="add">添加</button>
                 <!--<button class="layui-btn layui-btn-sm layui-btn-danger" layadmin-event="delete">删除</button>-->
             </div>
             <div class="layui-btn-group" style="float: right;">
@@ -62,6 +51,13 @@
     <span>女</span>
     {{# } }}
 </script>
+
+<!-- 循环遍历 -->
+<script type="text/html" id="gz">
+    {{#  layui.each(d.ptlist, function(index, item){ }}
+    <span class="layui-badge layui-bg-cyan">{{item}}</span>&nbsp;
+    {{#  }); }}
+</script>
 <script type="text/html" id="phone">
     {{#
     var phone=d.phone;
@@ -75,13 +71,19 @@
     }
     }}
 </script>
-<!-- 循环遍历 -->
-<script type="text/html" id="gz">
-    {{#  layui.each(d.ptlist, function(index, item){ }}
-    <span class="layui-badge layui-bg-cyan">{{item}}</span>&nbsp;
-    {{#  }); }}
+<script type="text/html" id="idcard">
+    {{#
+    var phone=d.identity;
+    var a=${so.isAuth()};
+    if(phone&&phone.length>7){
+    if(a){
+    return d.phone;
+    }else{
+    return phone.substr(0,3)+'********'+phone.substr(-4);
+    }
+    }
+    }}
 </script>
-
 <!-- 开关 -->
 <script type="text/html" id="stateTpl">
     <input type="checkbox" name="state" data-id="{{d.id}}" lay-skin="switch"
@@ -90,84 +92,76 @@
 
 <!-- 头像 -->
 <script id="headUrl" type="text/html">
-    {{# if(d.avatar!=null&&d.avatar!=""){ }}
-    <img class="layui-circle" src="{{d.avatar}}" style="width: 50px;height: 100%;" onclick="LookPhoto(this.src)"/>
-    {{# } }}
+    <img class="layui-circle" src="{{d.avatarUrl}}" style="width: 50px;height: 100%;"/>
 </script>
 
+<!-- 封面 -->
+<script type="text/html" id="picture">
+    <img src="{{ d.advertUrl}}" style="width:100%;height: 100%;" lay-event="lookPhoto"/>
+</script>
+
+<!-- 排序-->
+<script type="text/html" id="ordersTpl">
+    <input name="orders" value="{{d.orders}}" style="height: 28px;" data-oval="{{d.orders}}" data-id="{{d.id}}"
+           class="layui-input sort" onkeyup="value=value.replace(/[^\d]/g,'')"
+           keydown="value=value.replace(/[^\d]/g,'')">
+</script>
 <!-- 增删改-工具模板栏-->
 <script type="text/html" id="toolbar1">
-    <button class="layui-btn layui-btn-xs layui-bg-blue" lay-event="detail" title="详情">详情</button>
-    {{# if(d.status==4){ }}
-    <button class="layui-btn layui-btn-xs layui-btn-danger" lay-event="check" title="终审">终审</button>
-    {{# } }}
+    <button class="layui-btn layui-btn-xs layui-bg-blue" lay-event="edit" title="修改">修改</button>
+    <button class="layui-btn layui-btn-xs layui-bg-green" lay-event="detail" title="详情">详情</button>
+    <button class="layui-btn layui-btn-xs layui-btn-danger" lay-event="del" title="删除">删除</button>
 </script>
 <script type="text/javascript">
+    var table;
     layui.use(['index', 'layer', 'table', 'element', 'form', 'laytpl'], function () {
-        var table = layui.table, form = layui.form;
+        table = layui.table;
+        var form = layui.form;
         var admin = layui.admin;
         /**创建表格*/
         table.render({
             elem: '#dataList',
-            url: $ctx + '/CardOrder/storeCardList',
+            url: $ctx + '/Shop/pageList',
             method: "POST",
             page: true,
             loading: true,
             cols: [[
-                {field: 'tool', title: '操作', width: 120, toolbar: '#toolbar1'},
-                {
-                    field: 'status', title: '状态', width: 100, templet: function (d) {
-                        switch (d.status) {
-                            case 1:
-                                return "待审核";
-                                break;
-                            case 2:
-                                return "<span style='color:green;'><b>审核通过</b></span>";
-                                break;
-                            case 3:
-                                return "<span style='color:red;'>拒绝</span>";
-                                break;
-                            default:
-                                return "";
-                        }
-                    }
-                },
-                {field: 'avatar', title: '头像', templet: '#headUrl', width: 100, align: 'center'},
-                {field: 'nickname', title: '昵称', width: 100, align: 'center'},
-                {field: 'name', title: '姓名', width: 100},
-                {field: 'phone', title: '手机号码', width: 120,templet:'#phone'},
-                {field: 'count', title: '购买数量(张)', width: 150, align: 'right', sort: true},
-                {field: 'card_type', title: '卡片类型', width: 100, templet:function(d){
-                        switch(d.card_type){
-                            case 1: return "<span style='color:rgb(81,186,212);'><b>轻奢卡</b></span>";break;
-                            case 2: return "<span style='color:rgb(184,42,49);'><b>贵族卡</b></span>";break;
-                            case 3: return "<span style='color:rgb(35,61,98);'><b>至尊卡</b></span>";break;
-                            default:return "其他卡";
-                        }
-                    }},
-                {field: 'lb', title: '发货方式', width: 100, templet:function(d){
-                        switch(d.lb){
-                            case 0:return "<span>自发</span>";break;
-                            case 1:return "<span>代发</span>";break;
-                            default:return "其他";
-                        }
-                    }},
-                // {
-                //     field: 'total_price', title: '金额(元)', width: 100, templet: function (d) {
-                //         if (d.total_price != null) {
-                //             return d.total_price.toFixed(2);
-                //         } else {
-                //             return "";
-                //         }
-                //     }
-                // },
-                {field: 'create_time', title: '创建时间', width: 200}
-
+                {field: 'name', title: '商家名称', width: 200},
+                {field: 'phone', title: '联系号码', width: 200,templet:'#phone'},
+                {field: 'createTime', title: '创建时间', width: 200},
+                // {field: 'shareCount', title: '分享人数', width: 100},  //通过商家链接进入商城的新用户
+                // {field: 'clickCount', title: '点击次数', width: 100},
+                {field: 'lotteryCount', title: '抽奖次数', width: 100},
+                {field: 'partakeCount', title: '参与人数', width: 100},
+                {field: 'lastTime', title: '最后一次抽奖', width: 200},
+                {field: 'tool', title: '操作', width: 200,align:'center', toolbar: '#toolbar1'}
             ]]
             , limit: 10
             , text: {
                 none: '暂无相关数据'
             }
+            // , done: function (res, curr, count) {
+            //     //排序
+            //     $("input[name=orders]").on("focus", function () {
+            //         $(this).attr("data-oval", $(this).val()); //将当前值存入自定义属性
+            //     }).on("blur", function () {
+            //         var oldVal = $(this).attr("data-oval"); //获取原值
+            //         var orders = $(this).val(); //获取当前值
+            //         if (!orders) {
+            //             $(this).val(oldVal);
+            //             return;
+            //         }
+            //         if (oldVal != orders) {
+            //             var id = $(this).attr("data-id");
+            //             if (orders && id) {
+            //                 $.ajaxPost('/Retailer/update', {id: id, orders: orders},
+            //                     function (data) {
+            //                         table.reload("dataList");
+            //                     });
+            //             }
+            //         }
+            //     });
+            // }
         });
         //搜索
         form.on('submit(searchBtn)', function (data) {
@@ -190,7 +184,7 @@
 
         //添加
         admin.events.add = function () {
-            LayOpen('添加', '/CardOrder/toAdd', 'add');
+            LayOpen('添加', '/Shop/toAdd', 'add');
         };
         //批量删除
         admin.events.delete = function () {
@@ -201,7 +195,7 @@
                     idsArr.push(res.id);
                 });
                 layer.confirm('是否删除选中的数据?', function (index) {
-                    $.ajaxPost('/CardOrder/deleteForList', {ids: idsArr}, function (d) {
+                    $.ajaxPost('/Retailer/deleteForList', {ids: idsArr}, function (d) {
                         table.reload("dataList");
                     });
                 });
@@ -214,7 +208,7 @@
             var name = $(data.elem).attr("name"), id = $(data.elem).attr("data-id"),
                 obj = data.elem, isChecked = data.elem.checked, val = 1;
             if (isChecked) val = 2;
-            $.ajaxPost("/CardOrder/update", {id: id, state: val});
+            $.ajaxPost("/Retailer/update", {id: id, state: val});
         });
 
         //监听工具条(查询|编辑|删除|查看图片)
@@ -222,15 +216,13 @@
             var data = obj.data; //获得当前行数据
             var layEvent = obj.event;
             if (layEvent == 'detail') {//详情
-                LayOpen('详情', '/CardOrder/detail?id=' + data.id, 'find');
-            } else if (layEvent == 'check') { //编辑
-                LayOpen('终审', '/CardOrder/toCheck2?id=' + data.id, 'update');
-            } else if (layEvent == 'lookPhoto') {//查看图片
-                LookPhoto(data.advertUrl);
+                LayOpen('详情', '/Shop/detail?id=' + data.id, 'find');
+            } else if (layEvent == 'edit') { //编辑
+                LayOpen('编辑', '/Shop/toAdd?id=' + data.id, 'update');
             } else if (layEvent == 'del') { //删除
                 layer.confirm('是否删除该数据?', function (index) {
                     var param = {id: data.id};
-                    $.ajaxPost('/CardOrder/delete', param, function (data) {
+                    $.ajaxPost('/Shop/delete', param, function (data) {
                         table.reload("dataList");
                     });
                 });
@@ -238,7 +230,16 @@
         });
         //表单更新
         form.render();
+
     });
+
+    //刷新表格
+    function reloadTable() {
+        table.reload('dataList', {
+            where: $('#searchForm').serializeJSON(),
+            page: {curr: 1}
+        });
+    }
 </script>
 
 </body>

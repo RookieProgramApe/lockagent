@@ -132,6 +132,12 @@ public class ConfigController extends BaseController {
         model.addObject("card_note_b",configService.getOne(Wrappers.<Config>query().eq("`key`","card_note_b")));
         model.addObject("card_price_c",configService.getOne(Wrappers.<Config>query().eq("`key`","card_price_c")));
         model.addObject("card_note_c",configService.getOne(Wrappers.<Config>query().eq("`key`","card_note_c")));
+        model.addObject("card_price_d",configService.getOne(Wrappers.<Config>query().eq("`key`","card_price_d")));
+        model.addObject("card_note_d",configService.getOne(Wrappers.<Config>query().eq("`key`","card_note_d")));
+        model.addObject("card_price_e",configService.getOne(Wrappers.<Config>query().eq("`key`","card_price_e")));
+        model.addObject("card_note_e",configService.getOne(Wrappers.<Config>query().eq("`key`","card_note_e")));
+        model.addObject("card_price_f",configService.getOne(Wrappers.<Config>query().eq("`key`","card_price_f")));
+        model.addObject("card_note_f",configService.getOne(Wrappers.<Config>query().eq("`key`","card_note_f")));
         model.setViewName("/admin/Config/add4");
         return model;
     }
