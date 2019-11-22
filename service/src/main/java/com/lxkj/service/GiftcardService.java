@@ -55,4 +55,18 @@ public class GiftcardService extends ServiceImpl<GiftcardMapper, Giftcard> {
               return giftcardMapper.countGiftcardPageByMemberId(map);
 
        }
+
+       // 根据memberid查询分配的卡片信息
+       public List<Giftcard> queryGiftcardPage(Map<String, Object> map) {
+
+              return giftcardMapper.queryGiftcardPage(map);
+
+       }
+
+       // 根据memberid查询分配的卡片信息
+       public Long countGiftcardPage(Map<String, Object> map) {
+
+              return giftcardMapper.countGiftcardPage(map);
+
+       }
  }

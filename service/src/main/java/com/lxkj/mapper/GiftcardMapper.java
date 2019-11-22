@@ -30,4 +30,9 @@ public interface GiftcardMapper extends BaseMapper<Giftcard> {
 
         Long countGiftcardPageByMemberId(Map<String, Object> map);
 
+        // 优化后的分页查询卡片
+        List<Giftcard> queryGiftcardPage(Map<String, Object> map);
+
+        Long countGiftcardPage(Map<String, Object> map);
+
 }

@@ -33,7 +33,7 @@
         </select>
 
         <select id="queryGiftcardPageByMemberId" resultMap="BaseResultMap" parameterType="java.util.Map">
-            SELECT g.*, rg.state occupant, rg.`status` state
+            SELECT g.*, rg.state state, rg.`status` occupant
             FROM giftcard g INNER JOIN (select rg.giftcard_id, rg.state, rg.`status` from retailer_giftcard rg where rg.member_id=#{memberId, jdbcType=VARCHAR}) rg
             on g.id=rg.giftcard_id
             ORDER BY serial ASC LIMIT #{page, jdbcType=INTEGER}, #{limit, jdbcType=INTEGER}
@@ -43,6 +43,48 @@
             SELECT count(1)
             FROM giftcard g INNER JOIN (select rg.giftcard_id, rg.state, rg.`status` from retailer_giftcard rg where rg.member_id=#{memberId, jdbcType=VARCHAR}) rg
             on g.id=rg.giftcard_id
+        </select>
+
+        <select id="queryGiftcardPage" resultMap="BaseResultMap" parameterType="java.util.Map">
+            SELECT g.*, r.name occupant
+            FROM giftcard g LEFT JOIN retailer_giftcard rg on g.id=rg.giftcard_id LEFT JOIN retailer r on rg.member_id=r.member_id
+            <where>
+                r.`type`=1
+                <if test="keyword!=null and keyword!=''">
+                    and g.serial like concat('%', #{keyword, jdbcType=VARCHAR}, '%')
+                </if>
+                <if test="status!=null and status!=''">
+                    and g.`status` = #{status, jdbcType=VARCHAR}
+                </if>
+                <if test="type!=null and type!=''">
+                    and g.`type` = #{type, jdbcType=VARCHAR}
+                </if>
+                <if test="occupant!=null and occupant!=''">
+                    and r.`name` like concat('%', #{occupant, jdbcType=VARCHAR}, '%')
+                </if>
+            </where>
+            order by serial asc
+            LIMIT #{page, jdbcType=INTEGER}, #{limit, jdbcType=INTEGER}
+        </select>
+
+        <select id="countGiftcardPage" resultType="Long" parameterType="java.util.Map">
+            SELECT count(1)
+            FROM giftcard g LEFT JOIN retailer_giftcard rg on g.id=rg.giftcard_id LEFT JOIN retailer r on rg.member_id=r.member_id
+            <where>
+                r.`type`=1
+                <if test="keyword!=null and keyword!=''">
+                    and g.serial like concat('%', #{keyword, jdbcType=VARCHAR}, '%')
+                </if>
+                <if test="status!=null and status!=''">
+                    and g.`status` = #{status, jdbcType=VARCHAR}
+                </if>
+                <if test="type!=null and type!=''">
+                    and g.`type` = #{type, jdbcType=VARCHAR}
+                </if>
+                <if test="occupant!=null and occupant!=''">
+                    and r.`name` like concat('%', #{occupant, jdbcType=VARCHAR}, '%')
+                </if>
+            </where>
         </select>
 
 </mapper>

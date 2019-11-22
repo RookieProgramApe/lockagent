@@ -48,9 +48,9 @@ public class ShopService extends ServiceImpl<ShopMapper, Shop> {
         Integer count = rgService.count(new QueryWrapper<RetailerGiftcard>().eq("member_id", shop.getMemberId()).eq("state", 0).eq("`type`", 1));
 
         if(count > 0) {
-            if(count <= 90){
+            if(count <= 10){
                 // 补足卡片
-                this.buycard(shop.getRetailerId(), 10);
+                this.buycard(shop.getRetailerId(), 90);
             }
             // 查询一张轻奢卡片
             return this.jdbcTemplate.queryForObject("select * from giftcard where id=(select giftcard_id from retailer_giftcard where member_id=? and state=0 and `type`=1 LIMIT 1)",

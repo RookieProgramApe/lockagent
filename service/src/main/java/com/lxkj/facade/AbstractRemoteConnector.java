@@ -2,6 +2,8 @@ package com.lxkj.facade;
 
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.lxkj.common.util.Strings;
 import com.lxkj.common.util.collection.Lists;
 import java.io.IOException;
@@ -11,10 +13,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.security.*;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.apache.http.HttpEntity;
@@ -73,6 +72,23 @@ public abstract class AbstractRemoteConnector {
     return result;
   }
 
+  public static String sendPost1(String url, String json) throws ClientProtocolException, IOException,
+          UnrecoverableKeyException, KeyManagementException, KeyStoreException, NoSuchAlgorithmException {
+    HttpPost httpPost = new HttpPost(url + "?" + json);
+    httpPost.addHeader("Content-Type", "application/json;charset=UTF-8");
+
+    // 设置请求器的配置
+    RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(socketTimeout)
+            .setConnectTimeout(connectTimeout).build();
+    httpPost.setConfig(requestConfig);
+
+    org.apache.http.client.HttpClient httpClient = HttpClients.createDefault();
+    org.apache.http.HttpResponse response = httpClient.execute(httpPost);
+    HttpEntity entity = response.getEntity();
+    String result = EntityUtils.toString(entity, "UTF-8");
+    return result;
+  }
+
 
   protected String formData(final Map<String, ?> param) {
     return param.entrySet().stream()
@@ -100,6 +116,24 @@ public abstract class AbstractRemoteConnector {
       logger.error(e.getLocalizedMessage(), e);
       return null;
     }
+  }
+
+  protected List<Map> formData(String result) {
+    JSONObject res = JSONObject.parseObject(result);
+    JSONArray array = res.getJSONArray("data");
+//    System.out.println("result====>" + result);
+//    System.out.println("res====>" + res);
+//    System.out.println("array====>" + array);
+
+    for (int i = 0; i < array.size(); i++){
+      String upload_Timearray = array.getJSONObject(i).getString("ftime");
+      String processInfo = array.getJSONObject(i).getString("context");
+      array.getJSONObject(i).put("upload_Time", upload_Timearray);
+      array.getJSONObject(i).put("processInfo", processInfo);
+    }
+
+
+    return array.toJavaList(Map.class);
   }
 
 }

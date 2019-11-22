@@ -47,9 +47,13 @@ public class Order extends Model<Order> {
     private String memberId;
 
 
-    @ApiModelProperty(value = "1 临售商品，2 砍价商品")
+    @ApiModelProperty(value = "1 临售商品，2 砍价商品 3 积分商品")
     @TableField("type")
     private Integer type;
+
+    @ApiModelProperty(value = "订单类型名称")
+    @TableField(exist = false)
+    private String typeName;
 
 
     @ApiModelProperty(value = "购买商品时使用的卡片ID",hidden = true)
@@ -89,9 +93,13 @@ public class Order extends Model<Order> {
     private BigDecimal point;
 
 
-    @ApiModelProperty(value = "2 已支付，3 已发货，4 已完成")
+    @ApiModelProperty(value = "1 待支付，2 已支付，3 已发货，4 已完成")
     @TableField("status")
     private Integer status;
+
+    @ApiModelProperty(value = "状态名称")
+    @TableField(exist = false)
+    private String statusName;
 
 
     @ApiModelProperty(value = "快递公司")

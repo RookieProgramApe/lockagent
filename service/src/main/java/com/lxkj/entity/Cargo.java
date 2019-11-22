@@ -146,6 +146,10 @@ public class Cargo extends Model<Cargo> {
   @TableField("is_adv")
   private Integer isAdv;
 
+  @ApiModelProperty(value = "是否分销 （0不分销 1分销）")
+  @TableField("is_retail")
+  private Integer isRetail;
+
   @ApiModelProperty(value = "卡片类型 （0全部 1轻奢 2贵族 3至尊）")
   @TableField("card_type")
   private Integer cardType;

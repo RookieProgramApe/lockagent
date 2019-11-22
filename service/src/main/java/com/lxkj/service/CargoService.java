@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -56,6 +57,16 @@ public class CargoService extends ServiceImpl<CargoMapper, Cargo> {
         p.setCategoryList(categoryList);
     }
 
+    // 格式化首页商品数据
+    public void getIndexCargoData(Cargo p) {
+        //封面
+        var picture = this.cargoAttachmentService.getOne(Wrappers.<CargoAttachment>query().select("url").eq("cargo_id", p.getId()).eq("type", 1)).getUrl();
+        p.setPicture(picture == null ? "" : picture);
+        //展示销量
+        int i = getSaleNum(p.getId());
+        p.setSaleNum(p.getBaseSaleCount() + i);
+    }
+
 
     /**
      * 获取规格
@@ -70,8 +81,8 @@ public class CargoService extends ServiceImpl<CargoMapper, Cargo> {
      * 获得真实销量
      */
     public Integer getSaleNum(String id) {
-        int i = orderService.count(new QueryWrapper<Order>().eq("cargo_id", id).in("status", 2,3,4));
-        return i;
+        // int i = orderService.count(new QueryWrapper<Order>().eq("cargo_id", id).in("status", 2,3,4));
+        return orderService.count(new QueryWrapper<Order>().eq("cargo_id", id).in("status", 2,3,4));
     }
 
 
@@ -82,5 +93,13 @@ public class CargoService extends ServiceImpl<CargoMapper, Cargo> {
         var i=warehousingMapper.sumSku(skuId);
         new CargoSku().setId(skuId).setInventory(i).updateById();
 
+    }
+
+    public List<Cargo> getCargoList(Map<String, Object> map){
+        return this.baseMapper.getCargoList(map);
+    }
+
+    public Long countCargoList(Map<String, Object> map){
+        return this.baseMapper.countCargoList(map);
     }
 }

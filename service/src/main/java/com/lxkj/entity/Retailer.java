@@ -47,6 +47,9 @@ public class Retailer extends Model<Retailer> {
     @TableField("name")
     private String name;
 
+    @ApiModelProperty(value = "商家店的名字")
+    @TableField("store_name")
+    private String storeName;
 
     @ApiModelProperty(value = "性别")
     @TableField("gender")

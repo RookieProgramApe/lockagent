@@ -21,6 +21,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 /**
  * <p>
@@ -250,11 +251,12 @@ public class CardOrderService extends ServiceImpl<CardOrderMapper, CardOrder> {
         // 获取商家信息
         Retailer retailer = this.retailerService.getOne(Wrappers.<Retailer>query().eq("`id`", retailerId));
         // 获取商家的事业合伙人信息
-        Retailer retailer1 = retailerService.getOne(new QueryWrapper<Retailer>().eq("member_id", retailer.getParentMemberId()));
+//        Retailer retailer1 = retailerService.getOne(new QueryWrapper<Retailer>().eq("member_id", retailer.getParentMemberId()));
         // 默认为轻奢卡
         int cardType = 1;
         int i = retailerGiftcardService.count(new QueryWrapper<RetailerGiftcard>()
-                    .eq("member_id", retailer1.getMemberId())
+//                    .eq("member_id", retailer1.getMemberId())
+                    .eq("member_id", "16f76f03610398f9c7bd5ecc625cfcfd")
                     .eq("`type`", cardType)
                     .eq("`status`", 0)
                     .eq("`state`", 0));//卡片剩余库存
@@ -263,7 +265,8 @@ public class CardOrderService extends ServiceImpl<CardOrderMapper, CardOrder> {
                 return new JsonResults(200, "卡片库存不足");
             }
             List<RetailerGiftcard> addList = jdbcTemplate.query("select rg.*,(select g.serial from giftcard g where g.id=rg.giftcard_id) as serial from retailer_giftcard rg where rg.member_id=? and rg.`status`=0 and rg.`state`=0 and rg.`type`=? ORDER BY serial limit ?",
-                    new BeanPropertyRowMapper<>(RetailerGiftcard.class), retailer1.getMemberId(), cardType, sum);
+//                    new BeanPropertyRowMapper<>(RetailerGiftcard.class), retailer1.getMemberId(), cardType, sum);
+                    new BeanPropertyRowMapper<>(RetailerGiftcard.class), "16f76f03610398f9c7bd5ecc625cfcfd", cardType, sum);
 
             addList.stream().forEach(p -> {
                 //新增关联
@@ -318,25 +321,11 @@ public class CardOrderService extends ServiceImpl<CardOrderMapper, CardOrder> {
                         .insert();
             }
             Cargo cargo = cargoService.getById(o.getCargoId());
-//            if(o.getType().equals(3)){
-//
-//
-//                //扣除积分
-//                BigDecimal point = cargo.getPoint();
-//                member.setIntegral(member.getIntegral().subtract(point));
-//                mmberService.updateIntegral(member);
-//
-//                //积分表插入一条数据
-//                MemberCredit credit1 = new MemberCredit();
-//                credit1.setAmount(cargo.getSalePrice());
-//                credit1.setMemberId(member.getId());
-//                credit1.setOrderId(o.getId());
-//                credit1.setPoint(point);
-//                credit1.setType(-1);
-//                credit1.setTitle("兑换了礼品：" + cargo.getName());
-//                credit1.setCreateTime(new Date());
-//                credit1.insert();
-//            }
+
+            // 更新虚拟销量 随机数1-5
+            cargo.setBaseSaleCount(cargo.getBaseSaleCount() + (new Random().nextInt(5) + 1));
+            cargoService.update(new UpdateWrapper<Cargo>().set("base_sale_count", cargo.getBaseSaleCount() + new Random().nextInt(10)).eq("`id`", cargo.getId()));
+
             //增加消费积分流水
             if (o.getCredit().compareTo(BigDecimal.ZERO) > 0) {
                 integral = integral.subtract(o.getCredit());
@@ -373,7 +362,7 @@ public class CardOrderService extends ServiceImpl<CardOrderMapper, CardOrder> {
 //                                figure = retailerReward.getFigure();
 //                            }else if(cargo.getCardType().equals(2)) {
 //                                figure = retailerReward.getFigureb();
-//                            }else if(cargo.getCardType().equals(3)) {
+//                            }else if(cargo.getCardType().equals(3)) {+
 //                                figure = retailerReward.getFigurec();
 //                            }else{
 //                                figure = new BigDecimal(0);
@@ -402,13 +391,6 @@ public class CardOrderService extends ServiceImpl<CardOrderMapper, CardOrder> {
                         }
                     }
                 });
-//                if(retailerGiftcard1 == null){
-//                    // 未分配给商家
-//
-//                }else{
-//                    // 已分配给商家
-//
-//                }
 
 
             }
@@ -474,7 +456,10 @@ public class CardOrderService extends ServiceImpl<CardOrderMapper, CardOrder> {
                         .insert();
             }
 
-            // Cargo cargo = cargoService.getById(o.getCargoId());
+            Cargo cargo = cargoService.getById(o.getCargoId());
+            // 更新虚拟销量 随机数1-5
+            cargo.setBaseSaleCount(cargo.getBaseSaleCount() + (new Random().nextInt(5) + 1));
+            cargoService.update(new UpdateWrapper<Cargo>().set("base_sale_count", cargo.getBaseSaleCount() + new Random().nextInt(10)).eq("`id`", cargo.getId()));
         }
     }
 

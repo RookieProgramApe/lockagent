@@ -8,7 +8,8 @@
     <result column="name" property="name"/>
     <result column="original_price" property="originalPrice"/>
     <result column="sale_price" property="salePrice"/>
-    <result column="base_sale_count" property="baseSaleCount"/>
+<!--    <result column="base_sale_count" property="baseSaleCount"/>-->
+    <result column="base_sale_count" property="saleNum"/>
     <result column="description" property="description"/>
     <result column="status" property="status"/>
     <result column="create_time" property="createTime"/>
@@ -19,4 +20,37 @@
     id, `name`, original_price, sale_price, base_sale_count, `description`, create_time
   </sql>
 
+
+  <select id="getCargoList" resultMap="BaseResultMap" parameterType="java.util.Map">
+    SELECT c.*, ca.url picture FROM cargo c LEFT JOIN cargo_attachment ca on c.id=ca.cargo_id
+    <where>
+      c.status = 1 AND c.type = 1 AND c.isdel = 0
+      <if test="keyword!=null and keyword!=''">
+        and c.name like concat('%', #{keyword, jdbcType=VARCHAR}, '%')
+      </if>
+      <if test="isRetail!=null and isRetail!=''">
+        and c.is_retail = #{isRetail, jdbcType=INTEGER}
+      </if>
+      <if test="classifyId!=null and classifyId!=''">
+        and c.classify_id = #{classifyId, jdbcType=VARCHAR}
+      </if>
+    </where>
+    ORDER BY c.sort ASC LIMIT #{page, jdbcType=INTEGER}, #{limit, jdbcType=INTEGER}
+  </select>
+
+  <select id="countCargoList" resultType="Long" parameterType="java.util.Map">
+    SELECT count(1) FROM cargo c LEFT JOIN cargo_attachment ca on c.id=ca.cargo_id
+    <where>
+      c.status = 1 AND c.type = 1 AND c.isdel = 0
+      <if test="keyword!=null and keyword!=''">
+        and c.name like concat('%', #{keyword, jdbcType=VARCHAR}, '%')
+      </if>
+      <if test="isRetail!=null and isRetail!=''">
+        and c.is_retail = #{isRetail, jdbcType=INTEGER}
+      </if>
+      <if test="classifyId!=null and classifyId!=''">
+        and c.classify_id = #{classifyId, jdbcType=VARCHAR}
+      </if>
+    </where>
+  </select>
 </mapper>
