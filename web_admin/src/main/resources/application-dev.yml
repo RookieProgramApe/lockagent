@@ -15,6 +15,6 @@ spring:
         max-lifetime: 60000
 ########################附件配置########################
 file:
-  mapping: http://127.0.0.1:8088/lockagent/static/downFile
+  mapping: http://192.168.3.74:8088/lockagent/static/downFile
   path: D:\\projects
 devmode: true

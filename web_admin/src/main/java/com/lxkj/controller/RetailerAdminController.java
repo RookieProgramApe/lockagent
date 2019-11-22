@@ -13,6 +13,7 @@ import com.lxkj.common.util.PageData;
 import com.lxkj.entity.*;
 import com.lxkj.service.*;
 import lombok.extern.slf4j.Slf4j;
+import me.chanjar.weixin.common.error.WxErrorException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -52,6 +53,8 @@ public class RetailerAdminController extends BaseController {
     private CardOrderFlowFileService cardOrderFlowFileService;
     @Autowired
     private CardOrderFlowService cardOrderFlowService;
+    @Autowired
+    private WXMessageService wxMessageService;
 
     /**
      * 首页
@@ -556,7 +559,7 @@ public class RetailerAdminController extends BaseController {
     @RequestMapping("/endCheck")
     @ResponseBody
     @Transactional
-    public JsonResults endCheck(Retailer bean) {
+    public JsonResults endCheck(Retailer bean) throws WxErrorException {
         if (StringUtils.isBlank(bean.getId())) return BuildFailJson("主键不能为空");
         var retailer = retailerService.getById(bean.getId());
         if (bean.getStatus() == 1) {//通过
@@ -588,6 +591,9 @@ public class RetailerAdminController extends BaseController {
         flow.setLb(2);
         flow.setCreateBy(ShiroUtils.getUserId());
         flow.insert();
+        // 发送申请成功通知
+        wxMessageService.sendRetailerMessage(retailer.getId());
+
         return BuildSuccessJson("修改成功");
     }
 
@@ -600,7 +606,7 @@ public class RetailerAdminController extends BaseController {
     @RequestMapping("/endCheck2")
     @ResponseBody
     @Transactional
-    public JsonResults endCheck2(Retailer bean) {
+    public JsonResults endCheck2(Retailer bean) throws WxErrorException {
         if (StringUtils.isBlank(bean.getId())) return BuildFailJson("主键不能为空");
         var retailer = retailerService.getById(bean.getId());
         if (bean.getStatus() == 1) {//通过
@@ -632,6 +638,9 @@ public class RetailerAdminController extends BaseController {
         flow.setLb(2);
         flow.setCreateBy(ShiroUtils.getUserId());
         flow.insert();
+
+        // 发送申请成功通知
+        wxMessageService.sendRetailerMessage(retailer.getId());
         return BuildSuccessJson("修改成功");
     }
 

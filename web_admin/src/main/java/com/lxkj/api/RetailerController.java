@@ -70,9 +70,6 @@ public class RetailerController extends BaseController {
     private ConfigService configService;
 
     @Autowired
-    private MemberSubordinateService memberSubordinateService;
-
-    @Autowired
     private RetailerGiftcardService retailerGiftcardService;
 
     @Autowired
@@ -82,9 +79,7 @@ public class RetailerController extends BaseController {
     @Resource
     private RetailerMapper retailerMapper;
     @Autowired
-    private GiftcardService giftcardService;
-    @Autowired
-    private CardOrdersService cardOrdersService;
+    private WXMessageService wxMessageService;
 
     @Value("${picture.baillUrl}")
     private String baillUrl;
@@ -319,7 +314,7 @@ public class RetailerController extends BaseController {
             @RequestParam String name,
             @RequestParam String gender,
             @RequestParam String identity,
-            @RequestParam String city) {
+            @RequestParam String city) throws WxErrorException {
         String memberId = this.getToken();
         Retailer retailer = retailerService.getOne(new QueryWrapper<Retailer>().eq("member_id", memberId));
         if (retailer == null) {
@@ -362,6 +357,7 @@ public class RetailerController extends BaseController {
 
         // 会员表插入商家id并改变会员身份为商家
         this.memberService.update(Wrappers.<Member>update().set("retailer_id", retailer.getId()).set("isretailer", 3).eq("id", memberId));
+        wxMessageService.sendRetailerMessage(retailer.getId());
         return BuildSuccessJson("操作成功");
     }
 
@@ -376,13 +372,14 @@ public class RetailerController extends BaseController {
     })
     @PostMapping("/updateRetailerInfo")
     @LoginRequired
-    public JsonResults<?> updateRetailerInfo(String installerMobile, String bankHolder, String bank, String bankAccountNumber) {
+    public JsonResults<?> updateRetailerInfo(String installerMobile, String bankHolder, String bank, String bankAccountNumber, String storeName) {
         String memberId = this.getToken();
         this.retailerService.update(Wrappers.<Retailer>update()
                 .set("installer_mobile", installerMobile)
                 .set("bank_holder", bankHolder)
                 .set("bank", bank)
                 .set("bank_account_number", bankAccountNumber)
+                .set("store_name", storeName)
                 .eq("member_id", memberId));
         return BuildSuccessJson("操作成功");
     }

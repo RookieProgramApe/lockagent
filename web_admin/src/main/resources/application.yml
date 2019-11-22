@@ -64,17 +64,17 @@ logging:
 ########################微信配置#######################
 wechat:
   mp:
-#    appid: wxb60e3a8b79f4e69a
-#    secret: 1e02ffabf4aed84e5ab6aad67d713c5e
-#    callback-url: https://aw.wisehuitong.com/lockagent/api/pay/callback
-#    callback-url2: https://aw.wisehuitong.com/lockagent/api/pay/callback2
-#    wxcallback-url: https://aw.wisehuitong.com/lockagent/api/pay/wxcallback
+    appid: wxb60e3a8b79f4e69a
+    secret: 1e02ffabf4aed84e5ab6aad67d713c5e
+    callback-url: https://aw.wisehuitong.com/lockagent/api/pay/callback
+    callback-url2: https://aw.wisehuitong.com/lockagent/api/pay/callback2
+    wxcallback-url: https://aw.wisehuitong.com/lockagent/api/pay/wxcallback
 
-    appid: wxd85f81d36baa5da4
-    secret: e84433ff772e881db8cd909f9656f2fd
-    callback-url: http://192.168.3.74:8088/lockagent/api/pay/callback
-    callback-url2: http://192.168.3.74:8088/lockagent/api/pay/callback2
-    wxcallback-url: http://192.168.3.74:8088/lockagent/api/pay/wxcallback
+#    appid: wxd85f81d36baa5da4
+#    secret: e84433ff772e881db8cd909f9656f2fd
+#    callback-url: http://192.168.3.74:8088/lockagent/api/pay/callback
+#    callback-url2: http://192.168.3.74:8088/lockagent/api/pay/callback2
+#    wxcallback-url: http://192.168.3.74:8088/lockagent/api/pay/wxcallback
 
 
     mchId: 1545294801
@@ -89,3 +89,16 @@ picture:
   propurl: http://xiyanluo.oss-cn-beijing.aliyuncs.com/bill.jpg
   authurl: https://aw.wisehuitong.com/lockagentDownFile/auth.jpg
   zhanghurl: https://aw.wisehuitong.com/lockagentDownFile/zhang.png
+
+##########################################快递查询配置############################################
+kd:
+  customer: 1892FF0C2DF0AE14D7F8BF1AE17ED8BD
+  key:  HjXRhwJT4477
+  apiUrl: https://poll.kuaidi100.com/poll/query.do
+
+
+##########################################代理商申请成功通知参数############################################
+send_message:
+  template_id: QaU494KulG-ZGybKRfiNVk1cy-ea9aePwx-YXuW9-uU
+  url: https://aw.wisehuitong.com/information?type=1, https://aw.wisehuitong.com/information?type=2, https://aw.wisehuitong.com/information?type=3
+  topcolor: '#FF0000'

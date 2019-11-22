@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <title>编辑内容</title>
+    <%include("/includes/common.html"){}%>
+    <%include("/includes/ueditor.html"){}%>
+</head>
+<body>
+<div class="layui-fluid list_card">
+    <div class="layui-form list_box">
+        <!--搜索条件deliveryProvider deliveryTrack-->
+        <div class="layui-card-header layuiadmin-card-header-auto layui-row">
+            <form class="layui-form" id="addForm">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">快递公司<font color="red">*</font></label>
+                    <div class="layui-input-block">
+                        <select name="deliveryProvider" lay-search="" id="deliveryProvider" lay-verify="required" lay-filter="deliveryProvider"></select>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">运单号<font color="red">*</font></label>
+                    <div class="layui-input-block">
+                        <input type="text" name="deliveryTrack" value="${Order.deliveryTrack}" lay-verify="required" autocomplete="off" id="deliveryTrack" class="layui-input" >
+                    </div>
+                </div>
+                <!--隐藏域-不用乱动 -->
+                <div class="layui-form-item layui-hide">
+                    <button class="layui-btn" lay-submit="" lay-filter="save" id="save">确认</button>
+                    <input type="hidden" name="id"  value="${Order.id}">
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    layui.use(['index', 'layer', 'table', 'element', 'form', 'laytpl', 'laydate'], function () {
+        var form = layui.form;
+        var admin = layui.admin;
+
+        $("#deliveryProvider").Select({
+            url: $ctx + '/Order/selectDelivery',
+            data:{},
+            valueName:'name',
+            def:'${Order.deliveryProvider}'
+        });
+
+        //表单提交
+        form.on('submit(save)', function (data) {
+            var param = data.field;
+            $.ajaxPost( "/Order/saveDelivery", param, function (res) {
+                getParentIframe().layui.table.reload('dataList');
+                winClose();
+            });
+            return false;
+        });
+        form.render();
+    });
+
+    function aClick() {
+        window.open("http://lbs.qq.com/tool/getpoint/", "_blank")
+    }
+</script>
+</body>
+</html>

@@ -1,5 +1,6 @@
 package com.lxkj.api;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -14,6 +15,7 @@ import com.lxkj.common.util.DateUtil;
 import com.lxkj.common.util.ID;
 import com.lxkj.entity.*;
 import com.lxkj.facade.DeliveryLookupService;
+import com.lxkj.facade.DeliveryLookService;
 import com.lxkj.facade.LianpayService;
 import com.lxkj.service.*;
 import io.swagger.annotations.*;
@@ -27,6 +29,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -64,6 +70,10 @@ public class OrderController extends BaseController {
     private InstallerOrderService installerOrderService;
     @Autowired
     private WxPayService wxPayService;
+    @Autowired
+    private DeliveryLookService deliveryService;
+    @Autowired
+    private DeliveryService dService;
     @ApiOperation("订单分页查询")
     @PostMapping("/queryOrder")
     @LoginRequired
@@ -150,18 +160,57 @@ public class OrderController extends BaseController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "deliveryProvider:'快递公司',orderNum:物流运单号,process:[{Waybill_No:'运单号',Upload_Time:'时间',ProcessInfo:'跟踪内容'}]"),
     })
-    public JsonResults<?> findLogistics(@RequestParam String id) {
+    public JsonResults<?> findLogistics(@RequestParam String id) throws UnrecoverableKeyException, IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
         var order = orderService.getById(id);
-        List<DeliveryLookupService.WaybillProcessInfo> list = new ArrayList<>();
-        try {
-            if(StringUtils.isNotBlank(order.getDeliveryTrack())){
-                list = deliveryLookupService.lookup(order.getDeliveryTrack());
+        // 圆通用免费接口
+        if (order.getDeliveryProvider().equals("圆通速递")) {
+            List<DeliveryLookupService.WaybillProcessInfo> list = new ArrayList<>();
+            try {
+                if (StringUtils.isNotBlank(order.getDeliveryTrack())) {
+                    list = deliveryLookupService.lookup(order.getDeliveryTrack());
+                    return BuildSuccessJson(Map.of("process",list,"orderNum",order.getDeliveryTrack(),"deliveryProvider",order.getDeliveryProvider()), "查询成功");
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        }else {
+
+            // 其他快递使用快递100查询
+            if (StringUtils.isNotBlank(order.getDeliveryTrack())&&StringUtils.isNotBlank(order.getDeliveryProvider())) {
+                String com = dService.getOne(new QueryWrapper<Delivery>().eq("name", order.getDeliveryProvider())).getCode();
+                List<Map> list = deliveryService.queryDelivery(order.getDeliveryTrack(), com, order.getMobile());
+                return BuildSuccessJson(Map.of("process",list,"orderNum",order.getDeliveryTrack(),"deliveryProvider",order.getDeliveryProvider()), "查询成功");
+            }else {
+                return BuildSuccessJson("快递单号和快递公司不能为空！");
+            }
         }
-        return BuildSuccessJson(Map.of("process",list,"orderNum",order.getDeliveryTrack(),"deliveryProvider",order.getDeliveryProvider()), "查询成功");
+
+        return BuildSuccessJson("查询失败！");
+
     }
+
+
+//    @ApiOperation(value = "查询当前运单的物流信息",notes = "必须是已发货状态才可以看")
+//    @PostMapping("/queryByDeliveryTrack")
+//    @ApiImplicitParams({
+//            @ApiImplicitParam(name = "orderId", dataType = "String", value = "订单ID", required = true)
+//    })
+//    @ApiResponses({
+//            @ApiResponse(code = 200, message = "deliveryProvider:'快递公司',orderNum:物流运单号,process:[{Waybill_No:'运单号',Upload_Time:'时间',ProcessInfo:'跟踪内容'}]"),
+//    })
+//    public JsonResults<?> queryByDeliveryTrack(@RequestParam String orderId) throws UnrecoverableKeyException, IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+//        Order order = orderService.getById(orderId);
+//        JsonResults results = deliveryService.queryDelivery(order.getDeliveryTrack(), "yuantong");
+////        List<DeliveryLookupService.WaybillProcessInfo> list = new ArrayList<>();
+////        try {
+////            if(StringUtils.isNotBlank(order.getDeliveryTrack())){
+////                list = deliveryLookupService.lookup(order.getDeliveryTrack());
+////            }
+////        } catch (IOException e) {
+////            e.printStackTrace();
+////        }
+//        return BuildSuccessJson(JSONObject.parseObject(results.getMsg()), "查询成功");
+//    }
 
 
 

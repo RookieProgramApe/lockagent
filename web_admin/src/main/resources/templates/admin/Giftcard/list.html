@@ -16,9 +16,9 @@
         <div class="layui-card-header layuiadmin-card-header-auto layui-row">
             <div class="layui-form-item">
                 <div class="layui-inline">
-                    <label class="layui-form-label">关键字</label>
+                    <label class="layui-form-label">卡号</label>
                     <div class="layui-input-block">
-                        <input type="text" name="keyword" value="" placeholder="请输入卡号|提货码" class="layui-input">
+                        <input type="text" name="keyword" value="" placeholder="请输入卡号" class="layui-input">
                     </div>
                 </div>
                 <div class="layui-inline">
@@ -26,7 +26,7 @@
                     <div class="layui-input-block">
                         <select name="selectId2" lay-search="" class="layui-select">
                             <option value="">-全部-</option>
-                            <option value="1">未分配</option>
+<!--                            <option value="1">未分配</option>-->
                             <option value="3">已使用</option>
                             <option value="2">已分配</option>
                         </select>
@@ -41,6 +41,12 @@
                             <option value="2">贵族卡</option>
                             <option value="3">至尊卡</option>
                         </select>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">分配人</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="occupant" value="" placeholder="请输入分配人姓名" class="layui-input">
                     </div>
                 </div>
             </div>
@@ -157,7 +163,8 @@
                             default:return"";
                         }
                     }},
-                   {field: 'createTime', title: '创建时间', width: 200}
+                   {field: 'createTime', title: '创建时间', width: 200},
+                    {field: 'occupant', title: '分配人', width: 150}
                    // {field: 'tool', title: '操作', width: 120, toolbar: '#toolbar'}
                 ]]
                 , limit: 10

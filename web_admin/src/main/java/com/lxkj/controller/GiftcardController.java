@@ -84,15 +84,18 @@ public class GiftcardController extends BaseController {
             String keyword = params.getString("keyword");
             String selectId2 = params.getString("selectId2");
             String selectId3 = params.getString("selectId3");
-            IPage<Giftcard> page=giftcardService.page(new Page<Giftcard>(params.getInteger("page"),params.getInteger("limit")),
-                new QueryWrapper<Giftcard>()
-                    .eq("1",1)
-                    .and(StringUtils.isNotBlank(keyword),i->i.like("serial",keyword).or().like("passcode",keyword))
-                    .eq(StringUtils.isNotBlank(selectId2),"status",params.getInteger("selectId2"))
-                    .eq(StringUtils.isNotBlank(selectId3),"`type`", selectId3)
-                    .orderByAsc("serial")
-              );
-            DataGridModel<Giftcard> grid=new DataGridModel(page.getRecords(),page.getTotal());
+            String occupant = params.getString("occupant");
+            Integer limit = (Integer) params.getInteger("limit") == null?10:params.getInteger("limit");
+            Integer page = (Integer) params.getInteger("page") == null?0:(params.getInteger("page")-1) * limit;
+            Map<String, Object> map = new HashedMap();
+            map.put("keyword", keyword);
+            map.put("status", selectId2);
+            map.put("type", selectId3);
+            map.put("page", page);
+            map.put("limit", limit);
+            map.put("occupant", occupant);
+
+            DataGridModel<Giftcard> grid=new DataGridModel(giftcardService.queryGiftcardPage(map), giftcardService.countGiftcardPage(map));
             return  grid;
      }
 

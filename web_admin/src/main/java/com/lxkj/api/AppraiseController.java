@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -42,29 +43,24 @@ public class AppraiseController extends BaseController {
     @Autowired
     private AppraiseAttachmentService appraiseAttachmentService;
 
-//    @ApiOperation("评价新增功能")
-//    @PostMapping("/save")
-//    @ApiImplicitParams({
-//            @ApiImplicitParam(name = "star", dataType = "String", value = "星级", required = true),
-//            @ApiImplicitParam(name = "describe", dataType = "String", value = "描述", required = true)
-//    })
-//    public JsonResults queryCargoDetail(@RequestParam String star, @RequestParam String describe) {
-////        Cargo data = this.cargoService.getById(id);
-////        cargoService.getData(data);
-//        return BuildSuccessJson("查询成功");
-//    }
-
     @ApiOperation("评价新增功能")
     @PostMapping("/save")
 //    @ApiImplicitParams({
 //            @ApiImplicitParam(name = "star", dataType = "String", value = "星级", required = true),
 //            @ApiImplicitParam(name = "describe", dataType = "String", value = "描述", required = true)
 //    })
-    public JsonResults saveAppraise(Appraise appraise) {
-        System.out.println(this.getToken());
+    public JsonResults saveAppraise(@RequestBody Appraise appraise) {
         appraise.setCreateTime(new Date());
         //保存评价
         appraiseService.saveOrUpdate(appraise);
+        if(appraise.getImgs()!=null && appraise.getImgs().size()>0){
+            // 保存评价的附件
+//            List<AppraiseAttachment> imgs = new ArrayList<>();
+            appraise.getImgs().forEach(item -> {
+                item.setAppraiseId(appraise.getId());
+                item.insert();
+            });
+        }
 
         //更改订单表的评价状态
         orderService.update(Wrappers.<Order>update().set("appraise_id", appraise.getId()).eq("`id`", appraise.getOrderId()));
@@ -78,7 +74,6 @@ public class AppraiseController extends BaseController {
             @ApiImplicitParam(name = "id", dataType = "String", value = "订单ID", required = true)
     })
     public JsonResults<Appraise> getByOrderId(@RequestParam String id) {
-        System.out.println("id=======" + id);
         Appraise appraise = appraiseService.getOne(new QueryWrapper<Appraise>().eq("order_id", id));
         // 查询商品评价
         appraise.setImgs(appraiseAttachmentService.list(new QueryWrapper<AppraiseAttachment>().eq("appraise_id", appraise.getId())));
@@ -91,7 +86,6 @@ public class AppraiseController extends BaseController {
             @ApiImplicitParam(name = "id", dataType = "String", value = "评价ID", required = true)
     })
     public JsonResults<Appraise> getAppraiseById(@RequestParam String id) {
-        System.out.println("id==============" + id);
         Appraise appraise = appraiseService.getById(id);
         // 查询商品评价
         appraise.setImgs(appraiseAttachmentService.list(new QueryWrapper<AppraiseAttachment>().eq("appraise_id", appraise.getId())));

@@ -48,9 +48,37 @@
         </div>
         <!--按钮组-->
         <div class="layui-row list_btnGroup">
-            <div style="float: left;">
-                <!--<button class="layui-btn layui-btn-sm" layadmin-event="add">添加</button>-->
-                <!--<button class="layui-btn layui-btn-sm layui-btn-danger" layadmin-event="delete">删除</button>-->
+            <div class="layui-inline">
+                <label class="layui-form-label">订单类型</label>
+                <div class="layui-input-inline">
+                    <select name="orderType" id="orderType" lay-search="" class="layui-select">
+                        <option value="">-全部-</option>
+                        <option value="1">零售订单</option>
+                        <option value="2">砍价订单</option>
+                        <option value="3">积分商品订单</option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">订单状态</label>
+                <div class="layui-input-inline">
+                    <select name="orderStatus" id="orderStatus" lay-search="" class="layui-select">
+                        <option value="">-全部-</option>
+                        <option value="1">待支付</option>
+                        <option value="2">已支付</option>
+                        <option value="3">已发货</option>
+                        <option value="4">已完成</option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">日期范围</label>
+                <div class="layui-input-inline">
+                    <input type="text" class="layui-input" id="orderTime" placeholder=" - ">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <button class="layui-btn layui-btn-sm" layadmin-event="export">导出</button>
             </div>
             <div class="layui-btn-group" style="float: right;">
                 <button class="layui-btn layui-btn-sm layui-bg-cyan" title="搜索" lay-submit lay-filter="searchBtn"><i class="layui-icon layui-icon-search"></i></button>
@@ -105,15 +133,25 @@
 <!-- 增删改-工具模板栏-->
 <script type="text/html" id="toolbar1">
         <button class="layui-btn layui-btn-xs layui-bg-green" lay-event="detail" title="详情">详情</button>
-        <!--<button class="layui-btn layui-btn-xs layui-btn-danger" lay-event="del" title="删除">-->
-            <!--<i class="layui-icon">&#xe640;</i>-->
-        <!--</button>-->
+        <button class="layui-btn layui-btn-xs layui-btn-danger" lay-event="del" title="删除">
+            <i class="layui-icon">删除</i>
+        </button>
+        <button class="layui-btn layui-btn-xs layui-btn-normal" lay-event="editDelivery" title="编辑物流信息">编辑物流信息</button>
 </script>
 <script type="text/javascript">
-     layui.use(['index','layer', 'table', 'element', 'form', 'laytpl'], function () {
+     layui.use(['index','layer', 'table', 'element', 'form', 'laytpl', 'laydate'], function () {
           var table = layui.table, form = layui.form;
           var admin = layui.admin;
-            /**创建表格*/
+          var laydate = layui.laydate;
+          var layer = layui.layer;
+
+          //日期范围
+          laydate.render({
+              elem: '#orderTime',
+              range: true
+          });
+
+          /**创建表格*/
           table.render({
                 elem: '#dataList',
                 url: $ctx + '/Order/pageList',
@@ -150,7 +188,7 @@
                    {field: 'sequence', title: '物流订单号', width: 100},
                    {field: 'deliveryTrack', title: '运单号', width: 100},
                    {field: 'createTime', title: '创建时间', width: 200},
-                   {field: 'tool', title: '操作', width: 100, toolbar: '#toolbar1'}
+                   {field: 'tool', title: '操作', width: 250, toolbar: '#toolbar1'}
                 ]]
                 , limit: 10
                 , text: {
@@ -179,6 +217,15 @@
                     });
                 }
             });
+             // //select下拉触发
+             // form.on('select(deliveryCode)', function(data){
+             //     if(data.value=='7c3512caa38d44908b4cffea238956bd'){
+             //         $("#themeShow").show();
+             //     }else{
+             //         $("#themeShow").hide();
+             //     }
+             // });
+             //Select动态
             //搜索
             form.on('submit(searchBtn)', function (data) {
                 var field = data.field;
@@ -187,6 +234,14 @@
                     page: {curr: 1}
                 });
             });
+            //导出
+            admin.events.export = function () {
+                var orderType = $('#orderType').val();
+                var orderStatus = $('#orderStatus').val();
+                var orderTime = $('#orderTime').val();
+                window.location.href=$ctx + '/Order/exportOrder?orderType=' + orderType + '&orderStatus=' + orderStatus + '&orderTime=' + orderTime;
+            };
+
             //刷新
             admin.events.refresh = function () {
                 table.reload('dataList');
@@ -230,12 +285,19 @@
                  }else if(layEvent=='lookPhoto'){//查看图片
                      LookPhoto(data.cargoImage);
                  }else if(layEvent == 'del') { //删除
-                    layer.confirm('是否删除该数据?', function (index) {
-                    var param = {id: data.id};
-                    $.ajaxPost( '/Order/delete', param,function (data) {
-                            table.reload("dataList");
-                       });
-                    });
+                     if (data.status == 2 || data.status == 3 || data.status == 4) {
+                         alert('只能删除待支付和支付失败的订单！');
+                     } else {
+                         layer.confirm('是否删除该数据?', function (index) {
+                             var param = {id: data.id};
+                             $.ajaxPost( '/Order/delete', param,function (data) {
+                                 table.reload("dataList");
+                             });
+                         });
+                     }
+
+                 }else if (layEvent == 'editDelivery') {
+                     LayOpen('编辑物流信息','/Order/toEditDelivery?id=' + data.id,'update');
                  }
               });
             //表单更新

@@ -100,10 +100,11 @@
 </script>
 <!-- 增删改-工具模板栏-->
 <script type="text/html" id="toolbar1">
-    <button class="layui-btn layui-btn-xs layui-bg-green" lay-event="detail" title="详情">详情</button>
+    <button class="layui-btn layui-btn-xs layui-btn-danger" lay-event="confirmOrder" title="确认发货">确认发货</button>
     <!--<button class="layui-btn layui-btn-xs layui-btn-danger" lay-event="del" title="删除">-->
     <!--<i class="layui-icon">&#xe640;</i>-->
     <!--</button>-->
+<!--    <button class="layui-btn layui-btn-xs layui-bg-green" lay-event="detail" title="详情">详情</button>-->
 </script>
 <script type="text/javascript">
     layui.use(['index','layer', 'table', 'element', 'form', 'laytpl'], function () {
@@ -128,7 +129,8 @@
                 {field: 'address', title: '收件人地址', width: 100},
                 {field: 'mobile', title: '收件人手机号', width: 100},
                 {field: 'totalPrice', title: '代收货款', width: 100},
-                {field: 'remark', title: '备注', width: 200}
+                {field: 'remark', title: '备注', width: 200},
+                {field: 'tool', title: '操作', width: 200, toolbar: '#toolbar1'}
             ]]
             , limit: 10
             , text: {
@@ -203,6 +205,13 @@
                 layer.confirm('是否删除该数据?', function (index) {
                     var param = {id: data.id};
                     $.ajaxPost( '/Order/delete', param,function (data) {
+                        table.reload("dataList");
+                    });
+                });
+            }else if (layEvent == 'confirmOrder') {  // 确认发货
+                layer.confirm('是否已经确认发货?', function (index) {
+                    var param = {id: data.id};
+                    $.ajaxPost( '/Order/confirmOrder', param,function (data) {
                         table.reload("dataList");
                     });
                 });

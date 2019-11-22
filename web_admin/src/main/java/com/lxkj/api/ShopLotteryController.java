@@ -1,6 +1,7 @@
 package com.lxkj.api;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.lxkj.annotation.LoginRequired;
 import com.lxkj.common.bean.BaseController;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -160,6 +162,37 @@ public class ShopLotteryController extends BaseController {
         }
 
         return BuildSuccessJson("保存成功");
+    }
+
+    @ApiOperation("获得安心值")
+    @LoginRequired
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "header", dataType = "String", name = "token", value = "用户token值", required = true),
+            @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "integral", value = "安心值数量", required = true),
+            @ApiImplicitParam(paramType = "query", dataType = "String", name = "lotteryId", value = "抽奖id", required = true),
+    })
+    @PostMapping("/addIntegral")
+    public JsonResults queryLotteryCount(Integer integral, String lotteryId) {
+        String memberId = this.getToken();
+        if(integral != null && !integral.equals(0)){
+            // 获取当前用户信息
+            Member member = memberService.getById(memberId);
+            // 更新安心值
+            memberService.update(new UpdateWrapper<Member>().set("integral", member.getIntegral().add(new BigDecimal(integral))).eq("`id`", member.getId()));
+            // 插入抽奖记录
+            LotteryRecord record = new LotteryRecord().setLotteryId(lotteryId).setPrizeId("===" + lotteryId).setPrizeName(integral + "颗安心").setMemberId(memberId).setMemberName(member.getNickname());
+            record.insert();
+            // 插入安心值记录
+            new MemberCredit()
+                    .setMemberId(member.getId())
+                    .setTitle("抽奖获得")
+                    .setType(1)
+                    .setAmount(BigDecimal.ZERO)
+                    .setPoint(new BigDecimal(integral))
+                    .insert();
+        }
+
+        return BuildSuccessJson(0,"保存成功");
     }
 
     @ApiOperation("查询当前用户抽奖次数")

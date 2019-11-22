@@ -1,6 +1,7 @@
 package com.lxkj.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -59,6 +60,8 @@ public class OrderAdminController extends BaseController {
     private RetailerGiftcardService retailerGiftcardService;
     @Autowired
     private RetailerService retailerService;
+    @Autowired
+    private DeliveryService deliveryService;
 
     /**
      * 首页
@@ -178,6 +181,17 @@ public class OrderAdminController extends BaseController {
     }
 
     /**
+     * 快递公司列表
+     * @return
+     */
+    @RequestMapping("/selectDelivery")
+    @ResponseBody
+    public JsonResults selectDelivery() {
+        List<Delivery> deliveryList = deliveryService.list(new QueryWrapper<Delivery>().eq("is_del", 0));
+        return BuildSuccessJson(deliveryList,"查询成功");
+    }
+
+    /**
      * 导出待发货信息
      * @return
      */
@@ -236,6 +250,102 @@ public class OrderAdminController extends BaseController {
         return BuildSuccessJson("导入完成");
     }
 
+    /**
+     * 导出订单信息
+     * @param orderType  订单类型
+     * @param orderStatus  订单状态
+     * @param orderTime  订单起止时间
+     */
+    @RequestMapping("/exportOrder")
+    @ResponseBody
+    public void exportOrder(String orderType, String orderStatus, String orderTime) {
+        String startTime = "";
+        String endTime = "";
+        // 截取起止时间
+        if(StringUtils.isNotBlank(orderTime.trim())){
+            startTime = orderTime.substring(0, 10);
+            endTime = orderTime.substring(orderTime.length()-10, orderTime.length());
+        }
+
+
+        String filePath = "static/files/orderTemplate.xls";
+        InputStream input = this.getClass().getClassLoader().getResourceAsStream(filePath);
+        if(input==null){
+            throw new RuntimeException("模板文件没有找到，请联系管理员");
+        }
+        List<Order> list = orderService.list(new QueryWrapper<Order>().eq(StringUtils.isNotBlank(orderStatus), "status",orderStatus)
+                .eq(StringUtils.isNotBlank(orderType), "type", orderType)
+                .between(StringUtils.isNotBlank(orderTime), "create_time", startTime, endTime)
+                .orderByDesc("create_time"));
+        list.stream().forEach(p->{
+            if(StringUtils.isNotBlank(p.getMemberId())){
+                Member m = memberService.getById(p.getMemberId());
+                if(m!=null&&m.getNickname()!=null&&m.getNickname()!=""){
+                    p.setMemberId(m.getNickname());
+                }else{
+                    p.setMemberId("");
+                }
+            }else{
+                p.setMemberId("");
+            }
+
+            // 判断订单类型
+            if(p.getType().equals(1)) {
+                p.setTypeName("零售订单");
+            }else if(p.getType().equals(2)) {
+                p.setTypeName("砍价订单");
+            }else if(p.getType().equals(3)) {
+                p.setTypeName("积分商品订单");
+            }else {
+                p.setTypeName("其他订单");
+            }
+
+            // 判断订单状态
+            if(p.getStatus().equals(1)) {
+                p.setStatusName("待支付");
+            }else if(p.getStatus().equals(2)) {
+                p.setStatusName("已支付");
+            }else if(p.getStatus().equals(3)) {
+                p.setStatusName("已发货");
+            }else if(p.getStatus().equals(4)) {
+                p.setStatusName("已完成");
+            }else {
+                p.setStatusName("其他");
+            }
+        });
+        String title = "交易订单";
+        String[] keyHeaders = {"memberId","cargoName","ordernum","skuName","typeName","count","totalPrice","statusName","sequence","deliveryTrack","createTime"};
+        String suffix = filePath.substring(filePath.lastIndexOf(".") + 1);
+        String fileName =title+ ID.nextGUID()+ new SimpleDateFormat("yyyyMMddHHmm").format(new Date()) +"."+ suffix;
+
+        OutputStream out=null;
+        ByteArrayOutputStream fos=null;
+        byte[] retArr = null;
+        HttpServletResponse response = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getResponse();
+        try {
+            fileName=new String(fileName.getBytes("GB2312"),"ISO-8859-1");
+            fos = new ByteArrayOutputStream();
+            orderService.exportExcel(title,input,list,keyHeaders,fos);//file
+            retArr = fos.toByteArray();
+            out = response.getOutputStream();
+            response.reset();
+            response.setHeader("Content-Disposition", "attachment; filename="+fileName);//要保存的文件名
+            response.setContentType("application/octet-stream; charset=utf-8");
+            out.write(retArr);
+            out.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("导出失败");
+        }finally{
+            try {
+                if(out!=null)out.close();
+                if(fos!=null)out.close();
+            }catch(Exception e){
+                e.printStackTrace();
+                throw new RuntimeException("导出失败");
+            }
+        }
+    }
 
     @RequestMapping("/export")
     @ResponseBody
@@ -321,6 +431,36 @@ public class OrderAdminController extends BaseController {
         model.setViewName("/admin/Order/add");
         return model;
     }
+    /**
+     * 跳转添加/编辑物流信息界面
+     * @param id
+     * @param model
+     * @return
+     */
+    @RequestMapping("/toEditDelivery")
+    public ModelAndView toEditDelivery(String id,ModelAndView model) {
+        if (StringUtils.isNotBlank(id)) {
+            model.addObject("Order", orderService.getById(id));
+        }else{
+            model.addObject("Order",new Order());
+        }
+        model.setViewName("/admin/Order/editDelivery");
+        return model;
+    }
+
+    /**
+     * 保存物流信息
+     * @param
+     * @return
+     */
+    @RequestMapping("/saveDelivery")
+    @ResponseBody
+    @Transactional
+    public JsonResults saveDelivery(Order bean) {
+        orderService.update(new UpdateWrapper<Order>().set("delivery_provider", bean.getDeliveryProvider()).set("delivery_track", bean.getDeliveryTrack()).eq("`id`", bean.getId()));
+        return BuildSuccessJson("提交成功");
+    }
+
 
     /**
      * 保存
@@ -363,6 +503,19 @@ public class OrderAdminController extends BaseController {
     public JsonResults delete(String id) {
         orderService.removeById(id);
         return BuildSuccessJson("删除成功");
+    }
+
+    /**
+     * 确认发货
+     * @param
+     * @return
+     */
+    @RequestMapping("/confirmOrder")
+    @ResponseBody
+    @Transactional
+    public JsonResults confirmOrder(String id) {
+        orderService.update(new UpdateWrapper<Order>().set("`status`", 3).eq("`id`", id));
+        return BuildSuccessJson("操作成功");
     }
 
     /**

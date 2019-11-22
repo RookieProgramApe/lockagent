@@ -71,6 +71,7 @@ public class WxController extends BaseController {
     }
     try {
       WxMpOAuth2AccessToken accessToken = this.wxService.oauth2getAccessToken(code);
+      System.out.println("accessToken=========" + accessToken);
       WxMpUser user = this.wxService.oauth2getUserInfo(accessToken, "zh_CN");
       Member member = memberService.getOne(new QueryWrapper<Member>().eq("open_id", user.getOpenId()));
       if (member == null) {

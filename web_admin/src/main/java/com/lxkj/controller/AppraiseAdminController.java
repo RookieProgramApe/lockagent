@@ -74,79 +74,11 @@ public class AppraiseAdminController extends BaseController {
                         .eq("`type`", StringUtils.isNotBlank(type)?type:1)
 //                        .eq("type", 1)
                         .like(StringUtils.isNotBlank(keyword),"cargo_name", keyword)
-                        .orderByDesc("is_top")
-                        .orderByDesc("create_time"));
-//        page.getRecords().stream().forEach(p->{
-//            List<CargoAttachment> list =  cargoAttachmentService.list(Wrappers.<CargoAttachment>query().eq("cargo_id",p.getId()));
-//            if(list!=null&&list.size()>0){
-//                p.setAttachment(list);
-//            }
-//
-//            p.setSaleNum(cargoService.getSaleNum(p.getId()));
-//        });
+                        .orderByDesc("create_time")
+                        .orderByDesc("is_top"));
         DataGridModel<Appraise> grid=new DataGridModel(page.getRecords(),page.getTotal());
         return  grid;
     }
-
-//    @RequestMapping("/pageList1")
-//    @ResponseBody
-//    public DataGridModel<Cargo> pageList1(String csid) {
-//        PageData params = this.getPageData();
-//        List<Cargo> page=cargoService.list(
-//                new QueryWrapper<Cargo>()
-//                        .eq("isdel",0)
-//                        .eq("type", 1)
-//                        .ne("id",csid)
-//                        .orderByAsc("sort"));
-//        DataGridModel<Cargo> grid=new DataGridModel(page,Long.valueOf(page.size()));
-//        return  grid;
-//    }
-//
-//    @RequestMapping("/pageListOrder")
-//    @ResponseBody
-//    public DataGridModel<Order> pageListOrder(String cargo_id) {
-//        PageData params = this.getPageData();
-//        List<Map<String ,Object>> list = jdbcTemplate.queryForList("select * from `order` where cargo_id=? order by create_time ",cargo_id);
-////        IPage<Order> page=orderService.page(new Page<Order>(params.getInteger("page"),params.getInteger("limit")),
-////                new QueryWrapper<Order>()
-////                        .select("count","sku_name","status","create_time")
-////                        .eq("cargo_id",cargo_id)
-////                        .orderByDesc("create_time"));
-//        DataGridModel<Order> grid=new DataGridModel(list,Long.valueOf(list.size()));
-//        return  grid;
-//    }
-
-//    /**
-//     *
-//     * @param retailer_id
-//     * @return
-//     */
-//    @RequestMapping("/pageListReward")
-//    @ResponseBody
-//    public DataGridModel<Cargo> pageListReward(String retailer_id) {
-//        PageData params = this.getPageData();
-//        String keyword = params.getString("keyword");
-//        IPage<Cargo> page=cargoService.page(new Page<Cargo>(params.getInteger("page"),params.getInteger("limit")),
-//                new QueryWrapper<Cargo>()
-//                        .eq("isdel",0)
-//                        .eq("type", 1)
-//                        .select("cargo.*"
-//                                ,"(select figure from retailer_reward where cargo_id=cargo.id and retailer_id='"+retailer_id+"') as figure"
-//                                ,"(select id from retailer_reward where cargo_id=cargo.id and retailer_id='"+retailer_id+"') as retailerRewardId "
-//                        )
-//                        .eq("status",1)
-//                        .like(StringUtils.isNotBlank(keyword),"name",keyword)
-//        );
-//        page.getRecords().stream().forEach(p->{
-//            List<CargoAttachment> list =  cargoAttachmentService.list(Wrappers.<CargoAttachment>query().eq("cargo_id",p.getId()));
-//            if(list!=null&&list.size()>0){
-//                p.setAttachment(list);
-//            }
-//            p.setSaleNum(cargoService.getSaleNum(p.getId()));
-//        });
-//        DataGridModel<Cargo> grid=new DataGridModel(page.getRecords(),page.getTotal());
-//        return  grid;
-//    }
 
     /**
      * 跳转添加/编辑界面
