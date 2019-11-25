@@ -48,10 +48,17 @@
         </div>
     </div>
     <div class="layui-form-item optitem">
-        <label class="layui-form-label">添加奖品<font color="red">*</font></label>
-        <div class="layui-input-block">
-            <button type="button" id="addCargo" class="layui-btn layui-btn-warm">一键添加商品</button>
-            <button type="button" id="pasteLottery" style="background-color: #01AAED;" class="layui-btn">粘贴奖池</button>
+        <div class="layui-inline">
+            <label class="layui-form-label">添加奖品<font color="red">*</font></label>
+            <div class="layui-input-inline">
+                <select name="cargoId" lay-search id="cargoId" lay-verify="required" lay-filter="cargoId"></select>
+            </div>
+            <div class="layui-input-inline">
+                <button type="button" id="addCargo" class="layui-btn layui-btn-warm">一键添加商品</button>
+            </div>
+            <div class="layui-input-inline">
+                <button type="button" id="pasteLottery" style="background-color: #01AAED;" class="layui-btn">粘贴奖池</button>
+            </div>
         </div>
     </div>
     <div class="layui-form-item">
@@ -129,6 +136,30 @@
         laydate.render({
             elem: '#endTime'
             ,type: 'datetime'
+        });
+        //Select动态
+        $("#cargoId").Select({
+            url: $ctx + '/Appraise/selectCargos?type=',
+            data:{},
+            valueName:'id',
+            labelName:'name',
+            def:'${ShopLottery.cargoId}'
+        });
+        form.on('select(cargoId)', function(data){
+            $.asynPost( "/ShopLottery/selectCargoById?id=" + data.value, {},  res => {
+                var cargo = res.data;
+                var html="<tr>" +
+                    "<td><input class='layui-input' type='text' value='" + cargo.name + "' name='cargoName'  lay-verify='required' lay-verType='tips' maxlength='200' ></td>" +
+                    "<td><img name='cargoImg' width='70' style='cursor:pointer' src='" + cargo.picture + "'></td>" +
+                    "<td style='text-align: center;'>" +
+                    "<input type='hidden' name='optionId'  value='' />" +
+                    "<input type='hidden' name='cargoId'  value='" + cargo.id + "' /><input value='0' class='layui-input' type='text'  name='cargoCount'  lay-verify='required' lay-verType='tips' maxlength='200' >" +
+                    "</td>" +
+                    "<td><img height='30' width='30' style='cursor:pointer' src='${ctxPath}/static/image/jian.png' onclick='del(this)'></td>"
+                "</tr>";
+                $("#stepList").append(html);
+            });
+            return false;
         });
 
         //添加奖品

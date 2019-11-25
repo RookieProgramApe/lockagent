@@ -255,8 +255,8 @@
                     });
                 });
             }else if(layEvent == 'copyUrl') { //复制链接
-                sessionStorage.setItem("cargoId", {time:3000}, data.id);
-                layer.confirm('复制成功，是否立即前往添加商城轮播图?', function (index) {
+                sessionStorage.setItem("cargoId", data.id);
+                layer.confirm('复制成功，是否立即前往添加商城轮播图?', {time:3000}, function (index) {
                     LayOpen('添加商城首页轮播图','/Banner/list','add');
                     return true;
                 });

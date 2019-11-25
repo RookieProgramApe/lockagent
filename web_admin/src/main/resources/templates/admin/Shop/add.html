@@ -82,15 +82,28 @@
             }
         });
         $("#retailerId").Select({
-            url: $ctx + '/Shop/selectRetailers',
+            url: $ctx + '/Shop/selectRetailers?flag=${Shop.retailerId}',
             data:{},
             valueName:'id',
             labelName:'name',
             def:'${Shop.retailerId}'
         });
+        // $('select[name="retailerId"]').next().find('.layui-select-title input').click(() => {
+        //     $.ajaxPost( "/Retailer/getRetailerById?retailerId=" + data.value,  res => {
+        //         console.error(res.data);
+        //         $('#name').val(res.data.storeName);
+        //         $('#phone').val(res.data.phone);
+        // form.render();
+        //     });
+        // });
+
 
         form.on('select(retailerId)', function(data){
-
+            $.asynPost( "/Retailer/getRetailerById?retailerId=" + data.value, {},  res => {
+                $('#name').val(res.data.storeName);
+                $('#phone').val(res.data.phone);
+            });
+            return false;
         });
 
 
