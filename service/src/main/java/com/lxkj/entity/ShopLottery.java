@@ -80,6 +80,10 @@ public class ShopLottery extends Model<ShopLottery> {
     @TableField(value = "is_del")
     private Integer isDel;
 
+    @ApiModelProperty(value = "商品id")
+    @TableField(exist = false)
+    private String cargoId;
+
     @ApiModelProperty(value = "状态（0禁用 1正常）")
     @TableField(value = "status")
     private Integer status;
