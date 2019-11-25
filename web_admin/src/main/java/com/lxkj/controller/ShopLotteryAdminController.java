@@ -118,6 +118,20 @@ public class ShopLotteryAdminController extends BaseController {
      * 查询可用商品列表
      * @return
      */
+    @RequestMapping("/selectCargoById")
+    @ResponseBody
+    @Transactional
+    public JsonResults selectCargoById(String id) {
+        Cargo cargo = cargoService.getById(id);
+        var picture = this.cargoAttachmentService.getOne(Wrappers.<CargoAttachment>query().eq("cargo_id", cargo.getId()).eq("type", 1));
+        cargo.setPicture(picture == null ? "" : picture.getUrl());
+        return BuildSuccessJson(cargo,"查询成功");
+    }
+
+    /**
+     * 查询可用商品列表
+     * @return
+     */
     @RequestMapping("/selectCargos")
     @ResponseBody
     @Transactional

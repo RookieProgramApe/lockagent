@@ -100,17 +100,17 @@ public class ShopAdminController  extends BaseController {
     }
 
     /**
-     * 查询可用商家列表
+     * 查询可用微股东列表
      * @return
      */
     @RequestMapping("/selectRetailers")
     @ResponseBody
     @Transactional
-    public JsonResults selectClassifys() {
+    public JsonResults selectRetailers(String flag) {
         var list= retailerService.list(new QueryWrapper<Retailer>()
                 .eq("status", 1)
                 .eq("`type`", 3)
-                .notIn("`id`", this.jdbcTemplate.queryForList("select retailer_id from shop where is_del = 0", String.class))
+                .notIn("`id`", this.jdbcTemplate.queryForList("select retailer_id from shop where is_del = 0 and retailer_id<>?", String.class, flag))
                 .orderByDesc("create_time"));
         return BuildSuccessJson(list,"查询成功");
     }

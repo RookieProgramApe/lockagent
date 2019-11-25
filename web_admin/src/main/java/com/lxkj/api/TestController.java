@@ -24,9 +24,6 @@ public class TestController {
     @Value("${send_message.url}")
     private String[] url;
 
-    @Value("${send_message.topcolor}")
-    private String topcolor;
-
     @Autowired
     private WxService wxService;
     @Autowired

@@ -183,6 +183,19 @@ public class RetailerAdminController extends BaseController {
     }
 
     /**
+     * 根据id获取代理商信息
+     *
+     * @return
+     */
+    @RequestMapping("/getRetailerById")
+    @ResponseBody
+    @Transactional
+    public JsonResults getRetailerById(String retailerId) {
+        if (StringUtils.isBlank(retailerId)) return BuildFailJson("主键不能为空");
+        return BuildSuccessJson(retailerService.getById(retailerId), "查询成功");
+    }
+
+    /**
      * 商家分页列表
      *
      * @return
@@ -559,7 +572,7 @@ public class RetailerAdminController extends BaseController {
     @RequestMapping("/endCheck")
     @ResponseBody
     @Transactional
-    public JsonResults endCheck(Retailer bean) throws WxErrorException {
+    public JsonResults endCheck(Retailer bean) {
         if (StringUtils.isBlank(bean.getId())) return BuildFailJson("主键不能为空");
         var retailer = retailerService.getById(bean.getId());
         if (bean.getStatus() == 1) {//通过
@@ -606,7 +619,7 @@ public class RetailerAdminController extends BaseController {
     @RequestMapping("/endCheck2")
     @ResponseBody
     @Transactional
-    public JsonResults endCheck2(Retailer bean) throws WxErrorException {
+    public JsonResults endCheck2(Retailer bean) {
         if (StringUtils.isBlank(bean.getId())) return BuildFailJson("主键不能为空");
         var retailer = retailerService.getById(bean.getId());
         if (bean.getStatus() == 1) {//通过

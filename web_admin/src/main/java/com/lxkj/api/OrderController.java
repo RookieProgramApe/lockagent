@@ -50,14 +50,14 @@ public class OrderController extends BaseController {
     private DeliveryLookupService deliveryLookupService;
     @Autowired
     private CargoAttachmentService cargoAttachmentService;
-    @Autowired
-    private LianpayService lianpayService;
+//    @Autowired
+//    private LianpayService lianpayService;
     @Autowired
     private ConfigService configService;
     @Autowired
     private GiftcardService giftcardService;
-    @Autowired
-    private RetailerRewardService retailerRewardService;
+//    @Autowired
+//    private RetailerRewardService retailerRewardService;
     @Autowired
     private RetailerService rtailerService;
     @Autowired

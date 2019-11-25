@@ -90,6 +90,9 @@ public class RetailerController extends BaseController {
     @Value("${picture.baillUrl2}")
     private String baillUrl2;
 
+    @Value("${picture.baillUrl3}")
+    private String baillUrl3;
+
     @ApiOperation(value = "查询我申请代理状态", notes = "提交申请后，查询申请状态，审核通过才进入代理商中心界面")
     @PostMapping("/status")
     @LoginRequired
@@ -128,10 +131,10 @@ public class RetailerController extends BaseController {
         int giftcardCount = this.retailerGiftcardService.count(Wrappers.<RetailerGiftcard>query().eq("member_id", memberId).eq("state", 0));
         retailer.setGiftcardCount(giftcardCount);
         // 直属团队数量
-        int subordinateCount = this.retailerService.count(Wrappers.<Retailer>query().eq("parent_member_id", memberId).eq("`type`", 1));
+        int subordinateCount = this.retailerService.count(Wrappers.<Retailer>query().eq("parent_member_id", memberId).eq("`type`", retailer.getType()));
         retailer.setSubordinateCount(subordinateCount);
         //次属团队数量
-        int dinateCount = this.jdbcTemplate.queryForObject("select count(1) from retailer where parent_member_id in (select member_id from retailer where  parent_member_id=? and `type`=1)",Integer.class,memberId);
+        int dinateCount = this.jdbcTemplate.queryForObject("select count(1) from retailer where parent_member_id in (select member_id from retailer where  parent_member_id=? and `type`=?)",Integer.class,memberId, retailer.getType());
         retailer.setDinateCount(dinateCount);
         // 商家数量
         Integer storeCount = retailerService.count(new QueryWrapper<Retailer>().eq("parent_member_id", memberId).eq("`type`", 3));
@@ -314,7 +317,7 @@ public class RetailerController extends BaseController {
             @RequestParam String name,
             @RequestParam String gender,
             @RequestParam String identity,
-            @RequestParam String city) throws WxErrorException {
+            @RequestParam String city) {
         String memberId = this.getToken();
         Retailer retailer = retailerService.getOne(new QueryWrapper<Retailer>().eq("member_id", memberId));
         if (retailer == null) {
@@ -497,9 +500,10 @@ public class RetailerController extends BaseController {
     })
     public JsonResults queryMySubordinate(Long page, Long limit) {
         String memberId = this.getToken();
-        var data = this.memberSubordinateMapper.querySubordinate1(new Page<Map>(page != null ? page : 1, limit != null ? limit : 10), memberId, 1);
+        Member member = memberService.getById(memberId);
+        var data = this.memberSubordinateMapper.querySubordinate1(new Page<Map>(page != null ? page : 1, limit != null ? limit : 10), memberId, member.getIsretailer());
         data.getRecords().stream().forEach(p->{
-            int dinateCount = this.jdbcTemplate.queryForObject("select count(1) from retailer where parent_member_id in (select member_id from retailer where  parent_member_id=? and `type`=1)",Integer.class,p.get("memberId").toString());
+            int dinateCount = this.jdbcTemplate.queryForObject("select count(1) from retailer where parent_member_id in (select member_id from retailer where  parent_member_id=? and `type`=?)",Integer.class,p.get("memberId").toString(), member.getIsretailer());
             p.put("dinateCount",dinateCount);
         });
         return BuildSuccessJson(data.getRecords(), data.getPages(), "查询成功");
@@ -991,7 +995,7 @@ public class RetailerController extends BaseController {
 
     @ApiOperation("我的二维码-邀请事业合伙人")
     @PostMapping("/qr")
-    @LoginRequired
+//    @LoginRequired
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "header", dataType = "String", name = "token", value = "用户token值", required = true),
             @ApiImplicitParam(name = "url", value = "链接地址", required = true),
@@ -1003,9 +1007,13 @@ public class RetailerController extends BaseController {
 
         Retailer retailer = this.retailerService.getOne(Wrappers.<Retailer>query().eq("member_id", memberId));
         String baill = "";
-        if(type.equals(1)){
+        if(type == null){
+
+        }else if(type.equals(1)) {
             baill = retailer.getQr();
-        }else if(type.equals(3)){
+        }else if(type.equals(2)) {
+            baill = retailer.getQr();
+        }else if(type.equals(3)) {
             baill = retailer.getQr3();
         }
 
@@ -1013,11 +1021,14 @@ public class RetailerController extends BaseController {
             String qrcode = QrCodeUtil.createQrCode(url, fileUtil.getPath(), fileUtil.getMapping());
             try {
                 // baill = billUtil.generateImg(user.getAvatar(), baillUrl, qrcode, retailer.getName(), fileUtil.getPath(), fileUtil.getMapping());
+                if(type == null) {
 
-                if(type.equals(1)){
+                }else if(type.equals(1)) {
                     baill = billUtil.generateImg(user.getAvatar(), baillUrl1, qrcode, retailer.getName(), fileUtil.getPath(), fileUtil.getMapping());
-                }else if(type.equals(3)){
+                }else if(type.equals(2)) {
                     baill = billUtil.generateImg(user.getAvatar(), baillUrl2, qrcode, retailer.getName(), fileUtil.getPath(), fileUtil.getMapping());
+                }else if(type.equals(3)) {
+                    baill = billUtil.generateImg(user.getAvatar(), baillUrl3, qrcode, retailer.getName(), fileUtil.getPath(), fileUtil.getMapping());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -1025,7 +1036,9 @@ public class RetailerController extends BaseController {
             }
             if (StringUtils.isNotBlank(baill)) {
                 if(type.equals(1)){
-                     this.retailerService.update(Wrappers.<Retailer>update().set("qr", baill).eq("id", retailer.getId()));
+                    this.retailerService.update(Wrappers.<Retailer>update().set("qr", baill).eq("id", retailer.getId()));
+                }else if(type.equals(2)){
+                    this.retailerService.update(Wrappers.<Retailer>update().set("qr", baill).eq("id", retailer.getId()));
                 }else if(type.equals(3)){
                     this.retailerService.update(Wrappers.<Retailer>update().set("qr3", baill).eq("id", retailer.getId()));
                 }

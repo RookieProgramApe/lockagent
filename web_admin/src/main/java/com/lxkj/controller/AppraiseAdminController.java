@@ -234,4 +234,16 @@ public class AppraiseAdminController extends BaseController {
 
         return BuildSuccessJson(list, "查询成功！");
     }
+
+    /**
+     * 查询商品列表
+     * @return
+     */
+    @RequestMapping("/selectCargos")
+    @ResponseBody
+    @Transactional
+    public JsonResults selectGoods(Integer type) {
+        var list= cargoService.list(new QueryWrapper<Cargo>().eq(type!=null,"`type`", type).eq("isdel",0).orderByAsc("sort"));
+        return BuildSuccessJson(list,"查询成功");
+    }
 }
