@@ -61,6 +61,10 @@ public class RetailerReward extends Model<RetailerReward> {
     @TableField("figurec")
     private BigDecimal figurec;
 
+    @ApiModelProperty(value = "")
+    @TableField("figured")
+    private BigDecimal figured;
+
 
     @Override
     protected Serializable pkVal() {

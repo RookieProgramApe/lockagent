@@ -59,6 +59,10 @@ public class CardOrderService extends ServiceImpl<CardOrderMapper, CardOrder> {
     private BargainOrderService bargainOrderService;
     @Autowired
     protected JdbcTemplate jdbcTemplate;
+    @Autowired
+    private CargoCategoryService categoryService;
+    @Autowired
+    private WXMessageService wxMessageService;
     /**
      * 卡片剩余库存
      *
@@ -343,54 +347,164 @@ public class CardOrderService extends ServiceImpl<CardOrderMapper, CardOrder> {
             //提货奖励
             if(StringUtils.isNotBlank(o.getGiftcardId())){
 //                // 获取当前卡的代理商
-//                var retailerGiftcard1 = retailerGiftcardService.getOne(new QueryWrapper<RetailerGiftcard>().eq("giftcard_id", o.getGiftcardId()).eq("`status`", 1));
+                var retailerGiftcard1 = retailerGiftcardService.getOne(new QueryWrapper<RetailerGiftcard>().eq("giftcard_id", o.getGiftcardId()).eq("`status`", 0));
+                Retailer retailer1 = new Retailer();
 //                // 获取上级卡片代理商
-//                var retailerGiftcard = retailerGiftcardService.getOne(new QueryWrapper<RetailerGiftcard>().eq("giftcard_id", o.getGiftcardId()).eq("`status`", 0));
-                List<RetailerGiftcard> rgList = retailerGiftcardService.list(new QueryWrapper<RetailerGiftcard>().eq("giftcard_id", o.getGiftcardId()));
-                rgList.forEach(rg -> {
-                    if (rg != null) {
-                        var retailerReward = retailerRewardService.getOne(new QueryWrapper<RetailerReward>().eq("member_id", rg.getMemberId()).eq("cargo_id", o.getCargoId()));
-                        if (retailerReward != null) {
-//                         && retailerReward.getFigure().compareTo(BigDecimal.ZERO) > 0
-                            Retailer retailer = this.rtailerService.getById(retailerReward.getRetailerId());
-                            /*************************区分卡片类型分配提货奖励***********************/
-                            // 根据不同卡片类型分配不同提货奖励
-                            /************************后续可能要加**************************/
-//                            var figure = new BigDecimal(0);
-//
-//                            if(cargo.getCardType().equals(1)){
-//                                figure = retailerReward.getFigure();
-//                            }else if(cargo.getCardType().equals(2)) {
-//                                figure = retailerReward.getFigureb();
-//                            }else if(cargo.getCardType().equals(3)) {+
-//                                figure = retailerReward.getFigurec();
-//                            }else{
-//                                figure = new BigDecimal(0);
-//                            }
+                var retailerGiftcard = retailerGiftcardService.getOne(new QueryWrapper<RetailerGiftcard>().eq("giftcard_id", o.getGiftcardId()).eq("`status`", 1));
+                Retailer retailer = new Retailer();
+                // 一级分销
+                if(retailerGiftcard1!=null) {
+                    var retailerReward = retailerRewardService.getOne(new QueryWrapper<RetailerReward>().eq("member_id", retailerGiftcard1.getMemberId()).eq("cargo_id", o.getCargoId()));
+                    if (retailerReward != null) {
+                            retailer1 = this.rtailerService.getById(retailerReward.getRetailerId());
                             // 目前是根据使用的卡的类型区分提货奖励
                             var figure = new BigDecimal(0);
                             Giftcard giftcard = giftcardService.getById(o.getGiftcardId());
-                            if(giftcard.getType().equals(1)){
+
+                            // 20191126 修改 根据套餐区分提货奖励
+                            if(StringUtils.isNotBlank(o.getCateId())) {
+                                CargoCategory category = categoryService.getById(o.getCateId());
+                                if(category.getSort().equals(1)){
+                                    figure = retailerReward.getFigure();
+                                }else if(category.getSort().equals(2)) {
+                                    figure = retailerReward.getFigureb();
+                                }else if(category.getSort().equals(3)) {
+                                    figure = retailerReward.getFigurec();
+                                }else if(category.getSort().equals(4)) {
+                                    figure = retailerReward.getFigured();
+                                }else{
+                                    figure = new BigDecimal(0);
+                                }
+                            }else {
+                                // 没有套餐按默认奖励分配
                                 figure = retailerReward.getFigure();
-                            }else if(giftcard.getType().equals(2)) {
-                                figure = retailerReward.getFigureb();
-                            }else if(giftcard.getType().equals(3)) {
-                                figure = retailerReward.getFigurec();
-                            }else{
-                                figure = new BigDecimal(0);
                             }
+
                             // 获取提货佣金
-                            rtailerService.update(new UpdateWrapper<Retailer>().set("balance", retailer.getBalance().add(figure)).eq("id", retailer.getId()));
+                            rtailerService.update(new UpdateWrapper<Retailer>().set("balance", retailer1.getBalance().add(figure)).eq("id", retailer1.getId()));
                             Transaction transaction = new Transaction();
-                            transaction.setMemberId(retailer.getMemberId());
                             transaction.setOrderId(o.getId());
+                            transaction.setMemberId(retailer1.getMemberId());
                             transaction.setType(81);
                             transaction.setAmount(figure);
                             transaction.setStatus(1);
                             transactionService.save(transaction);
+
+                            // 发送佣金提醒
+                            wxMessageService.thSendMessage(giftcard.getSerial(), o.getCargoName(), figure.toString(), new Date(), retailer1.getType(), mmberService.getById(retailerGiftcard1.getMemberId()).getOpenId(), "");
                         }
+                }
+
+                // 二级分销
+                if(retailerGiftcard!=null) {
+                    var retailerReward = retailerRewardService.getOne(new QueryWrapper<RetailerReward>().eq("member_id", retailerGiftcard.getMemberId()).eq("cargo_id", o.getCargoId()));
+                    if (retailerReward != null) {
+                        retailer = this.rtailerService.getById(retailerReward.getRetailerId());
+                        // 目前是根据使用的卡的类型区分提货奖励
+                        var figure = new BigDecimal(0);
+                        Giftcard giftcard = giftcardService.getById(o.getGiftcardId());
+
+                        // 20191126 修改 根据套餐区分提货奖励
+                        if(StringUtils.isNotBlank(o.getCateId())) {
+                            CargoCategory category = categoryService.getById(o.getCateId());
+                            if(category.getSort().equals(1)){
+                                figure = retailerReward.getFigure();
+                            }else if(category.getSort().equals(2)) {
+                                figure = retailerReward.getFigureb();
+                            }else if(category.getSort().equals(3)) {
+                                figure = retailerReward.getFigurec();
+                            }else if(category.getSort().equals(4)) {
+                                figure = retailerReward.getFigured();
+                            }else{
+                                figure = new BigDecimal(0);
+                            }
+                        }else {
+                            // 没有套餐按默认奖励分配
+                            figure = retailerReward.getFigure();
+                        }
+
+                        // 获取提货佣金
+                        rtailerService.update(new UpdateWrapper<Retailer>().set("balance", retailer.getBalance().add(figure)).eq("id", retailer.getId()));
+                        Transaction transaction = new Transaction();
+                        transaction.setOrderId(o.getId());
+                        transaction.setMemberId(retailer.getMemberId());
+                        transaction.setType(81);
+                        transaction.setAmount(figure);
+                        transaction.setStatus(1);
+                        transactionService.save(transaction);
+
+                        // 发送佣金提醒
+                        wxMessageService.thSendMessage(giftcard.getSerial(), o.getCargoName(), figure.toString(), new Date(), retailer.getType(), mmberService.getById(retailerGiftcard1.getMemberId()).getOpenId(), retailer1.getName());
                     }
-                });
+                }
+//                List<RetailerGiftcard> rgList = retailerGiftcardService.list(new QueryWrapper<RetailerGiftcard>().eq("giftcard_id", o.getGiftcardId()));
+//                rgList.forEach(rg -> {
+//                    if (rg != null) {
+//                        var retailerReward = retailerRewardService.getOne(new QueryWrapper<RetailerReward>().eq("member_id", rg.getMemberId()).eq("cargo_id", o.getCargoId()));
+//                        if (retailerReward != null) {
+////                         && retailerReward.getFigure().compareTo(BigDecimal.ZERO) > 0
+//                            Retailer retailer = this.rtailerService.getById(retailerReward.getRetailerId());
+//                            /*************************区分卡片类型分配提货奖励***********************/
+//                            // 根据不同卡片类型分配不同提货奖励
+//                            /************************后续可能要加**************************/
+////                            var figure = new BigDecimal(0);
+////
+////                            if(cargo.getCardType().equals(1)){
+////                                figure = retailerReward.getFigure();
+////                            }else if(cargo.getCardType().equals(2)) {
+////                                figure = retailerReward.getFigureb();
+////                            }else if(cargo.getCardType().equals(3)) {+
+////                                figure = retailerReward.getFigurec();
+////                            }else{
+////                                figure = new BigDecimal(0);
+////                            }
+//                            // 目前是根据使用的卡的类型区分提货奖励
+//                            var figure = new BigDecimal(0);
+//                            Giftcard giftcard = giftcardService.getById(o.getGiftcardId());
+////                            if(giftcard.getType().equals(1)){
+////                                figure = retailerReward.getFigure();
+////                            }else if(giftcard.getType().equals(2)) {
+////                                figure = retailerReward.getFigureb();
+////                            }else if(giftcard.getType().equals(3)) {
+////                                figure = retailerReward.getFigurec();
+////                            }else{
+////                                figure = new BigDecimal(0);
+////                            }
+//
+//                            // 20191126 修改 根据套餐区分提货奖励
+//                            if(StringUtils.isNotBlank(o.getCateId())) {
+//                                CargoCategory category = categoryService.getById(o.getCateId());
+//                                if(category.getSort().equals(1)){
+//                                    figure = retailerReward.getFigure();
+//                                }else if(category.getSort().equals(2)) {
+//                                    figure = retailerReward.getFigureb();
+//                                }else if(category.getSort().equals(3)) {
+//                                    figure = retailerReward.getFigurec();
+//                                }else if(category.getSort().equals(4)) {
+//                                    figure = retailerReward.getFigured();
+//                                }else{
+//                                    figure = new BigDecimal(0);
+//                                }
+//                            }else {
+//                                // 没有套餐按默认奖励分配
+//                                figure = retailerReward.getFigure();
+//                            }
+//
+//                            // 获取提货佣金
+//                            rtailerService.update(new UpdateWrapper<Retailer>().set("balance", retailer.getBalance().add(figure)).eq("id", retailer.getId()));
+//                            Transaction transaction = new Transaction();
+//                            transaction.setOrderId(o.getId());
+//                            transaction.setMemberId(retailer.getMemberId());
+//                            transaction.setType(81);
+//                            transaction.setAmount(figure);
+//                            transaction.setStatus(1);
+//                            transactionService.save(transaction);
+//
+//                            // 发送佣金提醒
+//                            wxMessageService.thSendMessage(giftcard.getSerial(), o.getCargoName(), figure.toString(), new Date(), retailer.getType(), mmberService.getById(rg.getMemberId()).getOpenId(), "");
+//                        }
+//                    }
+//                });
 
 
             }

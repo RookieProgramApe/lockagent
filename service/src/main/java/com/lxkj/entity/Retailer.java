@@ -195,6 +195,18 @@ public class Retailer extends Model<Retailer> {
     @TableField("second_awardc")
     private BigDecimal secondAwardc;
 
+    @ApiModelProperty(value = "加盟费")
+    @TableField("amount")
+    private BigDecimal amount;
+
+    @ApiModelProperty(value = "直属上级奖励金额")
+    @TableField("first_reward")
+    private BigDecimal firstReward;
+
+    @ApiModelProperty(value = "次属上级奖励金额")
+    @TableField("second_reward")
+    private BigDecimal secondReward;
+
     @Override
     protected Serializable pkVal() {
         return this.id;

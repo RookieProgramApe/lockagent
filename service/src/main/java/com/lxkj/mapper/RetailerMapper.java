@@ -46,7 +46,10 @@ public interface RetailerMapper extends BaseMapper<Retailer> {
           + "   order by t.create_time desc")
   IPage<Map> queryCardAward(IPage<Map> page, @Param("memberId") String memberId);
 
-  @Select("select t.*,(select o.cargo_name from `order` o where o.id=t.order_id) as cargoName, (select g.serial from giftcard g where g.id=(select o.giftcard_id from `order` o where o.id=t.order_id)) as serial from `transaction` t where member_id=#{memberId,jdbcType=VARCHAR} and type=81 and status=1")
+  @Select("select t.amount reward, r.`name` retailerName, t.create_time createTime from `transaction` t INNER JOIN retailer r on r.member_id=t.member_id where t.type=82 and t.member_id = #{memberId,jdbcType=VARCHAR}")
+  IPage<Map> queryLbAward(IPage<Map> page, @Param("memberId") String memberId);
+
+  @Select("select t.*,(select o.cargo_name from `order` o where o.id=t.order_id) as cargoName, (select g.serial from giftcard g where g.id=(select o.giftcard_id from `order` o where o.id=t.order_id)) as serial from `transaction` t where member_id=#{memberId,jdbcType=VARCHAR} and type=81 and status=1 order by create_time DESC")
   IPage<Map> queryTransaction(IPage<Map> page, @Param("memberId") String memberId);
 
   // 根据卡片类型、卡片使用情况分页查询

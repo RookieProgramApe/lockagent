@@ -15,6 +15,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 通过微信公众号向用户推送信息
@@ -105,7 +106,106 @@ public class WXMessageService {
      * @param time 时间
      * @param type 代理商类型
      */
-    public void thSendMessage(String serial, String cargoName, String money, Date time, Integer type) {
+    public void thSendMessage(String serial, String cargoName, String money, Date time, Integer type, String openId, String storeName) {
+        WxMpTemplateMessage message = new WxMpTemplateMessage();
+        List<WxMpTemplateData> data = new ArrayList<>();
+        WxMpTemplateData d = new WxMpTemplateData();
+        d.setName("first");
+        if (type == 1){
+            d.setValue("您好，尊敬的安纹事业合伙人，您的微股东「" + storeName + "」名下的卡片「" + serial + "」已经完成提货。");
+        }else if (type == 2){
+            d.setValue("您好，尊敬的安纹合伙人，您的微股东「" + storeName + "」名下的卡片「" + serial + "」已经完成提货。");
+        }else if (type == 3){
+            d.setValue("您好，尊敬的安纹微股东，您名下的卡片「" + serial + "」已经完成提货。");
+        }else {
+            d.setValue("您好，您名下的卡片「" + serial + "」已经完成提货。");
+        }
+        d.setColor("#173177");
+        data.add(d);
+        d = new WxMpTemplateData();
+        d.setName("keyword1");
+        d.setValue(money + "元");
+        d.setColor("#F56C6C");
+        data.add(d);
+        d = new WxMpTemplateData();
+        d.setName("keyword2");
+        d.setValue(new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss").format(time));
+        d.setColor("#173177");
+        data.add(d);
+        d = new WxMpTemplateData();
+        d.setName("remark");
+        d.setValue("提货佣金已经到账，点击查看提货佣金明细。");
+        d.setColor("#173177");
+        data.add(d);
+        message.setTemplateId(templateId[3]);
+        message.setUrl(url[3] + "&identity=" + type);
 
+        message.setData(data);
+        message.setToUser(openId);
+
+        // 抛出可能的异常
+        try {
+            wxService.getTemplateMsgService().sendTemplateMsg(message);
+        }catch (WxErrorException e){
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 合伙人裂变收益提醒
+     * @param param
+     */
+    public void lbSendMessage(Map<String, Object> param) {
+        WxMpTemplateMessage message = new WxMpTemplateMessage();
+        List<WxMpTemplateData> data = new ArrayList<>();
+        WxMpTemplateData d = new WxMpTemplateData();
+        d.setName("first");
+        if (param.get("type").equals(1)){
+            d.setValue("您好，尊敬的安纹事业合伙人，您邀请的用户「" + param.get("retailerName") + "」已成功加入安纹事业合伙人。");
+        }else if (param.get("type").equals(2)){
+            d.setValue("您好，尊敬的安纹合伙人，您邀请的用户「" + param.get("retailerName") + "」已成功加入安纹合伙人。");
+        }else if (param.get("type").equals(3)){
+            d.setValue("您好，尊敬的安纹微股东，您邀请的用户「" + param.get("retailerName") + "」已成功加入安纹微股东。");
+        }else {
+            d.setValue("您好，尊敬的用户，您邀请的用户「" + param.get("retailerName") + "」已成功加入安纹。");
+        }
+        d.setColor("#173177");
+        data.add(d);
+        d = new WxMpTemplateData();
+        d.setName("keyword1");
+        d.setValue("裂变收益");
+        d.setColor("#173177");
+        data.add(d);
+        d = new WxMpTemplateData();
+        d.setName("keyword2");
+        d.setValue(param.get("money").toString() + "元");
+        d.setColor("#F56C6C");
+        data.add(d);
+        d = new WxMpTemplateData();
+        d.setName("keyword3");
+        d.setValue(new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss").format(param.get("time")));
+        d.setColor("#173177");
+        data.add(d);
+        d = new WxMpTemplateData();
+        d.setName("keyword4");
+        d.setValue(param.get("banlance").toString() + "元");
+        d.setColor("#173177");
+        data.add(d);
+        d = new WxMpTemplateData();
+        d.setName("remark");
+        d.setValue("裂变收益已经到账，点击查看收益明细。");
+        d.setColor("#173177");
+        data.add(d);
+        message.setTemplateId(templateId[4]);
+        message.setUrl(url[4] + "&identity=" + param.get("type"));
+
+        message.setData(data);
+        message.setToUser(param.get("openId").toString());
+        // 抛出可能的异常
+        try {
+            wxService.getTemplateMsgService().sendTemplateMsg(message);
+        }catch (WxErrorException e){
+            e.printStackTrace();
+        }
     }
 }

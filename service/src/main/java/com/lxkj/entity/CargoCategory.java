@@ -35,27 +35,31 @@ public class CargoCategory extends Model<CargoCategory> {
     private String id;
 
     @ApiModelProperty(value = "商品ID",hidden = true)
-    @TableId(value = "cargo_id")
+    @TableField(value = "cargo_id")
     private String cargoId;
 
     @ApiModelProperty(value = "种类名称")
-    @TableId(value = "`name`")
+    @TableField(value = "`name`")
     private String name;
 
     @ApiModelProperty(value = "价格")
-    @TableId(value = "`price`")
+    @TableField(value = "`price`")
     private BigDecimal price;
+
+    @ApiModelProperty(value = "运费")
+    @TableField(value = "fare_price")
+    private BigDecimal farePrice;
 
     @ApiModelProperty(value = "创建时间")
     @TableField("create_time")
     private Date createTime;
 
     @ApiModelProperty(value = "是否删除 0否 1是" ,hidden = true)
-    @TableId(value = "is_del")
+    @TableField(value = "is_del")
     private short isDel;
 
     @ApiModelProperty(value = "排序" ,hidden = true)
-    @TableId(value = "sort")
+    @TableField(value = "sort")
     private Integer sort;
 
     @Override
