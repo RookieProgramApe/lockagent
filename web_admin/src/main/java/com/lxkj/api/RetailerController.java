@@ -598,12 +598,24 @@ public class RetailerController extends BaseController {
         if (type == 2) {  // 汇聚查询提货佣金
             var data = this.retailerMapper.queryTransaction(new Page<Map>(page != null ? page : 1, limit != null ? limit : 10), memberId);
             // List<Map<String, Object>> commission = this.retailerMapper.queryCommission(memberId);
-            return BuildSuccessJson(data.getRecords(), "查询成功");
+            return BuildSuccessJson(data.getRecords(), data.getTotal(),"查询成功");
         } else if (type == 1) {//卡片奖励
              var data = this.retailerMapper.queryCardAward(new Page<Map>(page != null ? page : 1, limit != null ? limit : 10), memberId);
 
             // List<Transaction> list = transactionService.list(new QueryWrapper<Transaction>().eq("`type`", 81).eq("`status`", 1).eq("member_id", memberId));
-            return BuildSuccessJson(data.getRecords(), data.getPages(), "查询成功");
+            return BuildSuccessJson(data.getRecords(), data.getTotal(), "查询成功");
+        } else if (type == 3) {//裂变收益
+            var data = this.retailerMapper.queryLbAward(new Page<Map>(page != null ? page : 1, limit != null ? limit : 10), memberId);
+//            List<Map<String, Object>> list = new ArrayList<>();
+//
+//            Map<String, Object> map = new HashedMap();
+//            map.put("reward", 100);
+//            map.put("retailerName", "张三");
+//            map.put("createTime", new Date().toString());
+//            list.add(map);
+
+            // List<Transaction> list = transactionService.list(new QueryWrapper<Transaction>().eq("`type`", 81).eq("`status`", 1).eq("member_id", memberId));
+            return BuildSuccessJson(data.getRecords(), data.getTotal(), "查询成功");
         }
         return BuildSuccessJson(null, "查询成功");
     }

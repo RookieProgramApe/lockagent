@@ -50,6 +50,26 @@
                 <input type="radio" name="status" value="0" title="打回重审[退回上一节点]" lay-filter="status">
             </div>
         </div>
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">加盟费<font color="red">*</font></label>
+            <div class="layui-input-block">
+                <input type="text" placeholder="￥" lay-verify="required|number|positive" name="amount" id="amount" placeholder="请输入内容" autocomplete="off"  class="layui-input" />
+            </div>
+        </div>
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">直属上级奖励金额比例<font color="red">*</font></label>
+            <div class="layui-input-inline">
+                <input style="width: 50%;" type="text" placeholder="%" lay-verify="required|number|positive" name="firstReward" id="firstReward" autocomplete="off"  class="layui-input" />
+                (请输入1-100的整数)
+            </div>
+        </div>
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">次属上级奖励金额比例<font color="red">*</font></label>
+            <div class="layui-input-inline">
+                <input style="width: 50%;" type="text" placeholder="%" lay-verify="required|number|positive" name="secondReward" id="secondReward" autocomplete="off"  class="layui-input" />
+                (请输入1-100的整数)
+            </div>
+        </div>
         <!--大文本 -->
         <div class="layui-form-item layui-form-text" id="resonl">
             <label class="layui-form-label">作废意见<font id="font1" color="red">&nbsp;</font></label>

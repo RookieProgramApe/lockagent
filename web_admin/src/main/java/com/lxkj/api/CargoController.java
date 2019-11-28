@@ -224,7 +224,7 @@ public class CargoController extends BaseController {
             order.setCateId(category.getId());
             order.setCateName(category.getName());
             order.setUnitPrice(category.getPrice());
-            order.setTotalPrice(category.getPrice().subtract(credit_discount));
+            order.setTotalPrice(category.getPrice().subtract(credit_discount).add(category.getFarePrice()));
         }else{
             order.setUnitPrice(cargo.getSalePrice());//原价
             order.setTotalPrice(cargo.getSalePrice().subtract(credit_discount));//实际支付价格

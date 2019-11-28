@@ -101,6 +101,6 @@ kd:
 
 ##########################################公众号通知参数配置############################################
 send_message:
-  # 代理商消息模板参数 数组1事业合伙人通知 2合伙人通知 3微股东通知 4代理商提货通知
-  template_id: QaU494KulG-ZGybKRfiNVk1cy-ea9aePwx-YXuW9-uU, QaU494KulG-ZGybKRfiNVk1cy-ea9aePwx-YXuW9-uU, QaU494KulG-ZGybKRfiNVk1cy-ea9aePwx-YXuW9-uU,QaU494KulG-ZGybKRfiNVk1cy-ea9aePwx-YXuW9-uU
-  url: https://aw.wisehuitong.com/information?type=1, https://aw.wisehuitong.com/information?type=2, https://aw.wisehuitong.com/information?type=3,
+  # 代理商消息模板参数 数组1事业合伙人通知 2合伙人通知 3微股东通知 4代理商提货通知 5裂变收益提醒
+  template_id: QaU494KulG-ZGybKRfiNVk1cy-ea9aePwx-YXuW9-uU, QaU494KulG-ZGybKRfiNVk1cy-ea9aePwx-YXuW9-uU, QaU494KulG-ZGybKRfiNVk1cy-ea9aePwx-YXuW9-uU, K-zLE2u580bGH5Bx5jX6Q3dRzIwMCS0QqocO35olLWI, li51VTpjKPWXU4j2mN-k9fuyrMHL5jGCXuRnKoCos64
+  url: https://aw.wisehuitong.com/information?type=1, https://aw.wisehuitong.com/information?type=2, https://aw.wisehuitong.com/information?type=3, https://aw.wisehuitong.com/flow?type=2, https://aw.wisehuitong.com/flow?type=3

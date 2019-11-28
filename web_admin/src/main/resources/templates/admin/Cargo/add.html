@@ -232,8 +232,11 @@
             var btnId="upload"+guid();
             var sort=$("#stepList1 tr").length+1;
             var html="<tr>" +
-                "<td><input type='hidden' name='optionId'  value='' /><input placeholder='套餐名称' class='layui-input' type='text' name='content' lay-verType='tips' maxlength='200' >"
-                +"<input class='layui-input' type='text' placeholder='￥' name='content1' lay-verType='tips' maxlength='20'></td>"+
+                "<td><input type='hidden' name='optionId'  value='' /><input placeholder='套餐名称' class='layui-input' type='text' name='content' lay-verType='tips' maxlength='200' >" +
+                "<div style='width: 35%; float: left;'>套餐价格：<input class='layui-input' value='0' type='text' placeholder='套餐价格' name='content1' lay-verType='tips' maxlength='20'></div>" +
+                "<div style='width: 35%; float: left;'>运费：<input class='layui-input' value='0' type='text' placeholder='运费价格' name='content2' lay-verType='tips' maxlength='20'></div>" +
+                "<div style='width: 30%; float: left;'>排序：<input class='layui-input' value='" + sort +"' type='text' placeholder='排序' name='content3' lay-verType='tips' maxlength='20'></div>" +
+                "</td>"+
                 "<td style='text-align: center;'>" +
                 " <img height='30' width='30' style='cursor:pointer' src='${ctxPath}/static/image/jian.png' onclick='del(this)'>" +
                 "</td>" +
@@ -264,7 +267,9 @@
                 var btnId="uploads_"+obj.id;
                 var html="<tr>" +
                     "<td><input type='hidden' name='optionId'  value='"+obj.id+"' /><input class='layui-input' type='text'  name='content' value='"+obj.name+"'  lay-verify='required' lay-verType='tips' maxlength='200' >" +
-                    "<input class='layui-input' type='text'  name='content1' value='"+obj.price+"'  lay-verify='required' lay-verType='tips' maxlength='20' >" +
+                    "<div style='width: 35%; float: left;'>套餐价格：<input class='layui-input' type='text'  name='content1' value='"+obj.price+"'  lay-verify='required' lay-verType='tips' maxlength='20' ></div>" +
+                    "<div style='width: 35%; float: left;'>运费：<input class='layui-input' type='text'  name='content2' value='"+ obj.farePrice +"'  lay-verify='required' lay-verType='tips' maxlength='20' ></div>" +
+                    "<div style='width: 30%; float: left;'>排序：<input class='layui-input' type='text'  name='content3' value='"+ obj.sort +"'  lay-verify='required' lay-verType='tips' maxlength='20' ></div>" +
                     "</td>" +
                     "<td style='text-align: center;'>" +
                     " <img height='30' width='30' style='cursor:pointer' src='${ctxPath}/static/image/jian.png' data-id='"+obj.id+"' onclick='addDel1(this)'>" +
@@ -297,9 +302,13 @@
                 var id=$(this).find('input:hidden[name="optionId"]').val()||"";
                 var content=$(this).find('input[name="content"]').val()||"";
                 var content1=$(this).find('input[name="content1"]').val()||"";
+                var content2=$(this).find('input[name="content2"]').val()||"";
+                var content3=$(this).find('input[name="content3"]').val()||"";
                 josn.id = id;
                 josn.content = content;
                 josn.content1 = content1;
+                josn.content2 = content2;
+                josn.content3 = content3;
                 cateArr.push(josn);
             });
             if(stepArr.length==0){

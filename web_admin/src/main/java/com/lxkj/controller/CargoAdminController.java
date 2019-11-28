@@ -254,6 +254,8 @@ public class CargoAdminController extends BaseController {
                 addBean.setId(jsonObject.containsKey("id")?jsonObject.getString("id"):"");
                 addBean.setName(jsonObject.containsKey("content")?jsonObject.getString("content"):"");
                 addBean.setPrice(jsonObject.containsKey("content1")?new BigDecimal((String) jsonObject.getString("content1")):new BigDecimal(""));
+                addBean.setFarePrice(jsonObject.containsKey("content2")?new BigDecimal((String) jsonObject.getString("content2")):new BigDecimal(""));
+                addBean.setSort(jsonObject.containsKey("content3")?Integer.parseInt(jsonObject.getString("content3")):0);
                 if(StringUtils.isBlank(addBean.getId())){
                     addBean.setCreateTime(new Date());
                 }

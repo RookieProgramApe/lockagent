@@ -14,6 +14,7 @@ import com.lxkj.entity.*;
 import com.lxkj.service.*;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.error.WxErrorException;
+import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -25,6 +26,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -607,6 +609,45 @@ public class RetailerAdminController extends BaseController {
         // 发送申请成功通知
         wxMessageService.sendRetailerMessage(retailer.getId());
 
+        // 代理商裂变收益
+        if(retailer.getType().equals(1)){
+            // 事业合伙人 最多两层裂变
+            if(StringUtils.isNotBlank(retailer.getParentMemberId())) {
+                // 一层裂变
+                Member parent = memberService.getById(retailer.getParentMemberId());
+                Retailer retailer1 = retailerService.getOne(new QueryWrapper<Retailer>().eq("member_id", retailer.getParentMemberId()));
+                Transaction transaction = new Transaction().setAmount(bean.getFirstReward().multiply(bean.getAmount()).divide(new BigDecimal(100))).setMemberId(retailer.getParentMemberId()).setOrderId(retailer.getMemberId()).setStatus(1).setType(82);
+                transaction.insert();
+                Map<String, Object> map = new HashedMap();
+                map.put("openId", parent.getOpenId());
+                map.put("type", retailer1.getType());
+                map.put("retailerName", retailer.getName());
+                map.put("money", transaction.getAmount());
+                map.put("time", new Date());
+                map.put("banlance", retailer1.getBalance().add(transaction.getAmount()));
+                wxMessageService.lbSendMessage(map);
+                retailerService.update(new UpdateWrapper<Retailer>().set("balance", retailer1.getBalance().add(transaction.getAmount())).eq("id", retailer1.getId()));
+
+                if(StringUtils.isNotBlank(retailer1.getParentMemberId())) {
+                    // 获取直属领导
+                    Retailer retailer2 = retailerService.getOne(new QueryWrapper<Retailer>().eq("member_id", retailer1.getParentMemberId()));
+                    parent = memberService.getById(retailer1.getParentMemberId());
+                    // 二层裂变
+                    Transaction transaction1 = new Transaction().setAmount(bean.getSecondReward().multiply(bean.getAmount()).divide(new BigDecimal(100))).setMemberId(retailer1.getParentMemberId()).setOrderId(retailer.getMemberId()).setStatus(1).setType(82);
+                    transaction1.insert();
+                    map = new HashedMap();
+                    map.put("openId", parent.getOpenId());
+                    map.put("type", retailer2.getType());
+                    map.put("retailerName", retailer.getName());
+                    map.put("money", transaction1.getAmount());
+                    map.put("time", new Date());
+                    map.put("banlance", retailer2.getBalance().add(transaction1.getAmount()));
+                    wxMessageService.lbSendMessage(map);
+                    retailerService.update(new UpdateWrapper<Retailer>().set("balance", retailer2.getBalance().add(transaction1.getAmount())).eq("id", retailer2.getId()));
+                }
+            }
+
+        }
         return BuildSuccessJson("修改成功");
     }
 
@@ -654,6 +695,25 @@ public class RetailerAdminController extends BaseController {
 
         // 发送申请成功通知
         wxMessageService.sendRetailerMessage(retailer.getId());
+        if(retailer.getType().equals(2)) {
+            // 合伙人 一层裂变
+            if(StringUtils.isNotBlank(retailer.getParentMemberId())) {
+                Member parent = memberService.getById(retailer.getParentMemberId());
+                Retailer retailer1 = retailerService.getOne(new QueryWrapper<Retailer>().eq("member_id", retailer.getParentMemberId()));
+                Transaction transaction = new Transaction().setAmount(bean.getFirstReward().multiply(bean.getAmount()).divide(new BigDecimal(100))).setMemberId(retailer.getParentMemberId()).setOrderId(retailer.getMemberId()).setStatus(1).setType(82);
+                transaction.insert();
+                Map<String, Object> map = new HashedMap();
+                map.put("openId", parent.getOpenId());
+                map.put("type", retailer1.getType());
+                map.put("retailerName", retailer.getName());
+                map.put("money", transaction.getAmount());
+                map.put("time", new Date());
+                map.put("banlance", retailer1.getBalance().add(transaction.getAmount()));
+                wxMessageService.lbSendMessage(map);
+
+                retailerService.update(new UpdateWrapper<Retailer>().set("balance", retailer1.getBalance().add(transaction.getAmount())).eq("id", retailer1.getId()));
+            }
+        }
         return BuildSuccessJson("修改成功");
     }
 

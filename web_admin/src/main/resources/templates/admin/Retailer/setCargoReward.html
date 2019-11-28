@@ -10,24 +10,15 @@
 </head>
 <body class="childrenBody">
     <form class="layui-form" id="addForm" >
-        <div class="layui-form-item">
-            <label class="layui-form-label">轻奢卡奖励金额<font color="red">*</font></label>
-            <div class="layui-input-block">
-                <input type="text" name="figure" value="${figure}" placeholder="￥" lay-verify="required|number|positive" autocomplete="off"  class="layui-input" >
+        <%for(figure in figureList) {%>
+            <div class="layui-form-item">
+                <label class="layui-form-label">${figure.name}奖励金额<font color="red">*</font></label>
+                <div class="layui-input-block">
+                    <input type="text" name="${figure.id}" value="${figure.figure}" placeholder="￥" lay-verify="required|number|positive" autocomplete="off"  class="layui-input" >
+                </div>
             </div>
-        </div>
-        <div class="layui-form-item">
-            <label class="layui-form-label">贵族卡奖励金额<font color="red">*</font></label>
-            <div class="layui-input-block">
-                <input type="text" name="figureb" value="${figureb}" placeholder="￥" lay-verify="required|number|positive" autocomplete="off"  class="layui-input" >
-            </div>
-        </div>
-        <div class="layui-form-item">
-            <label class="layui-form-label">至尊卡奖励金额<font color="red">*</font></label>
-            <div class="layui-input-block">
-                <input type="text" name="figurec" value="${figurec}" placeholder="￥" lay-verify="required|number|positive" autocomplete="off"  class="layui-input" >
-            </div>
-        </div>
+        <%}%>
+
         <!--隐藏域-不用乱动 -->
         <div class="layui-form-item layui-hide">
             <button class="layui-btn" lay-submit="" lay-filter="save" id="save">确认</button>

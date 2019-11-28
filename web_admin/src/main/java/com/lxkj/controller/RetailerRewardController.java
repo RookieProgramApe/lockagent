@@ -7,11 +7,14 @@ import com.lxkj.common.bean.BaseController;
 import com.lxkj.common.bean.DataGridModel;
 import com.lxkj.common.bean.JsonResults;
 import com.lxkj.common.util.PageData;
+import com.lxkj.entity.CargoCategory;
 import com.lxkj.entity.Retailer;
 import com.lxkj.entity.RetailerReward;
+import com.lxkj.service.CargoCategoryService;
 import com.lxkj.service.RetailerRewardService;
 import com.lxkj.service.RetailerService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -21,7 +24,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -39,6 +46,8 @@ public class RetailerRewardController extends BaseController {
     private RetailerRewardService retailerRewardService;
     @Autowired
     private RetailerService retailerService;
+    @Autowired
+    private CargoCategoryService categoryService;
 
     /**
     * 首页
@@ -87,15 +96,58 @@ public class RetailerRewardController extends BaseController {
         model.addObject("id",id);
         model.addObject("retailer_id",retailer_id);
         model.addObject("cargo_id",cargo_id);
-        if(rr!=null&&rr.getFigure()!=null){
-            model.addObject("figure",rr.getFigure());
-            model.addObject("figureb",rr.getFigureb());
-            model.addObject("figurec",rr.getFigurec());
+        List list = this.jdbcTemplate.queryForList("select `name` from cargo_category where cargo_id=? and is_del=0 order by sort asc", List.class, cargo_id);
+        List<Map<String, Object>> lists = new ArrayList<>();
+
+        if(rr!=null){
+            for(int i = 0; i < list.size(); i++){
+                Map<String, Object> map = new HashedMap();
+                map.put("name", list.get(i));
+                BigDecimal decimal = BigDecimal.ZERO;
+                switch (i){
+                    case 0: decimal = rr.getFigure();map.put("id", "figure");break;
+                    case 1: decimal = rr.getFigureb();map.put("id", "figureb");break;
+                    case 2: decimal = rr.getFigurec();map.put("id", "figurec");break;
+                    case 3: decimal = rr.getFigured();map.put("id", "figured");break;
+                    default: decimal = BigDecimal.ZERO;map.put("id", "figure");break;
+                }
+                map.put("figure", decimal);
+                lists.add(map);
+            }
+            // 没有套餐
+            if(list.size() == 0){
+                Map<String, Object> map = new HashedMap();
+                map.put("name", "默认");
+                map.put("id", "figure");
+                map.put("figure", rr.getFigure());
+                lists.add(map);
+            }
         }else{
-            model.addObject("figure",0.00);
-            model.addObject("figureb",0.00);
-            model.addObject("figurec",0.00);
+            for(int i = 0; i < list.size(); i++){
+                Map<String, Object> map = new HashedMap();
+                map.put("name", list.get(i));
+                BigDecimal decimal = BigDecimal.ZERO;
+                switch (i){
+                    case 0: map.put("id", "figure");break;
+                    case 1: map.put("id", "figureb");break;
+                    case 2: map.put("id", "figurec");break;
+                    case 3: map.put("id", "figured");break;
+                    default: map.put("id", "figure");break;
+                }
+                map.put("figure", decimal);
+                lists.add(map);
+            }
+            // 没有套餐
+            if(list.size() == 0){
+                Map<String, Object> map = new HashedMap();
+                map.put("name", "默认");
+                map.put("id", "figure");
+                map.put("figure", 0.00);
+                lists.add(map);
+            }
         }
+        model.addObject("figureList", lists);
+        System.out.println(lists);
         model.setViewName("/admin/Retailer/setCargoReward");
         return model;
     }

@@ -8,7 +8,9 @@ import com.lxkj.common.bean.BaseController;
 import com.lxkj.common.bean.DataGridModel;
 import com.lxkj.common.bean.JsonResults;
 import com.lxkj.common.util.PageData;
+import com.lxkj.entity.CargoCategory;
 import com.lxkj.entity.CargoSku;
+import com.lxkj.service.CargoCategoryService;
 import com.lxkj.service.CargoSkuService;
 import com.lxkj.service.OrderService;
 import java.util.ArrayList;
@@ -41,6 +43,8 @@ public class CargoSkuController extends BaseController {
   private CargoSkuService cargoSkuService;
   @Autowired
   private OrderService orderService;
+  @Autowired
+  private CargoCategoryService categoryService;
 
   /**
    * 首页
@@ -183,8 +187,9 @@ public class CargoSkuController extends BaseController {
   @RequestMapping("/select2")
   @ResponseBody
   public JsonResults select2(String cargo_id) {
-    List<?> list = new ArrayList<>();
-    list = jdbcTemplate.queryForList("select * from cargo_category where cargo_id=? order by create_time ", cargo_id);
+    List<CargoCategory> list = new ArrayList<>();
+    list = categoryService.list(new QueryWrapper<CargoCategory>().eq("cargo_id", cargo_id).orderByAsc("create_time"));
+    // list = jdbcTemplate.queryForList("select * from cargo_category where cargo_id=? order by create_time ", List<CargoCategory>.getClass(), cargo_id);
     return BuildSuccessJson(list, "查询成功");
   }
 
